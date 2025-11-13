@@ -3,6 +3,18 @@ name: 编译 Electron 应用
 on:
   push:
     branches: [ test ]
+    paths:
+      - package.json
+      - electron-builder.yml
+      - vite.config.ts
+      - electron.vite.config.ts
+      - tsconfig.web.json
+      - tsconfig.node.json
+      - tsconfig.json
+      - LICENSE
+      - src/renderer/**
+      - src/electron/**
+      - .github/workflows/build-electron.yml
   workflow_dispatch:
 
 jobs:
