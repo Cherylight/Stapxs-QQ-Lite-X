@@ -527,7 +527,7 @@ class Driver {
         else {
             let url = `${protocol}://${this.url}`
             if (this.path) url = `${url}/${this.path}`
-            if (this.token) url = `${url}?access_token=${this.token}`
+            if (this.token) url = `${url}?access_token=${encodeURIComponent(this.token)}`
 
             return url
         }
