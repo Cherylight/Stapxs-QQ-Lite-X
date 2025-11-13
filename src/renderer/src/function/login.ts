@@ -38,7 +38,6 @@ for (const key in adapters) {
  */
 async function tryLogin(originUrl: string, token_: string): Promise<true | string>{
     // 预检查
-
     const checkRe = await preCheck(originUrl, token_)
     if (typeof checkRe === 'string') return checkRe
     const { protocol, ssl, url, token } = checkRe
@@ -153,7 +152,7 @@ async function preCheck(
     }
     let protocol: string = parseUrl.protocol
     const ssl: boolean = parseUrl.ssl
-    const url: string = `${parseUrl.host}:${parseUrl.port}`
+    const url: string = parseUrl.port ? `${parseUrl.host}:${parseUrl.port}` : parseUrl.host
     if (!protocol) return $t('连接地址格式错误，请参考如何连接')
     if (!url) return $t('连接地址格式错误，请参考如何连接')
     if (protocol === 'ws') {
