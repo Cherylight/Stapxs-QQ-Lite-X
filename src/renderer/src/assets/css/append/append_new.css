@@ -222,7 +222,11 @@ body {
 }
 
 .face-pan div.tab-main > div {
-    margin-bottom: 0 !important;
+    margin-bottom: 0px !important;
+}
+
+.face-pan div.tab-main div.system-face-bar {
+    height: 200px;
 }
 
 .face-pan div.system-face-bar {
@@ -422,22 +426,6 @@ body {
 .menu div.item > a,
 .msg-menu-body > div > a {
     font-size: 0.8rem !important;
-}
-
-.more-detail.show {
-    height: 40px;
-}
-
-.more-detail > div {
-    margin: 0 5px;
-    width: 40px;
-    height: 40px;
-}
-
-.more-detail > div > svg {
-    margin: 12.5px;
-    height: 15px;
-    width: 15px;
 }
 
 .chat-info > header > span {
