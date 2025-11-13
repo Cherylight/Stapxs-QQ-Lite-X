@@ -10,7 +10,10 @@ import { User } from './model/user'
 import { resetRuntime, runtimeData } from './msg'
 import { reloadUsers, sendIdentifyData, sendStatEvent, updateMenu } from './utils/appUtil'
 
-const SSL_WHITE_LIST = ['localhost', '127.0.0.1']
+const SSL_WHITE_LIST = new Set<string>([
+    'localhost',
+    '127.0.0.1'
+])
 
 const popInfo = new PopInfo()
 
@@ -141,10 +144,18 @@ async function preCheck(
     token: string
 ): Promise<string | { protocol: string; ssl: boolean; url: string; token: string} > {
     // 分析地址
-    const parseUrl = new URL(originUrl)
+    if (originUrl.trim() === '') return $t('请输入链接地址,参考如何连接')
+    let parseUrl: URL
+    try {
+        parseUrl = new URL(originUrl)
+    } catch {
+        return $t('连接地址格式错误，请参考如何连接')
+    }
     let protocol: string = parseUrl.protocol
     const ssl: boolean = parseUrl.ssl
     const url: string = `${parseUrl.host}:${parseUrl.port}`
+    if (!protocol) return $t('连接地址格式错误，请参考如何连接')
+    if (!url) return $t('连接地址格式错误，请参考如何连接')
     if (protocol === 'ws') {
         popInfo.add(PopType.INFO, $t('协议仅支持ob/mk,详情请看如何连接.ws默认按ob处理'))
         protocol = 'ob'
@@ -170,7 +181,7 @@ async function preCheck(
     }
 
     // https http兼容测试
-    if (window.location.protocol === 'https:' && !ssl && !SSL_WHITE_LIST.includes(parseUrl.host)) {
+    if (globalThis.location.protocol === 'https:' && !ssl && !SSL_WHITE_LIST.has(parseUrl.host)) {
         return $t('https页面不支持非ssl连接，请配备证书或者更换至非http版本的页面')
     }
 

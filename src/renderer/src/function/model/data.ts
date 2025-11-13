@@ -89,7 +89,9 @@ export class Channel<T> {
 
 export class URL {
     // SSL白名单,这些协议一定不是SSL协议,其他的看是不是s结尾,是的话就是采用ssl
-    private static SSL_WHITE_LIST = ['ws']
+    private static readonly SSL_WHITE_LIST = new Set<string>([
+        'ws',
+    ])
     private _protocol: string = ''
     private _host: string = ''
     private _port: number | null = null
@@ -105,7 +107,7 @@ export class URL {
     private parse(url: string): void {
         // 兼容所有环境的自定义 URL 解析
         // 正则解析协议
-    const urlPattern = /^(\w+):\/\/([^/?#:]*)(?::(\d+))?([^?#]*)?(?:\?([^#]*))?(?:#(.*))?/
+        const urlPattern = /^(\w+):\/\/([^/?#:]*)(?::(\d+))?([^?#]*)?(?:\?([^#]*))?(?:#(.*))?/
         const match = url.match(urlPattern)
         if (!match) {
             throw new Error(`无效的URL  ${url}`)
@@ -113,7 +115,7 @@ export class URL {
         // match[1]: protocol, match[2]: host, match[3]: port, match[4]: path, match[5]: query, match[6]: hash
         this.parseProtocol(match[1] || '')
         this._host = match[2] || ''
-        this._port = match[3] ? parseInt(match[3]) : null
+        this._port = match[3] ? Number.parseInt(match[3]) : null
         this._path = match[4] || ''
         this._hash = match[6] || ''
         this._query = {}
@@ -127,7 +129,7 @@ export class URL {
 
     private parseProtocol(originProtocol: string): void {
         const protocol = originProtocol.replace(':', '')
-        if (URL.SSL_WHITE_LIST.includes(protocol)) {
+        if (URL.SSL_WHITE_LIST.has(protocol)) {
             this._ssl = false
             this._protocol = protocol
             return

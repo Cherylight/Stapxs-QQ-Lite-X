@@ -75,7 +75,15 @@ class NativeWs implements Ws {
                 if (isConnected) return this.onClose(err)
                 else resolve(false)
             }
-            const websocket = new WebSocket(url)
+            let websocket: WebSocket
+            try {
+                websocket = new WebSocket(url)
+            } catch {
+                this.websocket = undefined
+                this.selfState = DriverState.Disconnected
+                resolve(false)
+                return
+            }
             websocket.onopen = onopen
             websocket.onclose = onclose
             websocket.onerror = onclose
@@ -424,7 +432,6 @@ class Driver {
             this.state = DriverState.Connected
         }else {
             this.state = DriverState.Error
-            new PopInfo().add(PopType.ERR, '连接失败')
         }
         return re
     }

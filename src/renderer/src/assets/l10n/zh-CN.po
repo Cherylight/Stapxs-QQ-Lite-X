@@ -2261,3 +2261,9 @@ msgstr ""
 
 msgid "禁言ing...剩余时间:"
 msgstr ""
+
+msgid "请输入链接地址,参考如何连接"
+msgstr ""
+
+msgid "连接地址格式错误，请参考如何连接"
+msgstr ""
