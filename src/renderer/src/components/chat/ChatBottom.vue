@@ -208,6 +208,7 @@ const inputPanHeight = shallowRef(0)
 const update = useUpdate()
 
 const textAreaHeight = computed(()=>{
+    if (!inputMsg.value.content) return 0
     inputMsg.value.content
     if (!mainInput.value) return 0
     const dom = mainInput.value as HTMLTextAreaElement
