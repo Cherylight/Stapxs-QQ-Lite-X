@@ -44,6 +44,7 @@ export default class NapCapOneBot extends OneBotAdapter {
         this.segSerializer['file'] = this.fileSerializer.bind(this)
 
         this.noticeEventProcessers['group_msg_emoji_like'] = this.groupMsgEmojiLikeEvent.bind(this)
+        this.eventProcessers['message_sent'] = this.messageEvent.bind(this)
     }
 
     //#region == API ===============================================
