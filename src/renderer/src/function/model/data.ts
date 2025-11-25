@@ -167,6 +167,13 @@ export class URL {
     get ssl(): boolean {
         return this._ssl
     }
+
+    get fullUrl(): string {
+        let url = `${this._host}`
+        if (this._port) url += `:${this._port}`
+        url += this._path
+        return url
+    }
 }
 
 /**

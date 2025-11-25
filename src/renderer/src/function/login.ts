@@ -152,7 +152,7 @@ async function preCheck(
     }
     let protocol: string = parseUrl.protocol
     const ssl: boolean = parseUrl.ssl
-    const url: string = parseUrl.port ? `${parseUrl.host}:${parseUrl.port}` : parseUrl.host
+    const url: string = parseUrl.fullUrl
     if (!protocol) return $t('连接地址格式错误，请参考如何连接')
     if (!url) return $t('连接地址格式错误，请参考如何连接')
     if (protocol === 'ws') {
