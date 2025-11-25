@@ -75,6 +75,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
         this.segSerializer['file'] = this.fileSerializer.bind(this)
 
+        this.eventProcessers['message_sent'] = this.messageEvent.bind(this)
         this.noticeEventProcessers['group_msg_emoji_like'] = this.groupMsgEmojiLikeEvent.bind(this)
         this.remarkCache = undefined
     }
