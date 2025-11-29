@@ -28,7 +28,7 @@
                         <hr>
                         <div ref="sessionList">
                             <div v-for="(session, key) in showSessions"
-                                :key="session.id"
+                                :key="key"
                                 :class="{
                                     'session-item': true,
                                     'selected': selectId === key,
