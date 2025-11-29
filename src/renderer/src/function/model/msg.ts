@@ -96,12 +96,12 @@ export class Msg extends Message {
             // 补充已删除
             this.isDelete = data.isDelete
             // 判断提及自己
-            this.message.forEach(seg => {
+            for (const seg of this.message) {
                 if (seg.type === 'atall') this.atall = true
                 else if (
                     seg instanceof AtSeg && Number(seg.user_id) === Number(runtimeData.loginInfo.uin)
                 ) this.atme = true
-            })
+            }
             // 生成session
             this.session = Session.getSession(
                 data.session.type,

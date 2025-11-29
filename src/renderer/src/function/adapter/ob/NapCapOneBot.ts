@@ -5,9 +5,9 @@ import { FileSeg, ForwardSeg, ImgSeg, MdSeg, MfaceSeg } from '@renderer/function
 import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
-import { EssenceData, EssenceSeg, FilesData, FileSegData, ForwardNodeData, ForwardSegData, FriendData, GroupAnnouncementData, ImgSegData, ImplInfo, JsonSegData, MdSegData, MsgData, PokeEventData, ResponseEventData, UserData } from '../interface'
+import { EssenceData, EssenceSeg, FilesData, FileSegData, ForwardNodeData, ForwardSegData, FriendData, GroupAnnouncementData, ImgSegData, ImplInfo, JsonSegData, MdSegData, MessageEventData, MsgData, PokeEventData, ResponseEventData, UserData } from '../interface'
 import { api, OneBotAdapter } from './adapter'
-import { NcForwardData, NcObCreateGroupFileFolder, NcObFetchCustomFace, NcObFileSeg, NcObForwardSeg, NcObGetEssenceMsgList, NcObGetFileUrl, NcObGetForwardMsg, NcObGetFriendsWithCategory, NcObGetGroupFile, NcObGetGroupNotices, NcObGetHistoryMsg, NcObGetStrangerInfo, NcObGroupMsgEmojiLikeEvent, NcObImgSeg, NcObMdSeg, NcObMfaceSeg, NcObPokeEvent, NcObUploadGroupFile, NcObUploadPrivateFile, ObForwardNodeSeg, ObForwardSeg, ObGetVersionInfo, ObJsonSeg, ObMsg, ObSendMsg } from './type'
+import { NcForwardData, NcObCreateGroupFileFolder, NcObFetchCustomFace, NcObFileSeg, NcObForwardSeg, NcObGetEssenceMsgList, NcObGetFileUrl, NcObGetForwardMsg, NcObGetFriendsWithCategory, NcObGetGroupFile, NcObGetGroupNotices, NcObGetHistoryMsg, NcObGetStrangerInfo, NcObGroupMsgEmojiLikeEvent, NcObImgSeg, NcObMdSeg, NcObMessageSendEvent, NcObMfaceSeg, NcObPokeEvent, NcObUploadGroupFile, NcObUploadPrivateFile, ObForwardNodeSeg, ObForwardSeg, ObGetVersionInfo, ObJsonSeg, ObMessageEvent, ObMsg, ObSendMsg } from './type'
 import { createSender, fileToBase64, getGender, ObConnector } from './utils'
 
 import { compareVersions } from 'compare-versions'
@@ -44,7 +44,7 @@ export default class NapCapOneBot extends OneBotAdapter {
         this.segSerializer['file'] = this.fileSerializer.bind(this)
 
         this.noticeEventProcessers['group_msg_emoji_like'] = this.groupMsgEmojiLikeEvent.bind(this)
-        this.eventProcessers['message_sent'] = this.messageEvent.bind(this)
+        this.eventProcessers['message_sent'] = this.messageSentEvent.bind(this)
     }
 
     //#region == API ===============================================
@@ -209,7 +209,10 @@ export default class NapCapOneBot extends OneBotAdapter {
 
         if (start) data.data.messages.pop() // 去掉第一条，避免重复
 
-        const out: Promise<MsgData>[] = data.data.messages.map(msg => this.parseMsg(msg))
+        const out: Promise<MsgData>[] = data.data.messages.map(msg => {
+            if (msg.user_id) msg.user_id = session.id // 修正user_id
+            return this.parseMsg(msg)
+        })
 
         return await Promise.all(out)
     }
@@ -543,6 +546,53 @@ export default class NapCapOneBot extends OneBotAdapter {
             add: true,
             time: event.time,
         }
+    }
+    async messageSentEvent(event: NcObMessageSendEvent): Promise<MessageEventData> {
+        let data: ObMessageEvent
+        if (event.message_type === 'private') {
+            data = {
+                time: event.time,
+                self_id: event.self_id,
+                post_type: 'message',
+                message_type: 'private',
+                sub_type: 'friend',
+                message_id: event.message_id,
+                user_id: event.target_id,
+                message: event.message,
+                raw_message: event.raw_message,
+                sender: {
+                    user_id: event.sender.user_id,
+                    nickname: event.sender.nickname,
+                    sex: 'unknown',
+                    age: 0,
+                }
+            }
+        }else {
+            data = {
+                time: event.time,
+                self_id: event.self_id,
+                post_type: 'message',
+                message_type: 'group',
+                sub_type: 'normal',
+                message_id: event.message_id,
+                user_id: event.user_id,
+                group_id: event.group_id,
+                message: event.message,
+                raw_message: event.raw_message,
+                sender: {
+                    user_id: event.sender.user_id,
+                    nickname: event.sender.nickname,
+                    card: event.sender.card,
+                    sex: 'unknown',
+                    age: 0,
+                    area: '',
+                    level: '',
+                    role: '',
+                    title: '',
+                }
+            }
+        }
+        return await this.messageEvent(data)
     }
     //#endregion
 

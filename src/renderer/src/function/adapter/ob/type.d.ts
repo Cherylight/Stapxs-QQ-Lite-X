@@ -494,7 +494,6 @@ export interface ObGroupMessageEvent extends ObEvent {
     raw_message: string                 // 原始消息文本
     sender: ObGroupSender |             // 发送者信息
             ObAnonymousSender
-
 }
 export interface ObPrivateMessageEvent extends ObEvent {
     post_type: 'message'
@@ -503,7 +502,7 @@ export interface ObPrivateMessageEvent extends ObEvent {
               'normal' |
               'other'
     message_id: number                  // 消息 ID
-    user_id: number                     // 发送者 QQ 号
+    user_id: number                     // 对话方 QQ 号
     group_id?: number                   // 群号
     message: ObSeg<string,any>[]        // 消息内容
     raw_message: string                 // 原始消息文本
@@ -882,6 +881,35 @@ export interface NcObGroupMsgEmojiLikeEvent extends ObNoticeEvent {
     group_id: number
     message_id: number
 }
+export interface NcObAbsMessageSendEvent extends ObEvent {
+    user_id: number
+    message_id: number
+    message: ObSeg<string, any>[]
+    raw_message: string
+    sub_type: 'friend' | 'normal'
+    target_id: number
+    message: ObSeg<string, any>[]
+}
+export interface NcObPrivateMessageSendEvent extends NcObAbsMessageSendEvent {
+    message_type: 'private'
+    sender: {
+        user_id: number
+        nickname: string
+        card: string
+    }
+}
+export interface NcObGroupMessageSendEvent extends NcObAbsMessageSendEvent {
+    group_id: number
+    group_name: string
+    message_type: 'group'
+    sender: {
+        user_id: number
+        nickname: string
+        card: string
+        role: string
+    }
+}
+export type NcObMessageSendEvent = NcObPrivateMessageSendEvent | NcObGroupMessageSendEvent
 export type NcObUploadGroupFile = ObResponse<{
     file_id: string,
 }>
@@ -1157,6 +1185,38 @@ export interface LltbObPokeEvent extends ObPokeEvent {
         {txt: string}
     ]
 }
+
+export interface LltbObAbsMessageSendEvent extends ObEvent {
+    user_id: number
+    message_id: number
+    message_seq: number
+    raw_message: string
+    sub_type: 'friend' | 'normal'
+    message: ObSeg<string, any>[]
+    post_type: 'message_sent'
+    target_id: number
+}
+export interface LltbObPrivateMessageSendEvent extends LltbObAbsMessageSendEvent {
+    message_type: 'private'
+    sender: {
+        user_id: number
+        nickname: string
+        card: string
+    }
+}
+export interface LltbObGroupMessageSendEvent extends LltbObAbsMessageSendEvent {
+    group_id: number
+    group_name: string
+    message_type: 'group'
+    sender: {
+        user_id: number
+        nickname: string
+        card: string
+        role: string
+    }
+}
+
+export type LltbObMessageSendEvent = LltbObPrivateMessageSendEvent | LltbObGroupMessageSendEvent
 
 export interface LltbObMsg extends ObMsg {
     message_seq: number

@@ -15,6 +15,7 @@ import {
     ImgSegData,
     ImplInfo,
     MdSegData,
+    MessageEventData,
     MfaceSegData,
     MsgData,
     PokeEventData,
@@ -39,6 +40,7 @@ import {
     LltbObGroupMsgEmojiLikeEvent,
     LltbObImageSeg,
     LltbObMdSeg,
+    LltbObMessageSendEvent,
     LltbObMfaceSeg,
     LltbObMsg,
     LltbObPokeEvent,
@@ -47,6 +49,7 @@ import {
     ObForwardNodeSeg,
     ObForwardSeg,
     ObGetVersionInfo,
+    ObMessageEvent,
     ObMsg,
     ObSendMsg
 } from './type'
@@ -75,7 +78,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
         this.segSerializer['file'] = this.fileSerializer.bind(this)
 
-        this.eventProcessers['message_sent'] = this.messageEvent.bind(this)
+        this.eventProcessers['message_sent'] = this.messageSentEvent.bind(this)
         this.noticeEventProcessers['group_msg_emoji_like'] = this.groupMsgEmojiLikeEvent.bind(this)
         this.remarkCache = undefined
     }
@@ -248,7 +251,10 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         const messages = data.data.messages
 
         if (start) messages.pop() // 去掉第一条，避免重复
-        const out: Promise<MsgData>[] = messages.map(msg => this.parseMsg(msg))
+        const out: Promise<MsgData>[] = messages.map(msg => {
+            if(msg.user_id) msg.user_id = session.id
+            return this.parseMsg(msg)
+        })
 
         return await Promise.all(out)
     }
@@ -581,6 +587,54 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             add: true,
             time: event.time,
         }
+    }
+    async messageSentEvent(event: LltbObMessageSendEvent): Promise<MessageEventData> {
+        let data: ObMessageEvent
+        if (event.message_type === 'private') {
+            data = {
+                time: event.time,
+                self_id: event.self_id,
+                post_type: 'message',
+                message_type: 'private',
+                sub_type: 'friend',
+                message_id: event.message_id,
+                user_id: event.target_id,
+                message: event.message,
+                raw_message: event.raw_message,
+                sender: {
+                    user_id: event.sender.user_id,
+                    nickname: event.sender.nickname,
+                    sex: 'female',
+                    age: 0,
+                }
+            }
+        }else {
+            data = {
+                time: event.time,
+                self_id: event.self_id,
+                post_type: 'message',
+                message_type: 'group',
+                sub_type: 'normal',
+                message_id: event.message_id,
+                user_id: event.sender.user_id,
+                group_id: event.target_id,
+                message: event.message,
+                raw_message: event.raw_message,
+                sender: {
+                    user_id: event.sender.user_id,
+                    nickname: event.sender.nickname,
+                    card: event.sender.card,
+                    sex: 'unknown',
+                    age: 0,
+                    area: '',
+                    level: '',
+                    role: event.sender.role,
+                    title: '',
+                }
+            }
+        }
+        (data as any).message_seq = event.message_seq
+        return await this.messageEvent(data)
     }
     //#endregion
 
