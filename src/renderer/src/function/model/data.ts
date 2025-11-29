@@ -6,7 +6,7 @@
  * @Description: 定义数据结构
  */
 
-import pinyin from 'tiny-pinyin'
+import { getPinyin, matchPinyin, PinYinData } from '../utils/pinyin'
 import {
     getTimeConfig,
     getTrueLang,
@@ -183,37 +183,19 @@ export class URL {
  * @extends String
  */
 export class Name extends String {
-    private _name!: string
-    private _pinyinName!: string
-    private _pinyinShort!: string
-    private _pinyinHead!: string
+    private readonly _pinyinData: PinYinData
 
-    constructor(name: string) {
-        super(name)
-        this.resetContent(name)
-    }
-
-    private resetContent(newName: string): void {
-        this._name = String(newName)
-        this._pinyinName = pinyin.convertToPinyin(this._name, '', true).toLowerCase()
-        this._pinyinShort = pinyin.convertToPinyin(this._name, '|||', true).
-            toLowerCase().
-            split('|||').
-            map(item => item[0] ?? '').
-            join('')
-        this._pinyinHead = this._pinyinName[0]
+    constructor(private readonly _name: string) {
+        super(_name)
+        this._pinyinData = getPinyin(this._name)
     }
 
     matchStr(str: string): boolean {
-        if (this._name.includes(str)) return true
-        if (this._pinyinName.includes(str)) return true
-        if (this._pinyinShort.includes(str)) return true
-        if (this._pinyinHead.includes(str)) return true
-        return false
+        return matchPinyin(this._pinyinData, str)
     }
 
     get py(): string {
-        return this._pinyinName
+        return this._pinyinData.main[0] || ''
     }
 }
 
@@ -223,7 +205,7 @@ export class Name extends String {
  * 自带格式化方法
  */
 export class Time {
-    private _time: number
+    private readonly _time: number
 
     constructor(time: number|string) {
         if (typeof time === 'string') this._time = new Date(time).getTime()
