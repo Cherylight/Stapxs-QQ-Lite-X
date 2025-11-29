@@ -78,7 +78,14 @@ jobs:
                 ~/.cache/yarn
                 .yarn/cache
                 ~/.npm
+                yarn.lock
                 node_modules
+                ~/.cache/electron
+                ~/.cache/electron-builder
+                ~/AppData/Local/electron/Cache
+                ~/AppData/Local/electron-builder/Cache
+                ~/Library/Caches/electron
+                ~/Library/Caches/electron-builder
             key: ${{ runner.os }}-${{ github.ref_name }}-electron
 
       - name: 更新依赖
