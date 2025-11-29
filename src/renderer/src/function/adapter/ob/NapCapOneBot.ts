@@ -5,9 +5,9 @@ import { FileSeg, ForwardSeg, ImgSeg, MdSeg, MfaceSeg } from '@renderer/function
 import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
-import { EssenceData, EssenceSeg, FilesData, FileSegData, ForwardNodeData, ForwardSegData, FriendData, GroupAnnouncementData, ImgSegData, ImplInfo, JsonSegData, MdSegData, MessageEventData, MsgData, PokeEventData, ResponseEventData, UserData } from '../interface'
+import { EssenceData, EssenceSeg, FilesData, FileSegData, ForwardNodeData, ForwardSegData, FriendData, GroupAnnouncementData, ImgSegData, ImplInfo, JsonSegData, LeaveEventData, MdSegData, MessageEventData, MsgData, PokeEventData, ResponseEventData, UserData } from '../interface'
 import { api, OneBotAdapter } from './adapter'
-import { NcForwardData, NcObCreateGroupFileFolder, NcObFetchCustomFace, NcObFileSeg, NcObForwardSeg, NcObGetEssenceMsgList, NcObGetFileUrl, NcObGetForwardMsg, NcObGetFriendsWithCategory, NcObGetGroupFile, NcObGetGroupNotices, NcObGetHistoryMsg, NcObGetStrangerInfo, NcObGroupMsgEmojiLikeEvent, NcObImgSeg, NcObMdSeg, NcObMessageSendEvent, NcObMfaceSeg, NcObPokeEvent, NcObUploadGroupFile, NcObUploadPrivateFile, ObForwardNodeSeg, ObForwardSeg, ObGetVersionInfo, ObJsonSeg, ObMessageEvent, ObMsg, ObSendMsg } from './type'
+import { NcForwardData, NcObCreateGroupFileFolder, NcObFetchCustomFace, NcObFileSeg, NcObForwardSeg, NcObGetEssenceMsgList, NcObGetFileUrl, NcObGetForwardMsg, NcObGetFriendsWithCategory, NcObGetGroupFile, NcObGetGroupNotices, NcObGetHistoryMsg, NcObGetStrangerInfo, NcObGroupMsgEmojiLikeEvent, NcObImgSeg, NcObMdSeg, NcObMessageSendEvent, NcObMfaceSeg, NcObPokeEvent, NcObUploadGroupFile, NcObUploadPrivateFile, ObForwardNodeSeg, ObForwardSeg, ObGetVersionInfo, ObGroupDecreaseEvent, ObJsonSeg, ObMessageEvent, ObMsg, ObSendMsg } from './type'
 import { createSender, fileToBase64, getGender, ObConnector } from './utils'
 
 import { compareVersions } from 'compare-versions'
@@ -532,6 +532,10 @@ export default class NapCapOneBot extends OneBotAdapter {
         re.ico = event.raw_info[1].src
         re.time = event.time
         return re
+    }
+    override async groupDecreaseEvent(event: ObGroupDecreaseEvent): Promise<LeaveEventData> {
+        if (event.operator_id === 0) event.operator_id = event.user_id
+        return await super.groupDecreaseEvent(event)
     }
     async groupMsgEmojiLikeEvent(event: NcObGroupMsgEmojiLikeEvent): Promise<ResponseEventData> {
         return {
