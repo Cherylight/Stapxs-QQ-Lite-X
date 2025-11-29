@@ -1,4 +1,4 @@
-import { pinyin } from 'pinyin'
+import 'https://cdn.jsdelivr.net/npm/pinyin@4.0.0/lib/umd/pinyin.min.js'
 
 export type PinYinData = {
     main: string[]
@@ -7,12 +7,12 @@ export type PinYinData = {
 
 export function getPinyin(name: string): PinYinData {
     return {
-        main: pinyin(name, {
+        main: pinyin.pinyin(name, {
             heteronym: true,
             compact: true,
             style: 'normal',
         }).map(item => item.join('').toLowerCase()),
-        short: pinyin(name, {
+        short: pinyin.pinyin(name, {
             heteronym: true,
             compact: true,
             style: 'first_letter',
