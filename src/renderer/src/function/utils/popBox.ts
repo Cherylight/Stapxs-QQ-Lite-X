@@ -110,7 +110,8 @@ export async function ensurePopBox(
                 text: mainButtonName,
                 fun: () => resolve(true)
             },
-        ]
+        ],
+        allowAutoClose: false,
     })
     return promise
 }
