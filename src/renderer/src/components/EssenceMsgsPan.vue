@@ -63,7 +63,7 @@
 import { FaceSeg, ImgSeg, TxtSeg } from '@renderer/function/model/seg'
 import { GroupSession } from '@renderer/function/model/session'
 import EmojiFace from './EmojiFace.vue'
-import { watchEffect } from 'vue';
+import { watchEffect } from 'vue'
 
 const { session } = defineProps<{
     session: GroupSession

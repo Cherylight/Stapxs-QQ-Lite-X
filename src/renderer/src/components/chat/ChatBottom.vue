@@ -10,13 +10,13 @@
         @mouseleave="hoverEnd()">
         <!-- 表情面板 -->
         <Transition name="pan">
-            <FacePan class="chat-bottom-pan" v-show="details === 'face' && !focusHide"
+            <FacePan v-show="details === 'face' && !focusHide" class="chat-bottom-pan"
                 @send-msg="sendMsg" />
         </Transition>
         <!-- 精华消息 -->
         <Transition v-if="session instanceof GroupSession" name="pan">
-            <EssenceMsgsPan class="chat-bottom-pan" v-show="details === 'essence' && !focusHide"
-                :key="session.id" :session="session" @close="switchDetail('essence')" />
+            <EssenceMsgsPan v-show="details === 'essence' && !focusHide" :key="session.id"
+                class="chat-bottom-pan" :session="session" @close="switchDetail('essence')" />
         </Transition>
         <!-- 定位点 -->
         <div id="chat-bottom-top" />
