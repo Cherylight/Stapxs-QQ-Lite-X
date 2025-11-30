@@ -24,7 +24,7 @@ import {
 } from '../interface'
 import { api, OneBotAdapter } from './adapter'
 import { createSender, fileToBase64, getGender, ObConnector } from './utils'
-import {
+import type {
     LltbObCreateGroupFileFolder,
     LltbObFetchCustomFace,
     LltbObFileSeg,
@@ -51,7 +51,8 @@ import {
     ObGetVersionInfo,
     ObMessageEvent,
     ObMsg,
-    ObSendMsg
+    ObSendMsg,
+    RkeyType
 } from './type'
 
 export default class LLTwoBotOneBot extends OneBotAdapter {
@@ -290,11 +291,23 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         return true
     }
     @api
-    override async getForwardMsg(forwardId: string): Promise<ForwardNodeData[]> {
+    override async getForwardMsg(forwardId: string, msg?: LltbObMsg): Promise<ForwardNodeData[]> {
         const { data }: LltbObGetForwardMsg = await this.connector.send('get_forward_msg', {
             id: forwardId,
         })
-        return await Promise.all(data.messages.map(node => this.lltbNodeParser(node)))
+        return await Promise.all(data.messages.map(node => this.lltbNodeParser(node, msg)))
+    }
+    /**
+     * 获取资源url
+     * @param id 资源id
+     */
+    @api
+    async getResource(id: string): Promise<string|undefined> {
+        const [type, url] = id.split('|||') as [RkeyType, string]
+        const rkey = await this.getRkey(type)
+        if (!rkey) return url
+        const sep = url.includes('?') ? '&' : '?'
+        return `${url}${sep}rkey=${rkey}`
     }
     //#endregion
     //#region == 群聊相关 ======================
@@ -435,21 +448,27 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         return base
     }
     //#region == 反序列化 ===========================
-    async mdParser(data: LltbObMdSeg): Promise<MdSegData> {
+    async mdParser(data: LltbObMdSeg, _?: ObMsg): Promise<MdSegData> {
         return {
             type: 'md',
             content: data.data.content,
         }
     }
-    override async imageParser(data: LltbObImageSeg): Promise<ImgSegData> {
+    override async imageParser(data: LltbObImageSeg, msg?: ObMsg): Promise<ImgSegData> {
+        let type: RkeyType
+
+        if (!msg) type = 'UNKNOWN'
+        else if (msg.message_type === 'private') type = 'PRIVATE'
+        else type = 'GROUP'
+
         return {
             type: 'image',
-            url: Resource.fromUrl(data.data.url),
+            url: await this.createResource(data.data.url, type),
             isFace: data.data.subType === 7 || data.data.subType === 1,
             summary: data.data.summary,
         }
     }
-    async mfaceParser(data: LltbObMfaceSeg): Promise<MfaceSegData> {
+    async mfaceParser(data: LltbObMfaceSeg, _?: ObMsg): Promise<MfaceSegData> {
         return {
             type: 'mface',
             url: data.data.url,
@@ -459,7 +478,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             key: data.data.key,
         }
     }
-    async fileParser(data: LltbObFileSeg): Promise<FileSegData> {
+    async fileParser(data: LltbObFileSeg, _?: ObMsg): Promise<FileSegData> {
         return {
             type: 'file',
             name: data.data.file,
@@ -468,13 +487,13 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             file_id: data.data.file_id,
         }
     }
-    async lltbNodeParser(data: LltbObForwardNode): Promise<ForwardNodeData> {
+    async lltbNodeParser(data: LltbObForwardNode, msg?: LltbObMsg): Promise<ForwardNodeData> {
         return {
             sender: {
                 nickname: data.sender.nickname,
                 face: `https://q1.qlogo.cn/g?b=qq&s=0&nk=${data.sender.user_id}`,
             },
-            content: await this.parseSeg(data.content),
+            content: await this.parseSeg(data.content, msg),
         }
     }
     //#endregion
@@ -685,5 +704,48 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
     private getMsgSeq(msg: MsgData | Msg): number | undefined {
         const key = `${msg.session?.type}-${msg.session?.id}-${msg.message_id}`
         return this.msgSeqCache.get(key)
+    }
+
+    private rkeyCache: {[key in RkeyType]: {value: string, time: number} | null} = {
+        'PRIVATE': null,
+        'GROUP': null,
+        'UNKNOWN': null
+    }
+    @api
+    /**
+     * 获取图片rkey
+     */
+    private async getRkey(type: RkeyType): Promise<string|undefined> {
+        if (type === 'UNKNOWN') return undefined
+        const cache = this.rkeyCache[type]
+        if (cache && (Date.now() - cache.time) < 5 * 60 * 1000)
+            return cache.value
+        const data = await this.connector.send('get_rkey', {})
+        const rkey = type === 'GROUP' ? data.data.group_key : data.data.private_key
+        this.rkeyCache[type] = { value: rkey, time: Date.now() }
+        return rkey
+    }
+
+    private async createResource(url: string, type: RkeyType): Promise<Resource> {
+        let baseUrl: string
+        // console.log('createResource', url, rkey)
+        try {
+            const u = new URL(url)
+            u.searchParams.delete('rkey')
+            baseUrl = u.toString()
+        } catch {
+            // 回退方案：使用正则在不能用 URL 的情况下处理
+            baseUrl = url.replace(/([?&])rkey=[^&]*(&?)/, (_, sep, tail) => tail ? sep : '')
+        }
+        const id = `${type}|||${baseUrl}`
+        let resUrl: string
+        const rkey = await this.getRkey(type)
+        if (rkey) {
+            const sep = baseUrl.includes('?') ? '&' : '?'
+            resUrl = `${baseUrl}${sep}rkey=${rkey}`
+        } else {
+            resUrl = url // 无法获取 rkey，使用原始 url
+        }
+        return Resource.fromUrl(resUrl, id)
     }
 }

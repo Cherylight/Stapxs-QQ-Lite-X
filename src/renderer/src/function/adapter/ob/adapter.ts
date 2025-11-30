@@ -185,7 +185,6 @@ export class OneBotAdapter implements AdapterInterface {
     }
 
     async redirect(): Promise<AdapterInterface | undefined> {
-        // TODO:重定向到其他适配器逻辑
         const implInfo = await this.getImplInfo()
         if (!implInfo)
             return undefined
@@ -364,11 +363,11 @@ export class OneBotAdapter implements AdapterInterface {
     }
     //#region == 消息相关 ===========================
     @api
-    async getForwardMsg(forwardId: string): Promise<ForwardNodeData[]> {
+    async getForwardMsg(forwardId: string, msg?: ObMsg): Promise<ForwardNodeData[]> {
         const { data }: ObGetForwardMsg = await this.connector.send('get_forward_msg', {
             id: forwardId,
         })
-        return await Promise.all(data.message.map(node => this.nodeParser(node)))
+        return await Promise.all(data.message.map(node => this.nodeParser(node, msg)))
     }
     @api
     async getMsg(_: Session, msgId: string): Promise<MsgData | undefined> {
@@ -415,7 +414,7 @@ export class OneBotAdapter implements AdapterInterface {
 
     //#region == 消息相关 ===========================================
     async parseMsg(data: ObMsg): Promise<MsgData> {
-        const message = await this.parseSeg(data.message)
+        const message = await this.parseSeg(data.message, data)
 
         // 组装发送者信息
         let sender: SenderData
@@ -470,16 +469,16 @@ export class OneBotAdapter implements AdapterInterface {
     }
 
     //#region == 反序列化 ===========================
-    segParsers: Record<string, ((data: ObSeg<any, any>)=>Promise<SegData>)> = {}
-    async parseSeg(data: ObSeg<string, any>): Promise<SegData>
-    async parseSeg(data: ObSeg<string, any>[]): Promise<SegData[]>
-    async parseSeg(data: ObSeg<string, any> | ObSeg<string, any>[]): Promise<SegData | SegData[]> {
+    segParsers: Record<string, ((data: ObSeg<any, any>, msg?: ObMsg)=>Promise<SegData>)> = {}
+    async parseSeg(data: ObSeg<string, any>, msg?: ObMsg): Promise<SegData>
+    async parseSeg(data: ObSeg<string, any>[], msg?: ObMsg): Promise<SegData[]>
+    async parseSeg(data: ObSeg<string, any> | ObSeg<string, any>[], msg?: ObMsg): Promise<SegData | SegData[]> {
         if (Array.isArray(data)) {
-            return await Promise.all(data.map(d => this.parseSeg(d)))
+            return await Promise.all(data.map(d => this.parseSeg(d, msg)))
         } else {
             try {
                 const parser = this.segParsers[data.type]
-                if (parser) return await parser(data)
+                if (parser) return await parser(data, msg)
                 return this.unknownParser(data)
             }catch (err) {
                 logger.error(err as Error, '消息段解析失败:' + JSON.stringify(data))
@@ -487,26 +486,26 @@ export class OneBotAdapter implements AdapterInterface {
             }
         }
     }
-    async textParser(data: ObTextSeg): Promise<TextSegData> {
+    async textParser(data: ObTextSeg, _?: ObMsg): Promise<TextSegData> {
         return {
             type: 'text',
             text: data.data.text
         }
     }
-    async imageParser(data: ObImgSeg): Promise<ImgSegData> {
+    async imageParser(data: ObImgSeg, _?: ObMsg): Promise<ImgSegData> {
         return {
             type: 'image',
             url: Resource.fromUrl(data.data.url),
             isFace: false,
         }
     }
-    async faceParser(data: ObFaceSeg): Promise<FaceSegData> {
+    async faceParser(data: ObFaceSeg, _?: ObMsg): Promise<FaceSegData> {
         return {
             type: 'face',
             id: Number(data.data.id),
         }
     }
-    async atParser(data: ObAtSeg): Promise<AtSegData|AtAllSegData> {
+    async atParser(data: ObAtSeg, _?: ObMsg): Promise<AtSegData|AtAllSegData> {
         if (data.data.qq === 'all') {
             return {
                 type: 'atall',
@@ -519,16 +518,16 @@ export class OneBotAdapter implements AdapterInterface {
             }
         }
     }
-    async videoParser(data: ObVideoSeg): Promise<VideoSegData> {
+    async videoParser(data: ObVideoSeg, _?: ObMsg): Promise<VideoSegData> {
         return {
             type: 'video',
             file: data.data.file,
             url: Resource.fromUrl(data.data.url),
         }
     }
-    async forwardParser(data: ObForwardSeg): Promise<ForwardSegData> {
+    async forwardParser(data: ObForwardSeg, msg?: ObMsg): Promise<ForwardSegData> {
         const id: string = data.data.id
-        const nodes = await this.getForwardMsg(id)
+        const nodes = await this.getForwardMsg(id, msg)
         if (!nodes) throw new Error('获取合并转发消息失败')
         return {
             type: 'forward',
@@ -536,23 +535,23 @@ export class OneBotAdapter implements AdapterInterface {
             content: nodes,
         }
     }
-    async replyParser(data: ObReplySeg): Promise<ReplySegData> {
+    async replyParser(data: ObReplySeg, _?: ObMsg): Promise<ReplySegData> {
         return {
             type: 'reply',
             id: data.data.id,
         }
     }
-    async pokeParser(_data: ObPokeSeg): Promise<PokeSegData> {
+    async pokeParser(_data: ObPokeSeg, _?: ObMsg): Promise<PokeSegData> {
         return { type: 'poke' }
     }
-    async xmlParser(data: ObXmlSeg): Promise<XmlSegData> {
+    async xmlParser(data: ObXmlSeg, _?: ObMsg): Promise<XmlSegData> {
         return {
             type: 'xml',
             data: data.data.data,
             id: uuid(),
         }
     }
-    async jsonParser(data: ObJsonSeg): Promise<JsonSegData> {
+    async jsonParser(data: ObJsonSeg, _?: ObMsg): Promise<JsonSegData> {
         return {
             type: 'json',
             data: data.data.data,
@@ -560,20 +559,20 @@ export class OneBotAdapter implements AdapterInterface {
         }
     }
 
-    unknownParser(data: ObSeg<string, any>): UnknownSegData {
+    unknownParser(data: ObSeg<string, any>, _?: ObMsg): UnknownSegData {
         return {
             type: 'unknown',
             segType: data.type,
             data: data
         }
     }
-    async nodeParser(data: ObForwardNodeSeg): Promise<ForwardNodeData> {
+    async nodeParser(data: ObForwardNodeSeg, msg?: ObMsg): Promise<ForwardNodeData> {
         return {
             sender: {
                 nickname: data.data.nickname,
                 face: `https://q1.qlogo.cn/g?b=qq&s=0&nk=${data.data.user_id}`,
             },
-            content: await this.parseSeg(data.data.content),
+            content: await this.parseSeg(data.data.content, msg),
         }
     }
     //#endregion

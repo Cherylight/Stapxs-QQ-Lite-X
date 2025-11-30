@@ -565,6 +565,7 @@ export interface ObPokeEvent extends ObNoticeEvent {
     target_id: number                   // 被戳者 QQ 号
 }
 //#endregion
+export type RkeyType = 'PRIVATE' | 'GROUP' | 'UNKNOWN'
 
 //#region == LGRV1 ==============================================
 export type LgrObGetVersionInfo = ObResponse<{
@@ -923,6 +924,20 @@ export type NcObCreateGroupFileFolder = ObResponse<{
         }
     }
 }>
+export type NcObGetRkey = ObResponse<[
+    {
+        rkey: string,
+        ttl: string,
+        time: number,
+        type: 10
+    },
+    {
+        rkey: string,
+        ttl: string,
+        time: number,
+        type: 20
+    }
+]>
 //#endregion
 
 //#region == LLTWOBOT =============================================
@@ -1130,6 +1145,13 @@ export type LltbObCreateGroupFileFolder = ObResponse<{
 }>
 
 export type LltbObGetEssenceMsgList = ObResponse<LltbObEssenceMsg[]>
+
+export type LltbObGetRkey = ObResponse<{
+    private_key: string,
+    group_key:  string,
+    expired_time: number,
+    updated_time: string,
+}>
 
 // == 消息 =================
 

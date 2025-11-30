@@ -5,9 +5,59 @@ import { FileSeg, ForwardSeg, ImgSeg, MdSeg, MfaceSeg } from '@renderer/function
 import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
-import { EssenceData, EssenceSeg, FilesData, FileSegData, ForwardNodeData, ForwardSegData, FriendData, GroupAnnouncementData, ImgSegData, ImplInfo, JsonSegData, LeaveEventData, MdSegData, MessageEventData, MsgData, PokeEventData, ResponseEventData, UserData } from '../interface'
+import {
+    EssenceData,
+    EssenceSeg,
+    FilesData,
+    FileSegData,
+    ForwardNodeData,
+    ForwardSegData,
+    FriendData,
+    GroupAnnouncementData,
+    ImgSegData,
+    ImplInfo,
+    JsonSegData,
+    LeaveEventData,
+    MdSegData,
+    MessageEventData,
+    MsgData,
+    PokeEventData,
+    ResponseEventData,
+    UserData,
+} from '../interface'
 import { api, OneBotAdapter } from './adapter'
-import { NcForwardData, NcObCreateGroupFileFolder, NcObFetchCustomFace, NcObFileSeg, NcObForwardSeg, NcObGetEssenceMsgList, NcObGetFileUrl, NcObGetForwardMsg, NcObGetFriendsWithCategory, NcObGetGroupFile, NcObGetGroupNotices, NcObGetHistoryMsg, NcObGetStrangerInfo, NcObGroupMsgEmojiLikeEvent, NcObImgSeg, NcObMdSeg, NcObMessageSendEvent, NcObMfaceSeg, NcObPokeEvent, NcObUploadGroupFile, NcObUploadPrivateFile, ObForwardNodeSeg, ObForwardSeg, ObGetVersionInfo, ObGroupDecreaseEvent, ObJsonSeg, ObMessageEvent, ObMsg, ObSendMsg } from './type'
+import type {
+    NcForwardData,
+    NcObCreateGroupFileFolder,
+    NcObFetchCustomFace,
+    NcObFileSeg,
+    NcObForwardSeg,
+    NcObGetEssenceMsgList,
+    NcObGetFileUrl,
+    NcObGetForwardMsg,
+    NcObGetFriendsWithCategory,
+    NcObGetGroupFile,
+    NcObGetGroupNotices,
+    NcObGetHistoryMsg,
+    NcObGetStrangerInfo,
+    NcObGroupMsgEmojiLikeEvent,
+    NcObImgSeg,
+    NcObMdSeg,
+    NcObMessageSendEvent,
+    NcObMfaceSeg,
+    NcObPokeEvent,
+    NcObUploadGroupFile,
+    NcObUploadPrivateFile,
+    ObForwardNodeSeg,
+    ObForwardSeg,
+    ObGetVersionInfo,
+    ObGroupDecreaseEvent,
+    ObJsonSeg,
+    ObMessageEvent,
+    ObMsg,
+    ObSendMsg,
+    RkeyType
+} from './type'
 import { createSender, fileToBase64, getGender, ObConnector } from './utils'
 
 import { compareVersions } from 'compare-versions'
@@ -241,11 +291,23 @@ export default class NapCapOneBot extends OneBotAdapter {
         return true
     }
     @api
-    override async getForwardMsg(forwardId: string): Promise<ForwardNodeData[]> {
+    override async getForwardMsg(forwardId: string, msg?: ObMsg): Promise<ForwardNodeData[]> {
         const { data }: NcObGetForwardMsg = await this.connector.send('get_forward_msg', {
             id: forwardId,
         })
-        return await Promise.all(data.messages.map(node => this.ncNodeParser(node)))
+        return await Promise.all(data.messages.map(node => this.ncNodeParser(node, msg)))
+    }
+    /**
+     * 获取资源url
+     * @param id 资源id
+     */
+    @api
+    async getResource(id: string): Promise<string|undefined> {
+        const [type, url] = id.split('|||') as [RkeyType, string]
+        const rkey = await this.getRkey(type)
+        if (!rkey) return url
+        const sep = url.includes('?') ? '&' : '?'
+        return `${url}${sep}rkey=${rkey}`
     }
     //#endregion
     //#region == 群聊相关 ======================
@@ -386,17 +448,23 @@ export default class NapCapOneBot extends OneBotAdapter {
 
     //#region == 消息相关 ===========================================
     //#region == 反序列化 ===========================
-    async mdParser(data: NcObMdSeg): Promise<MdSegData> {
+    async mdParser(data: NcObMdSeg, _?: ObMsg): Promise<MdSegData> {
         return {
             type: 'md',
             content: data.data.content,
         }
     }
-    override async imageParser(data: NcObImgSeg): Promise<ImgSegData> {
+    override async imageParser(data: NcObImgSeg, msg?: ObMsg): Promise<ImgSegData> {
         if (!('key' in data.data)) {
+            let type: RkeyType
+
+            if (!msg) type = 'UNKNOWN'
+            else if (msg.message_type === 'private') type = 'PRIVATE'
+            else type = 'GROUP'
+
             return {
                 type: 'image',
-                url: Resource.fromUrl(data.data.url),
+                url: await this.createResource(data.data.url, type),
                 isFace: data.data.sub_type === 7 || data.data.sub_type === 1,
                 summary: data.data.summary,
             }
@@ -411,7 +479,7 @@ export default class NapCapOneBot extends OneBotAdapter {
             } as any as ImgSegData
         }
     }
-    async fileParser(data: NcObFileSeg): Promise<FileSegData> {
+    async fileParser(data: NcObFileSeg, _?: ObMsg): Promise<FileSegData> {
         return {
             type: 'file',
             name: data.data.file,
@@ -420,7 +488,7 @@ export default class NapCapOneBot extends OneBotAdapter {
             file_id: data.data.file_id,
         }
     }
-    override async forwardParser(_data: ObForwardSeg): Promise<ForwardSegData> {
+    override async forwardParser(_data: ObForwardSeg, _?: ObMsg): Promise<ForwardSegData> {
             const data = _data as any as NcObForwardSeg
             const id = data.data.id
             const nodes = await Promise.all(data.data.content.map(node => this.ncNodeParser(node)))
@@ -430,7 +498,7 @@ export default class NapCapOneBot extends OneBotAdapter {
                 content: nodes,
             }
     }
-    override async jsonParser(data: ObJsonSeg): Promise<JsonSegData> {
+    override async jsonParser(data: ObJsonSeg, _?: ObMsg): Promise<JsonSegData> {
         const jsonData = JSON.parse(data.data.data)
         if (jsonData['app'] !== 'com.tencent.multimsg') return super.jsonParser(data)
 
@@ -443,13 +511,13 @@ export default class NapCapOneBot extends OneBotAdapter {
         }
         return out as any as JsonSegData
     }
-    async ncNodeParser(data: NcForwardData): Promise<ForwardNodeData> {
+    async ncNodeParser(data: NcForwardData, msg?: ObMsg): Promise<ForwardNodeData> {
         return {
             sender: {
                 nickname: data.sender.nickname,
                 face: `https://q1.qlogo.cn/g?b=qq&s=0&nk=${data.sender.user_id}`,
             },
-            content: await this.parseSeg(data.message),
+            content: await this.parseSeg(data.message, msg),
         }
     }
     //#endregion
@@ -637,5 +705,53 @@ export default class NapCapOneBot extends OneBotAdapter {
                 creator_id: folder.creator,
             }))
         }
+    }
+
+    private rkeyCache: {[key in RkeyType]: {value: string, time: number} | null} = {
+        'PRIVATE': null,
+        'GROUP': null,
+        'UNKNOWN': null
+    }
+    @api
+    /**
+     * 获取图片rkey
+     */
+    private async getRkey(type: RkeyType): Promise<string|undefined> {
+        if (type === 'UNKNOWN') return undefined
+        const ncType = type === 'GROUP' ? 20 : 10
+        const cache = this.rkeyCache[type]
+        if (cache && (Date.now() - cache.time) < 5 * 60 * 1000)
+            return cache.value
+        const data = await this.connector.send('nc_get_rkey', {})
+        for (const item of data.data) {
+            if (item.type !== ncType) continue
+            const rkey = item.rkey.replace('&rkey=', '')
+            this.rkeyCache[type] = { value: rkey, time: Date.now() }
+            return rkey
+        }
+        return undefined
+    }
+
+    private async createResource(url: string, type: RkeyType): Promise<Resource> {
+        let baseUrl: string
+        // console.log('createResource', url, rkey)
+        try {
+            const u = new URL(url)
+            u.searchParams.delete('rkey')
+            baseUrl = u.toString()
+        } catch {
+            // 回退方案：使用正则在不能用 URL 的情况下处理
+            baseUrl = url.replace(/([?&])rkey=[^&]*(&?)/, (_, sep, tail) => tail ? sep : '')
+        }
+        const id = `${type}|||${baseUrl}`
+        let resUrl: string
+        const rkey = await this.getRkey(type)
+        if (rkey) {
+            const sep = baseUrl.includes('?') ? '&' : '?'
+            resUrl = `${baseUrl}${sep}rkey=${rkey}`
+        } else {
+            resUrl = url // 无法获取 rkey，使用原始 url
+        }
+        return Resource.fromUrl(resUrl, id)
     }
 }
