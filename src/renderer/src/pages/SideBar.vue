@@ -9,7 +9,7 @@
         v-move="moveOptions"
         class="side-bar"
         :style="{
-            paddingBottom: get('fs_adaptation') > 0 ? `${get('fs_adaptation')}px` : '',
+            paddingBottom: runtimeData.sysConfig.fs_adaptation > 0 ? `${runtimeData.sysConfig.fs_adaptation}px` : '',
         }"
         :class="{
             fold: foldState === 'fold',
@@ -79,7 +79,6 @@
 <script setup lang="ts">
 import { mousemoveMask } from '@renderer/function/input'
 import { runtimeData } from '@renderer/function/msg'
-import option, { get } from '@renderer/function/option'
 import { popBox } from '@renderer/function/utils/popBox'
 import { VMoveOptions, vMove } from '@renderer/function/utils/vcmd'
 import { useEventListener, useKeyboard, useLocalStorage } from '@renderer/function/utils/vuse'
@@ -266,7 +265,6 @@ function startDrag() {
     }, ()=>{
         dragging.value = false
         bar.value!.style.transition = ''
-        option.save('side_bar_width', runtimeData.sysConfig.side_bar_width)
     })
 }
 

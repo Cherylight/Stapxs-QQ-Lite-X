@@ -44,6 +44,8 @@ module.exports = {
                 ]
             }
         ],
+        // 允许while true
+        'no-constant-condition': ['error', { 'checkLoops': false }],
 
         // === Vue 相关规则 ===
         // html 缩进

@@ -103,8 +103,8 @@ export class InputMsg {
         // 插入引用
         if (this.reply?.message_id) back = [new ReplySeg(this.reply.message_id), ...back]
         // 插入小尾巴
-        if (runtimeData.sysConfig.msg_taill) {
-            const taill = (runtimeData.sysConfig.msg_taill as string).replaceAll(
+        if (runtimeData.sysConfig.msg_tail) {
+            const taill = (runtimeData.sysConfig.msg_tail as string).replaceAll(
                 '\\n',
                 '\n',
             )

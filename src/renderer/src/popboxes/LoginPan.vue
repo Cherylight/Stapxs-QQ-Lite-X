@@ -36,7 +36,7 @@
             </label>
             <div style="display: flex">
                 <label class="default">
-                    <input id="in_" v-model="loginInfo.savePassword" type="checkbox"
+                    <input id="in_" v-model="runtimeData.sysConfig.auto_save_password" type="checkbox"
                         name="save_password"
                         @click="savePassword">
                     <a>{{ $t('记住密码') }}</a>
@@ -67,7 +67,6 @@
 import driver from '@renderer/function/driver'
 import { login } from '@renderer/function/login'
 import { runtimeData } from '@renderer/function/msg'
-import Option from '@renderer/function/option'
 import { noticePopBox, popBox } from '@renderer/function/utils/popBox'
 import { i18n } from '@renderer/main'
 import { computed, shallowReactive, shallowRef } from 'vue'
@@ -75,7 +74,6 @@ import Icon from '@renderer/components/Icon.vue'
 import HowToConnect from '@renderer/popboxes/doc/HowToConnect.vue'
 import Options from '@renderer/pages/Options.vue'
 const loginInfo = shallowReactive({
-    savePassword: false,
     quickLoginSelect: '',
     quickLogin: shallowReactive([]) as { address: string, port: number }[],
     address: '',
@@ -98,11 +96,9 @@ const $t = i18n.global.t
 // 加载密码保存和自动连接
 loginInfo.address = runtimeData.sysConfig.address
 if (
-    runtimeData.sysConfig.save_password &&
-    runtimeData.sysConfig.save_password != true
+    runtimeData.sysConfig.auto_save_password
 ) {
-    loginInfo.token = runtimeData.sysConfig.save_password
-    loginInfo.savePassword = true
+    loginInfo.token = runtimeData.sysConfig.saved_password
 }
 
 // 自动登陆
@@ -122,9 +118,9 @@ async function connect() {
         if (!re) return
 
         // 保存登陆地址密码
-        Option.save('address', loginInfo.address)
-        if (Option.get('save_password'))
-            Option.save('save_password', loginInfo.token)
+        runtimeData.sysConfig.address = loginInfo.address
+        if (runtimeData.sysConfig.auto_save_password)
+            runtimeData.sysConfig.saved_password = loginInfo.token
 
         // 移除未登陆状态
         runtimeData.tags.noLogin = false
@@ -154,11 +150,13 @@ function savePassword(event: Event) {
     const sender = event.target as HTMLInputElement
     const value = sender.checked
     if (value) {
-        Option.save('save_password', true)
+        runtimeData.sysConfig.auto_save_password = true
         // 创建提示弹窗
         noticePopBox($t('连接密钥将以明文存储在浏览器 Cookie 中，请确保设备安全以防止密钥泄漏。'))
     } else {
-        Option.remove('save_password')
+        // 清除保存的密码
+        runtimeData.sysConfig.auto_save_password = false
+        runtimeData.sysConfig.saved_password = ''
     }
 }
 
@@ -166,12 +164,10 @@ function savePassword(event: Event) {
  * 保存自动连接
  * @param event 事件
  */
-function saveAutoConnect(event: Event) {
-    Option.runASWEvent(event)
-    // 如果自动保存密码没开，那也需要开
-    if (!runtimeData.sysConfig.save_password) {
-        savePassword(event)
-    }
+function saveAutoConnect(event: PointerEvent) {
+    if (!(event.target as HTMLInputElement).checked) return
+    // 开启自动连接时，强制开启保存密码
+    runtimeData.sysConfig.auto_save_password = true
 }
 
 /**

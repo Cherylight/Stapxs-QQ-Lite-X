@@ -1,4 +1,3 @@
-import option from '@renderer/function/option'
 import app from '@renderer/main'
 import Umami from '@stapxs/umami-logger-typescript'
 import FileDownloader from 'js-file-downloader'
@@ -181,13 +180,7 @@ export async function reloadUsers(useCache: boolean = true) {
     })
 
     // 设置置顶列表
-    const topList = runtimeData.sysConfig.top_info as {
-        [key: string]: number[]
-    } | null
-    if (!topList) return
-    const topSessions = topList[runtimeData.loginInfo.uin]
-    if (!topSessions) return
-    for (const id of topSessions) {
+    for (const id of runtimeData.sysConfig.pin_sessions) {
         const session = Session.getSessionById(id)
         if (!session) {
             logger.debug('未找到置顶会话：' + id)
@@ -198,8 +191,8 @@ export async function reloadUsers(useCache: boolean = true) {
     }
 
     // 加载通知开关
-    const noticeList = runtimeData.sysConfig?.notice_group[runtimeData.loginInfo.uin]
-    if (noticeList) {
+    const noticeList = runtimeData.sysConfig.notice_group
+    if (noticeList.length > 0) {
         for (const session of GroupSession.sessionList) {
             if (!noticeList.includes(session.id)) continue
             session.setNotice(true, false)
@@ -295,11 +288,11 @@ export function updateWinColor(color: string) {
         // 平衡颜色亮度
         const hsl = rgbToHsl(red, green, blue)
         const media = window.matchMedia('(prefers-color-scheme: dark)')
-        const autodark = option.get('opt_auto_dark')
-        const dark = option.get('opt_dark')
+        const autodark = runtimeData.sysConfig.opt_auto_dark
+        const dark = runtimeData.sysConfig.opt_dark
         if (
-            (autodark == true && media.matches) ||
-            (autodark != true && dark == true)
+            (autodark && media.matches) ||
+            (!autodark && dark)
         ) {
             hsl[2] = 0.8
         } else {
@@ -397,7 +390,7 @@ export function createIpc() {
         popInfo.add(PopType.INFO, app.config.globalProperties.$t('刷新用户列表成功'))
     })
     backend.addListener(undefined, 'bot:logout', () => {
-        option.remove('auto_connect')
+        runtimeData.sysConfig.auto_connect = false
         if (!runtimeData.nowAdapter) return
         runtimeData.nowAdapter.close()
     })
@@ -917,7 +910,7 @@ export function BackendRequest(type: 'GET' | 'POST', url: string,
 * @param data 数据
 */
 export function sendStatEvent(event: string, data: { [key: string]: any }) {
-    if (!option.get('close_ga') && !import.meta.env.DEV) {
+    if (!runtimeData.sysConfig.close_ga && !import.meta.env.DEV) {
         Umami.trackEvent(event, data)
     }
 }
@@ -927,7 +920,7 @@ export function sendStatEvent(event: string, data: { [key: string]: any }) {
  * @param data 数据
  */
 export function sendIdentifyData(data: { [key: string]: any }) {
-    if (!option.get('close_ga') && !import.meta.env.DEV) {
+    if (!runtimeData.sysConfig.close_ga && !import.meta.env.DEV) {
         Umami.trackIdentify(data)
     }
 }

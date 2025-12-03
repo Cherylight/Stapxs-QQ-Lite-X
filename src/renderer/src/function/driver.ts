@@ -32,7 +32,7 @@ interface Ws {
     // 夹送数据
     send(data: string): void                                // 发送数据
     // 自身状态
-    get state(): DriverState                                      // 当前状态
+    get state(): DriverState                                // 当前状态
     isConnected(): boolean                                  // 是否连接
     onError(callback: (data: OnCloseData) => void): void    // 错误回调
     onMessage(callback: (msg: OnMessageData) => void): void // 接收消息回调

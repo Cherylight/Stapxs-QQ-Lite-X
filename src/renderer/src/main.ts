@@ -17,11 +17,11 @@ import './assets/css/sys_notice.css'
 import './assets/css/view.css'
 
 import { runtimeData } from './function/msg'
-import Option from './function/option'
 import { getPortableFileLang, getVersion } from './function/utils/systemUtil'
 import { useLocalStorage } from './function/utils/vuse'
 import { backend } from './runtime/backend'
 import win from './runtime/win'
+import OptionManager from './function/option/option'
 
 /* eslint-disable no-console */
 const zh = getPortableFileLang('zh-CN')
@@ -89,7 +89,7 @@ console.log('[ SSystem Bootloader Loading …… core/ssqq-core ]')
 setTimeout(async () => {
     // 加载设置项
     await backend.init() // Desktop：初始化客户端功能
-    runtimeData.sysConfig = await Option.load()
+    await OptionManager.init(runtimeData) // 载入设置项
     await win.init() // 初始化窗口信息
     app.mount('#app')
 }, 0)

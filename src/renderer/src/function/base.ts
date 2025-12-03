@@ -8,7 +8,7 @@
 
 import { shallowReactive } from 'vue'
 import { PopInfoElem } from './elements/system'
-import Option from './option'
+import OptionManager from './option/option'
 
 // =============== 日志 ===============
 
@@ -82,7 +82,7 @@ export class Logger {
         this.add(LogType._PUT, 'PUT|' + api, params, false, deep)
     }
     private normallyContditionCheck(type: LogType): boolean {
-        const logLevel = Option.get('log_level')
+        const logLevel = OptionManager.options.log_level
         if (type === LogType._GET || type === LogType._PUT) return true
         if (logLevel === 'all') return true
         if (logLevel === 'debug' && (type === LogType.DEBUG || type === LogType.UI)) return true
@@ -92,12 +92,14 @@ export class Logger {
         return false
 
     }
-    private apiConditionCheck(api: string): boolean {
-        let api_log = Option.get('api_log')?.trim()
-        if (!api_log) return false
-        if (api_log === 'all') return true
-        api_log = api_log.split(',').map((e: string) => e.trim())
-        return api_log.includes(api)
+    private apiConditionCheck(_api: string): boolean {
+        // TODO api 日志
+        return false
+        // let api_log = Option.get('api_log')?.trim()
+        // if (!api_log) return false
+        // if (api_log === 'all') return true
+        // api_log = api_log.split(',').map((e: string) => e.trim())
+        // return api_log.includes(api)
     }
     /**
      * 打印一条日志

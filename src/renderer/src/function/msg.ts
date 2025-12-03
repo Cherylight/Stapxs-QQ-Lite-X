@@ -15,7 +15,6 @@
 import qed from '@renderer/assets/qed.txt?raw'
 
 import app from '@renderer/main'
-import { optDefault } from './option'
 
 import Umami from '@stapxs/umami-logger-typescript'
 
@@ -45,6 +44,7 @@ import { Session } from './model/session'
 import { Notify } from './notify'
 import { htmlPopBox } from './utils/popBox'
 import { FileSender } from './utils/fileSender'
+import { AppConfig } from './option/option'
 
 // 其他 tag
 const logger = new Logger()
@@ -211,7 +211,7 @@ function updateSysInfo(
 const baseRuntime = {
     connectInfo: shallowReactive({ address: undefined, token: undefined }),
     loginInfo: {} as unknown as {nickname: string, uin: number},
-    sysConfig: reactive({}) as Record<keyof typeof optDefault, NonNullable<any> | null>,
+    sysConfig: reactive({}) as AppConfig,
     tags: shallowReactive({
         firstLoad: false,
         darkMode: false,

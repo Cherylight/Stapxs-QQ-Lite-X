@@ -2267,3 +2267,6 @@ msgstr ""
 
 msgid "连接地址格式错误，请参考如何连接"
 msgstr ""
+
+msgid "上传背景"
+msgstr ""

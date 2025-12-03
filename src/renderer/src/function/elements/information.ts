@@ -4,10 +4,10 @@ import { SessionBox } from '../model/box'
 import { ForwardSeg } from '../model/seg'
 import { Session } from '../model/session'
 import { User } from '../model/user'
-import { optDefault } from '../option'
+import { AppConfig } from '../option/option'
 
 export interface RunTimeDataElem {
-    sysConfig: Record<keyof typeof optDefault, any | null>
+    sysConfig: AppConfig
     connectInfo: {address: string | undefined, token: string | undefined}
     loginInfo: LoginInfo,
     selfInfo?: User

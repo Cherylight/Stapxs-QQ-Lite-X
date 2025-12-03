@@ -2,7 +2,6 @@ import horizontalStyles from '@renderer/assets/css/append/mobile/append_mobile_h
 import verticalCss from '@renderer/assets/css/append/mobile/append_mobile_vertical.css?raw'
 import { Logger } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
-import option from '@renderer/function/option'
 import { computed, ComputedRef, shallowRef, watchEffect, markRaw } from 'vue'
 import { backend } from './backend'
 
@@ -45,7 +44,7 @@ const win = markRaw({
         })
         this._isTiling = computed(()=>{
             if (backend.platform !== 'linux') return false
-            return this.TILING_WMS.indexOf(backend.de || '') >= 0
+            return this.TILING_WMS.includes(backend.de || '')
         })
 
         // 最大化检测
@@ -68,7 +67,7 @@ const win = markRaw({
         })
         // 安全区域规划
         document.body.style.setProperty('--safe-area-bottom',
-            (option.get('fs_adaptation') > 0 ? option.get('fs_adaptation') : 0) + 'px')
+            Math.max(runtimeData.sysConfig.fs_adaptation, 0) + 'px')
         document.body.style.setProperty('--safe-area-top', '0')
         document.body.style.setProperty('--safe-area-left', '0')
         document.body.style.setProperty('--safe-area-right', '0')

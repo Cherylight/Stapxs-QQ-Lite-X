@@ -80,7 +80,6 @@ import { AdapterInterface } from '@renderer/function/adapter/interface'
 import { PopInfo, PopType } from '@renderer/function/base'
 import { User } from '@renderer/function/model/user'
 import { resetRuntime, runtimeData } from '@renderer/function/msg'
-import { remove } from '@renderer/function/option'
 import { openLoginPan } from '@renderer/function/utils/systemUtil'
 import { i18n } from '@renderer/main'
 import {
@@ -126,7 +125,7 @@ function updateSelfInfo() {
  * 断开连接
  */
 function exitConnect() {
-    remove('auto_connect')
+    runtimeData.sysConfig.auto_connect = false
     runtimeData.nowAdapter?.close()
     resetRuntime(true)
     goLogin()

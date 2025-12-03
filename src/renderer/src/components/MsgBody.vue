@@ -433,7 +433,6 @@
 </template>
 
 <script setup lang="ts">
-import Option from '@renderer/function/option'
 import markdownit from 'markdown-it'
 
 import EmojiFace from './EmojiFace.vue'
@@ -625,7 +624,7 @@ defineExpose({
                 backend,
                 md: markdownit({ breaks: true }),
                 isMe: false,
-                isDebugMsg: Option.get('debug_msg'),
+                isDebugMsg: runtimeData.sysConfig.debug_msg,
                 linkViewStyle: '',
                 View: ViewFuns,
                 runtimeData: runtimeData,

@@ -84,7 +84,6 @@
 </template>
 
 <script setup lang="ts">
-import Option from '@renderer/function/option'
 import Umami from '@stapxs/umami-logger-typescript'
 import Spacing from 'spacingjs/src/spacing'
 import * as App from './function/utils/appUtil'
@@ -224,14 +223,6 @@ async function init() {
         logger.debug('stapxs-qq-lite.user:$/mnt/app/bin/main', true)
     }
     logger.add(LogType.DEBUG, '系统配置', runtimeData.sysConfig)
-    // PS：重新再应用部分需要加载完成后才能应用的设置
-    Option.run('opt_dark', Option.get('opt_dark'))
-    Option.run('opt_auto_dark', Option.get('opt_auto_dark'))
-    Option.run('theme_color', Option.get('theme_color'))
-    Option.run(
-        'merge_forward_width_type',
-        Option.get('merge_forward_width_type'),
-    )
 
     // 基础初始化完成
     logger.system('欢迎回来，开发者。Stapxs QQ Lite X 正处于 ' + (dev ? 'development' : 'production') + ' 模式。正在为您加载更多功能。')
@@ -267,7 +258,7 @@ async function init() {
     //#endregion
 
     //#region == 加载 Umami 统计功能 ============================
-    if (!Option.get('close_ga') && !dev) {
+    if (!runtimeData.sysConfig.close_ga && !dev) {
         const config = {
             baseUrl: import.meta.env.VITE_APP_MU_ADDRESS,
             websiteId: import.meta.env.VITE_APP_MU_ID
@@ -312,7 +303,7 @@ async function init() {
  */
 function changeTab(view: PageType, show: boolean) {
     // UM：发送页面路由分析
-    if (!Option.get('close_ga') && !dev) {
+    if (!runtimeData.sysConfig.close_ga && !dev) {
         Umami.trackPageView('/' + view)
     }
     pageInfo.showChat = show

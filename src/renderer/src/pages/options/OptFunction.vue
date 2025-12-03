@@ -11,37 +11,25 @@
         <div class="ss-card">
             <header>{{ $t('通知选项') }}</header>
             <div class="opt-item">
-                <div :class="checkDefault('close_notice')" />
+                <div :class="{changed: !OptionManager.checkDefault('close_notice')}" />
                 <font-awesome-icon :icon="['fas', 'volume-xmark']" />
                 <div>
                     <span>{{ $t('禁用通知') }}</span>
                     <span>{{ $t('好嘛 …… 不烦你 ……') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.close_notice"
-                        type="checkbox" name="close_notice" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.close_notice" />
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('bubble_sort_user')" />
+                <div :class="{changed: !OptionManager.checkDefault('bubble_sort_user')}" />
                 <font-awesome-icon :icon="['fas', 'box-open']" />
                 <div>
                     <span>{{ $t('群收纳盒') }}</span>
                     <span>{{ $t('全都放出来！全都放出来！') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.bubble_sort_user"
-                        type="checkbox" name="bubble_sort_user" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.bubble_sort_user" />
             </div>
             <div v-if="!runtimeData.sysConfig.bubble_sort_user" class="opt-item">
-                <div :class="checkDefault('group_notice_type')" />
+                <div :class="{changed: !OptionManager.checkDefault('group_notice_type')}" />
                 <font-awesome-icon :icon="['fas', 'user-group']" />
                 <div>
                     <span>{{ $t('群消息通知方式') }}</span>
@@ -49,7 +37,7 @@
                 </div>
                 <div class="select-wrapper">
                     <select v-model="runtimeData.sysConfig.group_notice_type"
-                        name="group_notice_type" title="group_notice_type" @change="save">
+                        name="group_notice_type" title="group_notice_type">
                         <option value="none">
                             {{ $t('不通知（默认）') }}
                         </option>
@@ -63,19 +51,13 @@
                 </div>
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('preview_notice')" />
+                <div :class="{changed: !OptionManager.checkDefault('preview_notice')}" />
                 <font-awesome-icon :icon="['fas', 'eye']" />
                 <div>
                     <span>{{ $t('预览通知') }}</span>
                     <span>{{ $t('诸如撤回消息等事件也会做为预览消息') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.preview_notice"
-                        type="checkbox" name="preview_notice" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.preview_notice" />
             </div>
         </div>
         <div class="ss-card">
@@ -88,17 +70,10 @@
                         ndt === 0 ? $t('说出去的话就像泼出去的水 ……') : $t('说了不做这功能就是不做')
                     }}</span>
                 </div>
-                <label
-                    v-if="ndt < 3"
-                    class="ss-switch">
-                    <input v-model="ndv" type="checkbox" @change="msgND">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-if="ndt < 3" v-model="ndv" @click="msgND" />
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('close_respond')" />
+                <div :class="{changed: !OptionManager.checkDefault('close_respond')}" />
                 <font-awesome-icon :icon="['fas', 'face-laugh-squint']" />
                 <div>
                     <span>{{ $t('关闭回应功能') }}</span>
@@ -106,16 +81,10 @@
                         $t('如果你不想用它或者 bot 不支持，可以关闭这个功能')
                     }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.close_respond"
-                        type="checkbox" name="close_respond" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.close_respond" />
             </div>
             <div v-if="runtimeData.sysConfig.close_respond !== true" class="opt-item">
-                <div :class="checkDefault('show_response_message')" />
+                <div :class="{changed: !OptionManager.checkDefault('show_response_message')}" />
                 <font-awesome-icon :icon="['fas', 'comment']" />
                 <div>
                     <span>{{ $t('表情回应通知') }}</span>
@@ -125,7 +94,7 @@
                 </div>
                 <div class="select-wrapper">
                     <select v-model="runtimeData.sysConfig.show_response_message"
-                        name="show_response_message" title="show_response_message" @change="save">
+                        name="show_response_message" title="show_response_message">
                         <option value="none">
                             {{ $t('不通知') }}
                         </option>
@@ -139,18 +108,18 @@
                 </div>
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('msg_taill')" />
+                <div :class="{changed: !OptionManager.checkDefault('msg_tail')}" />
                 <font-awesome-icon :icon="['fas', 'fish-fins']" />
                 <div>
                     <span>{{ $t('小尾巴') }}</span>
                     <span>{{ $t('只会追加在最后一段话后面') }}</span>
                 </div>
-                <input v-model="runtimeData.sysConfig.msg_taill"
+                <input v-model="runtimeData.sysConfig.msg_tail"
                     class="ss-input" style="width: 150px"
-                    type="text" name="msg_taill" @keyup="save">
+                    type="text" name="msg_taill">
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('send_face')" />
+                <div :class="{changed: !OptionManager.checkDefault('send_face')}" />
                 <font-awesome-icon :icon="['fas', 'square-arrow-up-right']" />
                 <div>
                     <span>{{ $t('直接发送表情') }}</span>
@@ -158,16 +127,10 @@
                         $t('咻！点击发送！')
                     }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.send_face"
-                        type="checkbox" name="send_face" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.send_face" />
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('send_key')" />
+                <div :class="{changed: !OptionManager.checkDefault('send_key')}" />
                 <font-awesome-icon :icon="['fas', 'keyboard']" />
                 <div>
                     <span>{{ $t('发送键') }}</span>
@@ -175,7 +138,7 @@
                 </div>
                 <div class="select-wrapper">
                     <select v-if="backend.platform === 'darwin' || backend.platform === 'ios'" v-model="runtimeData.sysConfig.send_key"
-                        name="send_key" title="send_key" @change="save">
+                        name="send_key" title="send_key">
                         <option value="none">
                             Enter
                         </option>
@@ -193,7 +156,7 @@
                         </option>
                     </select>
                     <select v-else v-model="runtimeData.sysConfig.send_key"
-                        name="send_key" title="send_key" @change="save">
+                        name="send_key" title="send_key">
                         <option value="none">
                             Enter
                         </option>
@@ -213,67 +176,43 @@
                 </div>
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('dont_parse_delete')" />
+                <div :class="{changed: !OptionManager.checkDefault('dont_parse_delete')}" />
                 <font-awesome-icon :icon="['fas', 'delete-left']" />
                 <div>
                     <span>{{ $t('禁止解析[已删除]') }}</span>
                     <span>{{ $t('在tx服务器里，被撤回的消息为[已删除]') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.dont_parse_delete"
-                        type="checkbox" name="dont_parse_delete" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.dont_parse_delete" />
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('jump_forward')" />
+                <div :class="{changed: !OptionManager.checkDefault('jump_forward')}" />
                 <font-awesome-icon :icon="['fas', 'share']" />
                 <div>
                     <span>{{ $t('转发消息跳转群组') }}</span>
                     <span>{{ $t('发到哪里水到哪里～') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.jump_forward"
-                        type="checkbox" name="jump_forward" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.jump_forward" />
             </div>
             <div class="opt-item">
-                <div :class="checkDefault('default_multiselect_forward')" />
+                <div :class="{changed: !OptionManager.checkDefault('default_multiselect_forward')}" />
                 <font-awesome-icon :icon="['fas', 'fa-list-check']" />
                 <div>
                     <span>{{ $t('转发默认多选') }}</span>
                     <span>{{ $t('需要用到这个选项的...应该是和我一样的搬石大王吧？') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.default_multiselect_forward"
-                        type="checkbox" name="default_multiselect_forward" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.default_multiselect_forward" />
             </div>
         </div>
         <div class="ss-card">
             <header>{{ $t('浏览') }}</header>
             <div class="opt-item">
-                <div :class="checkDefault('close_browser')" />
+                <div :class="{changed: !OptionManager.checkDefault('close_browser')}" />
                 <font-awesome-icon :icon="['fas', 'globe']" />
                 <div>
                     <span>{{ $t('禁用内置浏览器') }}</span>
                     <span>{{ $t('让我看看你的浏览器 👀') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.close_browser"
-                        type="checkbox" name="close_browser" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.close_browser" />
             </div>
         </div>
         <div class="ss-card">
@@ -282,19 +221,13 @@
                 class="opt-item"
                 :style="runtimeData.sysConfig.close_ga !== true ?
                     'background: var(--color-card-1);' : ''">
-                <div :class="checkDefault('close_ga')" />
+                <div :class="{changed: !OptionManager.checkDefault('close_ga')}" />
                 <font-awesome-icon :icon="['fas', 'cloud']" />
                 <div>
                     <span>{{ $t('关闭分析') }}</span>
                     <span>{{ $t('真的不让看吗（小声') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.close_ga" type="checkbox"
-                        name="close_ga" @change="save">
-                    <div style="background: var(--color-card-2)">
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.close_ga" />
             </div>
             <div
                 v-if="runtimeData.sysConfig.close_ga !== true"
@@ -316,27 +249,25 @@
             </div>
             <div v-if="runtimeData.sysConfig.close_ga !== true"
                 class="opt-item">
-                <div :class="checkDefault('open_ga_bot')" />
+                <div :class="{changed: !OptionManager.checkDefault('open_ga_bot')}" />
                 <font-awesome-icon :icon="['fas', 'dice']" />
                 <div>
                     <span>{{ $t('后端类型分析') }}</span>
                     <span>{{ $t('在连接后上传所使用的 bot 的类型分析') }}</span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.open_ga_bot" type="checkbox"
-                        name="open_ga_bot" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.open_ga_bot" />
             </div>
         </div>
     </div>
 </template>
 
+<script setup lang="ts">
+import Switch from '@renderer/components/Switch.vue'
+import OptionManager from '@renderer/function/option/option'
+</script>
+
 <script lang="ts">
 import { runtimeData } from '@renderer/function/msg'
-import { checkDefault, runASWEvent as save } from '@renderer/function/option'
 import { popBox } from '@renderer/function/utils/popBox'
 import UmamiInfoPan from '@renderer/popboxes/UmamiInfoPan.vue'
 import { backend } from '@renderer/runtime/backend'
@@ -346,9 +277,7 @@ import { defineComponent } from 'vue'
         name: 'ViewOptFunction',
         data() {
             return {
-                checkDefault: checkDefault,
                 runtimeData: runtimeData,
-                save: save,
                 ndt: 0,
                 ndv: false,
                 backend,
@@ -366,7 +295,7 @@ import { defineComponent } from 'vue'
                 this.ndt++
                 setTimeout(() => {
                     this.ndv = false
-                }, 300)
+                }, 500)
             },
         },
     })

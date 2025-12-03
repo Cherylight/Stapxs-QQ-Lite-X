@@ -16,7 +16,6 @@ import { Msg } from './model/msg'
 import { NotifyInfo } from './elements/system'
 import { Notify } from './notify'
 import { isImportant as userIsImportant } from './utils/msgUtil'
-import option from './option'
 import { backend } from '@renderer/runtime/backend'
 import { refreshFavicon } from './utils/favicon'
 
@@ -170,7 +169,7 @@ function addHighlightInfo(session: Session, msg: string): void {
  */
 function sendNotify(session: Session, msg: Message, important: boolean = false): void {
     // 如果没有开启通知，直接返回
-    if (option.get('close_notice')) return
+    if (runtimeData.sysConfig.close_notice) return
 
     let tag: string
     if (msg instanceof Msg)

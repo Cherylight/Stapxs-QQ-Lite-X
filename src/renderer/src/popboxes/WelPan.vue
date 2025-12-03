@@ -29,8 +29,7 @@
                 <div class="select-wrapper">
                     <select v-model="runtimeData.sysConfig.language"
                         name="language"
-                        title="language"
-                        @change="save($event);gaLanguage($event)">
+                        title="language">
                         <option v-for="item in languages"
                             :key="item.value"
                             :value="item.value">
@@ -87,9 +86,7 @@
                         <label v-for="(name, index) in colors" :key="'color_id_' + index"
                             :title="name" class="ss-radio">
                             <input type="radio" name="theme_color" :data-id="index"
-                                :checked="runtimeData.sysConfig.theme_color === undefined ?
-                                    index === 0 : Number(runtimeData.sysConfig.theme_color) === index"
-                                @change="save($event)">
+                                :checked="runtimeData.sysConfig.theme_color === index">
                             <div
                                 :style="'background: var(--color-main-' + index + ')'">
                                 <div />
@@ -102,26 +99,14 @@
                         <span>{{ $t('深色模式') }}</span>
                         <span>{{ $t('是五彩斑斓的黑色！') }}</span>
                     </div>
-                    <label class="ss-switch">
-                        <input v-model="runtimeData.sysConfig.opt_dark"
-                            type="checkbox" name="opt_dark" @change="save">
-                        <div>
-                            <div />
-                        </div>
-                    </label>
+                    <Switch v-model="runtimeData.sysConfig.opt_dark" />
                 </div>
                 <div class="opt-item wel-opt-item">
                     <div>
                         <span>{{ $t('自动深色模式') }}</span>
                         <span>{{ $t('Biubiu ——，自动变黑！') }}</span>
                     </div>
-                    <label class="ss-switch">
-                        <input v-model="runtimeData.sysConfig.opt_auto_dark"
-                            type="checkbox" name="opt_auto_dark" @change="save">
-                        <div>
-                            <div />
-                        </div>
-                    </label>
+                    <Switch v-model="runtimeData.sysConfig.opt_auto_dark" />
                 </div>
             </div>
         </div>
@@ -149,13 +134,7 @@
                         <span>{{ $t('群收纳盒') }}</span>
                         <span>{{ $t('全都放出来！全都放出来！') }}</span>
                     </div>
-                    <label class="ss-switch">
-                        <input v-model="runtimeData.sysConfig.bubble_sort_user"
-                            type="checkbox" name="bubble_sort_user" @change="save">
-                        <div>
-                            <div />
-                        </div>
-                    </label>
+                    <Switch v-model="runtimeData.sysConfig.bubble_sort_user" />
                 </div>
                 <div v-if="!runtimeData.sysConfig.bubble_sort_user" class="opt-item wel-opt-item">
                     <div>
@@ -163,8 +142,7 @@
                         <span>{{ $t('重要消息将始终发起应用内通知和系统通知') }}</span>
                     </div>
                     <div class="select-wrapper">
-                        <select v-model="runtimeData.sysConfig.group_notice_type" style="width: 100%;"
-                            name="group_notice_type" title="group_notice_type" @change="save">
+                        <select v-model="runtimeData.sysConfig.group_notice_type" style="width: 100%;">
                             <option value="none">
                                 {{ $t('不通知（默认）') }}
                             </option>
@@ -266,7 +244,7 @@
             <span>{{ $t('统计选项') }}</span>
             <div />
             <div>
-                <span>{{ $t('Stapxs QQ Lite 会将部分使用数据上传到上游的 umami 服务器中用于了解用户使用情况以及制作一些有趣的统计信息。') }}</span>
+                <span>{{ $t('Stapxs QQ Lite X 会将部分使用数据上传到上游的 umami 服务器中用于了解用户使用情况以及制作一些有趣的统计信息。') }}</span>
                 <span style="margin-bottom: 20px;">{{ $t('如果你并不希望上传这些数据，可以选择关闭它。') }}</span>
                 <div class="opt-item wel-opt-item"
                     :style="runtimeData.sysConfig.close_ga !== true ?
@@ -276,13 +254,7 @@
                         <span>{{ $t('关闭分析') }}</span>
                         <span>{{ $t('真的不让看吗（小声') }}</span>
                     </div>
-                    <label class="ss-switch">
-                        <input v-model="runtimeData.sysConfig.close_ga" type="checkbox"
-                            name="close_ga" @change="save">
-                        <div style="background: var(--color-card-2)">
-                            <div />
-                        </div>
-                    </label>
+                    <Switch v-model="runtimeData.sysConfig.close_ga" />
                 </div>
             </div>
         </div>
@@ -386,8 +358,8 @@ import Icon from '@renderer/components/Icon.vue'
 
 import { defineComponent } from 'vue'
 import { runtimeData } from '@renderer/function/msg'
-import { runASWEvent as save } from '@renderer/function/option'
-import { openLink, sendIdentifyData } from '@renderer/function/utils/appUtil'
+import { openLink } from '@renderer/function/utils/appUtil'
+import Switch from '@renderer/components/Switch.vue'
 
 const emit = defineEmits<{
     closePopBox: []
@@ -401,7 +373,6 @@ const emit = defineEmits<{
                 languages: languages,
                 openLink: openLink,
                 runtimeData: runtimeData,
-                save: save,
                 show: 'home',
                 colors: [
                     '林槐蓝',
@@ -417,11 +388,6 @@ const emit = defineEmits<{
             changeView(name: string) {
                 if(this.show === name || this.show === 'license') return
                 this.show = name
-            },
-            gaLanguage(event: Event) {
-                const sender = event.target as HTMLInputElement
-                sendIdentifyData({'use_language': sender.value})
-                // TODO: 刷新菜单
             },
             setPage(name: string) {
                 this.show = name

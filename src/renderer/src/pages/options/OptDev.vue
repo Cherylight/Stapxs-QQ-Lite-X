@@ -14,7 +14,7 @@
                     $t('这儿是兼容性相关的高级选项，这些选项通常会自动识别，如果出现了不正确的情况你也可以手动调整。')
                 }}
             </div>
-            <div class="opt-item" :class="checkDefault('proxyUrl')">
+            <div class="opt-item" :class="{changed: !OptionManager.checkDefault('proxyUrl')}">
                 <font-awesome-icon :icon="['fas', 'route']" />
                 <div>
                     <span>{{ $t('自定义跨域服务') }}</span>
@@ -26,8 +26,7 @@
                     v-model.trim="runtimeData.sysConfig.proxyUrl"
                     class="ss-input"
                     type="text"
-                    name="proxyUrl"
-                    @keyup="save">
+                    name="proxyUrl">
                 <br>
                 <div :style="{
                     'color': 'var(--color-red)',
@@ -71,7 +70,7 @@
         <div class="ss-card">
             <header>{{ $t('开发者选项') }}</header>
             <div class="opt-item">
-                <div :class="checkDefault('log_level')" />
+                <div :class="{changed: !OptionManager.checkDefault('log_level')}" />
                 <font-awesome-icon :icon="['fas', 'book']" />
                 <div>
                     <span>{{ $t('日志等级') }}</span>
@@ -79,7 +78,7 @@
                 </div>
                 <div class="select-wrapper">
                     <select v-model="runtimeData.sysConfig.log_level"
-                        name="log_level" title="log_level" @change="save">
+                        name="log_level" title="log_level">
                         <option value="err">
                             {{ $t('错误') }}
                         </option>
@@ -96,8 +95,8 @@
                 </div>
             </div>
             <!-- TODO 这个输入框确实不好用...不知道用啥输入框合适...等那天都啥api统计齐全了直接做成复选框 -->
-            <div class="opt-item">
-                <div :class="checkDefault('api_log')" />
+            <!-- <div class="opt-item">
+                <div :class="{changed: !OptionManager.checkDefault('api_log')}" />
                 <font-awesome-icon :icon="['fas', 'right-left']" />
                 <div>
                     <span>{{ $t('通信过滤器') }}</span>
@@ -106,9 +105,9 @@
                 <input v-model="runtimeData.sysConfig.api_log"
                     class="ss-input" style="width: 150px"
                     type="text" name="api_log" @keyup="save">
-            </div>
+            </div> -->
             <div class="opt-item">
-                <div :class="checkDefault('debug_msg')" />
+                <div :class="{changed: !OptionManager.checkDefault('debug_msg')}" />
                 <font-awesome-icon :icon="['fas', 'robot']" />
                 <div>
                     <span>{{ $t('禁用消息渲染') }}</span>
@@ -116,13 +115,7 @@
                         <a style="cursor: pointer" @click="sendAbab">{{ $t('点击进行 CAPTCHA 验证') }}</a>
                     </span>
                 </div>
-                <label class="ss-switch">
-                    <input v-model="runtimeData.sysConfig.debug_msg"
-                        type="checkbox" name="debug_msg" @change="save">
-                    <div>
-                        <div />
-                    </div>
-                </label>
+                <Switch v-model="runtimeData.sysConfig.debug_msg" />
             </div>
         </div>
         <div class="ss-card">
@@ -245,19 +238,12 @@
 </template>
 
 <script setup lang="ts">
-import app from '@renderer/main'
-
-import {
-    run,
-    runASWEvent as save,
-    saveAll,
-    checkDefault,
-    optDefault,
-} from '@renderer/function/option'
+import Switch from '@renderer/components/Switch.vue'
+import OptionManager from '@renderer/function/option/option'
 import { PopInfo, PopType } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import { BrowserInfo, detect } from 'detect-browser'
-import { uptime } from '@renderer/main'
+import app, { uptime } from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
 import {
     defineComponent,
@@ -281,10 +267,7 @@ const illegalProxyUrl = computed(() => {
         data() {
             return {
                 dev: import.meta.env.DEV,
-                checkDefault: checkDefault,
                 runtimeData: runtimeData,
-                save: save,
-                run: run,
                 ws_text: '',
                 parse_text: '',
                 appmsg_text: '',
@@ -360,13 +343,13 @@ const illegalProxyUrl = computed(() => {
                 ] as [key: string, value: any][]
                 if (addInfo) {
                     const get = addInfo as { [key: string]: [string, string] }
-                    Object.keys(get).forEach((name: string) => {
-                        info += `    ${get[name][0]}  -> ${get[name][1]}\n`
-                    })
+                    for (const key in get) {
+                        info += `    ${get[key][0]}  -> ${get[key][1]}\n`
+                    }
                 }
                 // 获取安装信息，这儿主要判断几种已提交的包管理安装方式
                 if (backend.isDesktop() && backend.release) {
-                    const process = window.electron?.process
+                    const process = globalThis.electron?.process
                     switch (process && process.platform) {
                         case 'linux': {
                             // archlinux
@@ -395,7 +378,7 @@ const illegalProxyUrl = computed(() => {
                 info += this.createVersionInfo(systemInfo)
 
                 const applicationInfo = [
-                    ['Uptime', Math.floor(((new Date().getTime() - uptime) / 1000) * 100) / 100 + ' s'],
+                    ['Uptime', Math.floor(((Date.now() - uptime) / 1000) * 100) / 100 + ' s'],
                     ['Package Version', getVersion()],
                     ['Service Work', runtimeData.tags.sw],
                 ] as [key: string, value: any][]
@@ -444,10 +427,10 @@ const illegalProxyUrl = computed(() => {
                     ['Link API        ', 'https://api.stapxs.cn'],
                 ]
                 for (const item of testList) {
-                    const start = new Date().getTime()
+                    const start = Date.now()
                     try {
                         await fetch(item[1], { method: 'GET' })
-                        const end = new Date().getTime()
+                        const end = Date.now()
                         networkInfo.push([item[0], end - start + ' ms'])
                     } catch (e) {
                         networkInfo.push([item[0], 'failed'])
@@ -481,7 +464,7 @@ const illegalProxyUrl = computed(() => {
                 })
             },
             printSetUpInfo() {
-                const json = JSON.stringify(runtimeData.sysConfig)
+                const json = JSON.stringify(OptionManager.rawConfigs)
                 htmlPopBox(
                     '<textarea style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;">' +
                         json +
@@ -520,15 +503,13 @@ const illegalProxyUrl = computed(() => {
                         {
                             text: app.config.globalProperties.$t('确定'),
                             master: true,
-                            fun: () => {
+                            fun: async () => {
                                 const input = document.getElementById(
                                     'importSetUpInfoTextArea',
                                 ) as HTMLTextAreaElement
                                 if (input) {
                                     try {
-                                        const json = JSON.parse(input.value)
-                                        runtimeData.sysConfig = json
-                                        saveAll(json)
+                                        await OptionManager.loadAllFromString(input.value)
                                         location.reload()
                                     } catch (e) {
                                         new PopInfo().add(
@@ -552,10 +533,11 @@ const illegalProxyUrl = computed(() => {
                 if (!ensure) return
 
                 localStorage.clear()
-                document.cookie.split(';').forEach((c) => {
-                    document.cookie = c.replace(/^ +/, '')
+                const cookies = document.cookie.split(';')
+                for (const cookie of cookies) {
+                    document.cookie = cookie.replace(/^ +/, '')
                         .replace(/=.*/,'=;expires=' + new Date().toUTCString() + ';path=/')
-                })
+                }
                 backend.call(undefined, 'opt:clearAll', false)
                 location.reload()
             },
@@ -564,40 +546,37 @@ const illegalProxyUrl = computed(() => {
             },
             // 查看配置文件
             rmNeedlessOption() {
-                const needless: string[] = []
-                for (const key of Object.keys(runtimeData.sysConfig)) {
-                    if (optDefault[key] === undefined) {
-                        needless.push(key)
-                    }
-                }
-                if (needless.length === 0) {
-                    new PopInfo().add(
-                        PopType.INFO,
-                        this.$t('没有需要删除的配置项'),
-                    )
-                    return
-                }
-                htmlPopBox(`
-                        <header>以下配置将被删除</header>
-                        <div style="color: var(--color-red);font-weight: 700;">
-                    ` + needless.join('<br>') + '</div>', {
-                    title: this.$t('删除无用配置'),
-                    button: [
-                        {
-                            text: this.$t('取消'),
-                            master: true,
-                        },
-                        {
-                            text: this.$t('确定'),
-                            fun: () => {
-                                for (const key of needless) {
-                                    delete runtimeData.sysConfig[key]
-                                }
-                                saveAll(runtimeData.sysConfig)
-                            },
-                        },
-                    ],
-                })
+                // const needless: string[] = []
+                // for (const key of Object.keys(runtimeData.sysConfig)) {
+                //     if (optDefault[key] === undefined) {
+                //         needless.push(key)
+                //     }
+                // }
+                // if (needless.length === 0) {
+                //     new PopInfo().add(
+                //         PopType.INFO,
+                //         this.$t('没有需要删除的配置项'),
+                //     )
+                //     return
+                // }
+                // htmlPopBox(`
+                //         <header>以下配置将被删除</header>
+                //         <div style="color: var(--color-red);font-weight: 700;">
+                //     ` + needless.join('<br>') + '</div>', {
+                //     title: this.$t('删除无用配置'),
+                //     button: [
+                //         {
+                //             text: this.$t('取消'),
+                //             master: true,
+                //         },
+                //         {
+                //             text: this.$t('确定'),
+                //             fun: async () => {
+                //                 // TODO 删除配置
+                //             },
+                //         },
+                //     ],
+                // })
             },
             createVersionInfo(data: [key: string, value: any][]) {
                 let info = ''

@@ -20,7 +20,6 @@ import {
 import { Message } from './message'
 import { GroupSession, Session } from './session'
 import { runtimeData } from '../msg'
-import option from '../option'
 import { Msg } from './msg'
 
 // 对于会话而言，收纳盒是有序的，对于收纳盒，会话是无序的，所以不把content塞到这个表里
@@ -130,32 +129,16 @@ export class SessionBox {
      * @returns
      */
     static load(): void {
-        const selfId = runtimeData.loginInfo.uin.toString()
-        const cfgs = runtimeData.sysConfig.boxes as {
-            [key: string]: {[key: string]: SessionBoxData}
-        }
-        if (!cfgs) return
-        const userBoxes = cfgs[selfId]
-        if (!userBoxes) return
-
         // 读取所有的收纳盒
-        for (const id in userBoxes) {
-            this.parse(userBoxes[id])
+        for (const box of runtimeData.sysConfig.boxes) {
+            this.parse(box)
         }
 
         // 读取群组对应的收纳盒
-        const sessionBoxes = runtimeData.sysConfig.sessionBoxes as {
-            [key: string]: {[key: string]: SessionBoxData}
-        }
-        if (!sessionBoxes) return
-        const userSessionBoxes = sessionBoxes[selfId] as unknown as {[key: string]: string[]}
-        if (!userSessionBoxes) return
-
-        // 读取所有的群组收纳盒
-        for (const id in userSessionBoxes) {
-            const session = Session.getSessionById(Number(id))
+        for (const sessionId in runtimeData.sysConfig.session_box_map) {
+            const session = Session.getSessionById(Number(sessionId))
             if (!session) continue
-            for (const boxId of userSessionBoxes[id]) {
+            for (const boxId of runtimeData.sysConfig.session_box_map[sessionId]) {
                 const box = this.getBoxById(boxId)
                 if (!box) continue
                 box.putSession(session)
@@ -168,42 +151,19 @@ export class SessionBox {
     static saveData(): void {
         // 检查前提条件
         if (!runtimeData.loginInfo.uin) return
-        const selfId = runtimeData.loginInfo.uin.toString()
 
-        // == 保存收纳盒数据 =========================================================
-        {
-        // 序列化全部数据
-        const datas = {}
-        for (const box of this.sessionBoxes) {
-            const data = box.toData()
-            datas[data.id] = data
-        }
-
-        // 更新配置
-        const cfgs = runtimeData.sysConfig.boxes ?? {} as {
-            [key: string]: {[key: string]: SessionBoxData}
-        }
-        cfgs[selfId] = datas
-
-        // 保存到配置
-        option.save('boxes', cfgs)
-        }
-        // == 保存群组对应收纳盒数据 ====================================================
-        {
-        const datas = {}
+        // 保存收纳盒数据
+        runtimeData.sysConfig.boxes = this.sessionBoxes.map(
+            box => box.toData()
+        )
+        // 保存群组对应收纳盒数据
+        const data = {}
         for (const session of Session.sessionList) {
             if (session.boxes.length === 0) continue
-            datas[session.id] = session.boxes.map(box => box.id)
+            data[session.id] = session.boxes.map(box => box.id)
         }
 
-        // 更新配置
-        const cfgs = runtimeData.sysConfig.sessionBoxes ?? {} as {
-            [key: string]: {[key: string]: SessionBoxData}
-        }
-        cfgs[selfId] = datas
-
-        option.save('sessionBoxes', cfgs)
-        }
+        runtimeData.sysConfig.session_box_map = data
     }
     /**
      * 将自身转化为往配置文件存储的数据

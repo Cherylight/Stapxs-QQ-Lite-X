@@ -251,7 +251,6 @@ import { AtSeg } from '@renderer/function/model/seg'
 import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
 import { BaseUser, IUser, Member } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
-import { get } from '@renderer/function/option'
 import { downloadFile, shouldAutoFocus } from '@renderer/function/utils/appUtil'
 import {
     closeSession,
@@ -494,7 +493,7 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
 
     // 检查消息，确认菜单显示状态
     // 关闭回应功能
-    if (get('close_respond') == true) {
+    if (runtimeData.sysConfig.close_respond) {
         menuDisplay.showRespond = false
     }
 

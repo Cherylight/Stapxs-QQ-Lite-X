@@ -21,7 +21,6 @@ import { SessionData } from '../adapter/interface'
 import { Logger, PopInfo, PopType } from '../base'
 import { runtimeData } from '../msg'
 import { Notify } from '../notify'
-import option from '../option'
 import { queueWait } from '../utils/systemUtil'
 import { Ann } from './ann'
 import { SessionBox } from './box'
@@ -248,7 +247,6 @@ export abstract class Session {
      */
     setAlwaysTop(flag: boolean, saveCfg: boolean = true): void {
         this.alwaysTop = flag
-
         // 更新置顶列表
         if (flag && !Session.alwaysTopSessions.has(this))
             Session.alwaysTopSessions.add(this)
@@ -256,29 +254,17 @@ export abstract class Session {
             Session.alwaysTopSessions.delete(this)
 
         if (!saveCfg) return
-
-        const id = runtimeData.loginInfo.uin
-        const upId = this.id
-        // 完整的设置 JSON
-        const topInfo = runtimeData.sysConfig.top_info as {
-            [key: string]: number[]
-        } ?? {}
-        // 本人的置顶信息
-        let topList = topInfo[id]
-        // 操作
-        if (flag) {             // 设置
-            if (topList) {
-                if (topList.indexOf(this.id) < 0) topList.push(upId)
-            } else {
-                topList = [upId]
-            }
-        } else if (topList) {   // 移除
-            topList.splice(topList.indexOf(upId), 1)
-        }
-        // 刷新设置
-        if (topList) {
-            topInfo[id] = topList
-            option.save('top_info', topInfo)
+        if (flag) {
+            if (runtimeData.sysConfig.pin_sessions.includes(this.id)) return
+            runtimeData.sysConfig.pin_sessions = [
+                ...runtimeData.sysConfig.pin_sessions,
+                this.id
+            ]
+        }else {
+            if (!runtimeData.sysConfig.pin_sessions.includes(this.id)) return
+            runtimeData.sysConfig.pin_sessions = runtimeData.sysConfig.pin_sessions.filter(
+                i => i !== this.id
+            )
         }
     }
     //#endregion
@@ -885,20 +871,18 @@ export class GroupSession extends Session {
         this.notice = flag
 
         if (!saveCfg) return
-        // 写入配置
-        const noticeInfo = option.get('notice_group') ?? {}
-        const list = noticeInfo[runtimeData.loginInfo.uin]
         if (flag) {
-            if (list) {
-                list.push(this.id)
-            } else {
-                noticeInfo[runtimeData.loginInfo.uin] = [this.id]
-            }
-        } else if (list) {
-            const index = list.indexOf(this.id)
-            if (index >= 0) list.splice(index, 1)
+            if (runtimeData.sysConfig.notice_group.includes(this.id)) return
+            runtimeData.sysConfig.notice_group = [
+                ...runtimeData.sysConfig.notice_group,
+                this.id
+            ]
+        } else {
+            if (!runtimeData.sysConfig.notice_group.includes(this.id)) return
+            runtimeData.sysConfig.notice_group = runtimeData.sysConfig.notice_group.filter(
+                i => i !== this.id
+            )
         }
-        option.save('notice_group', noticeInfo)
     }
 
     private readonly _annsLoaded = shallowRef(false)
