@@ -297,18 +297,6 @@ msgstr ""
 msgid "访问 GitHub 仓库"
 msgstr ""
 
-msgid "自动深色模式"
-msgstr ""
-
-msgid "Biubiu ——，自动变黑！"
-msgstr ""
-
-msgid "深色模式"
-msgstr ""
-
-msgid "是五彩斑斓的黑色！"
-msgstr ""
-
 msgid "本土化"
 msgstr ""
 
@@ -2269,4 +2257,19 @@ msgid "连接地址格式错误，请参考如何连接"
 msgstr ""
 
 msgid "上传背景"
+msgstr ""
+
+msgid "亮暗模式"
+msgstr ""
+
+msgid "你是亮色党还是暗色党？"
+msgstr ""
+
+msgid "亮色模式"
+msgstr ""
+
+msgid "跟随系统"
+msgstr ""
+
+msgid "暗色模式"
 msgstr ""

@@ -3,9 +3,9 @@ import app from '../main'
 
 import { CapacitorGlobal } from '@capacitor/core'
 import { IpcRenderer } from '@electron-toolkit/preload'
-import { runtimeData } from '@renderer/function/msg'
 import { InvokeArgs, InvokeOptions } from '@tauri-apps/api/core'
 import { Logger, LogType, PopInfo, PopType } from '../function/base'
+import win from './win'
 
 const logger = new Logger()
 const popInfo = new PopInfo()
@@ -59,7 +59,7 @@ export const backend = {
                 capacitor: window.Capacitor,
                 plugins: window.Capacitor.Plugins,
                 vConsole: new VConsole({
-                    theme: runtimeData.tags.darkMode ? 'dark' : 'light',
+                    theme: win.darkMode ? 'dark' : 'light',
                 })
             }
             this.listener = (type: string, name: string, callBack: (...args: any[]) => void) => {

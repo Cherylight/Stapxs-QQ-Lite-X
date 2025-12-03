@@ -94,19 +94,14 @@
                         </label>
                     </div>
                 </div>
-                <div v-if="!runtimeData.sysConfig.opt_auto_dark" id="opt_view_dark" class="opt-item wel-opt-item">
+                <div class="opt-item">
+                    <div />
+                    <font-awesome-icon :icon="['fas', 'moon']" />
                     <div>
-                        <span>{{ $t('深色模式') }}</span>
-                        <span>{{ $t('是五彩斑斓的黑色！') }}</span>
+                        <span>{{ $t('亮暗模式') }}</span>
+                        <span>{{ $t('你是亮色党还是暗色党？') }}</span>
                     </div>
-                    <Switch v-model="runtimeData.sysConfig.opt_dark" />
-                </div>
-                <div class="opt-item wel-opt-item">
-                    <div>
-                        <span>{{ $t('自动深色模式') }}</span>
-                        <span>{{ $t('Biubiu ——，自动变黑！') }}</span>
-                    </div>
-                    <Switch v-model="runtimeData.sysConfig.opt_auto_dark" />
+                    <DarkModeSwitch v-model="runtimeData.sysConfig.opt_dark_mode" />
                 </div>
             </div>
         </div>
@@ -360,6 +355,7 @@ import { defineComponent } from 'vue'
 import { runtimeData } from '@renderer/function/msg'
 import { openLink } from '@renderer/function/utils/appUtil'
 import Switch from '@renderer/components/Switch.vue'
+import DarkModeSwitch from '@renderer/components/DarkModeSwitch.vue'
 
 const emit = defineEmits<{
     closePopBox: []

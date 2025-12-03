@@ -51,22 +51,13 @@
         <div class="ss-card">
             <header>{{ $t('主题与颜色') }}</header>
             <div class="opt-item">
-                <div :class="{changed: !OptionManager.checkDefault('opt_dark')}" />
+                <div :class="{changed: !OptionManager.checkDefault('opt_dark_mode')}" />
                 <font-awesome-icon :icon="['fas', 'moon']" />
                 <div>
-                    <span>{{ $t('深色模式') }}</span>
-                    <span>{{ $t('是五彩斑斓的黑色！') }}</span>
+                    <span>{{ $t('亮暗模式') }}</span>
+                    <span>{{ $t('你是亮色党还是暗色党？') }}</span>
                 </div>
-                <Switch v-model="runtimeData.sysConfig.opt_dark" />
-            </div>
-            <div class="opt-item">
-                <div :class="{changed: !OptionManager.checkDefault('opt_auto_dark')}" />
-                <font-awesome-icon :icon="['fas', 'toggle-on']" />
-                <div>
-                    <span>{{ $t('自动深色模式') }}</span>
-                    <span>{{ $t('Biubiu ——，自动变黑！') }}</span>
-                </div>
-                <Switch v-model="runtimeData.sysConfig.opt_auto_dark" />
+                <DarkModeSwitch v-model="runtimeData.sysConfig.opt_dark_mode" />
             </div>
             <template v-if="!runtimeData.sysConfig.opt_auto_win_color">
                 <div class="opt-item">
@@ -360,6 +351,7 @@
 import Switch from '@renderer/components/Switch.vue'
 import OptionManager from '@renderer/function/option/option'
 import { defineComponent, toRaw, shallowRef } from 'vue'
+import DarkModeSwitch from '@renderer/components/DarkModeSwitch.vue'
 
 const isVibrancy = shallowRef(runtimeData.sysConfig.vibrancy)
 
@@ -394,7 +386,7 @@ import { closePopBox, ensurePopBox, textPopBox } from '@renderer/function/utils/
 import { backend } from '@renderer/runtime/backend'
 import languages from '../../assets/l10n/_l10nconfig.json'
 import app from '@renderer/main'
-
+import win from '@renderer/runtime/win'
     export default defineComponent({
         name: 'ViewOptTheme',
         data() {
@@ -501,9 +493,9 @@ import app from '@renderer/main'
                 Object.keys(iconList).forEach((key: string) => {
                     const name = key.split('/').pop()?.split('.')[0].replace('AppIcon', '')
                     if(name || name === '') {
-                        if(!runtimeData.tags.darkMode && !name.endsWith('Dark')) {
+                        if(!win.darkMode && !name.endsWith('Dark')) {
                             iconListInfo.push({ name: name, icon: (iconList[key] as any).default })
-                        } else if(runtimeData.tags.darkMode && name.endsWith('Dark')) {
+                        } else if(win.darkMode && name.endsWith('Dark')) {
                             iconListInfo.push({ name: name.replace('Dark', ''), icon: (iconList[key] as any).default })
                         }
                     }

@@ -15,6 +15,7 @@ import './assets/css/msg.css'
 import './assets/css/options.css'
 import './assets/css/sys_notice.css'
 import './assets/css/view.css'
+import './assets/css/color.css'
 
 import { runtimeData } from './function/msg'
 import { getPortableFileLang, getVersion } from './function/utils/systemUtil'
@@ -46,7 +47,7 @@ library.add(faSquare)
 app.component('FontAwesomeIcon', FontAwesomeIcon)
 
 export default app
-export const uptime = new Date().getTime()
+export const uptime = Date.now()
 
 const _nowTimes = useLocalStorage('now-times', 0)
 const timesEnd = useLocalStorage('last-times', 0)

@@ -211,7 +211,7 @@ async function init() {
     if (dev) {
         document.title = 'Stapxs QQ Lite X (Dev)'
         // 布局检查工具
-        Spacing.start()
+        // Spacing.start()
         // FPS 检查
         rafLoop()
     }

@@ -35,6 +35,7 @@ export interface RunTimeDataElem {
     nowBox?: SessionBox  // 当前的会话盒子
     nowAdapter?: AdapterInterface // 当前适配器
     popBoxList: { id: string, data: PopBoxData }[],
+    defaultColorMode: 'light' | 'dark',
 }
 
 export interface MenuEventData {

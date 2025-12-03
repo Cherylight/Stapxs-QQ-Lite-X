@@ -1,6 +1,6 @@
 
 function spaceCfgs(): {_version: number} {
-    const OPTION_VERSION = 1
+    const OPTION_VERSION = 2
     return { _version: OPTION_VERSION }
 }
 

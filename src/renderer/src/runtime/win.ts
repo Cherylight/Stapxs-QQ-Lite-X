@@ -14,6 +14,7 @@ const win = markRaw({
     _needMargin: undefined as any as ComputedRef<boolean>,
 
     _forceTilingState: shallowRef<undefined|boolean>(),
+    _darkMode: shallowRef<boolean>(false),
 
     hasInit: false,
 
@@ -82,6 +83,11 @@ const win = markRaw({
                 document.body.style.setProperty('--safe-area-right', safeArea.right + 'px')
             }
         }
+        // 添加配置监听
+        this.refreshDarkMode()
+        watchEffect(()=>{
+            this.refreshDarkMode()
+        })
 
         this.hasInit = true
     },
@@ -193,6 +199,42 @@ const win = markRaw({
         runtimeData.tags.vibrancy = false
         new Logger().info('已移除透明 UI 效果禁用')
     },
+    /**
+     * 刷新暗色模式
+     */
+    refreshDarkMode() {
+        let darkMode: boolean
+        switch (runtimeData.sysConfig.opt_dark_mode) {
+            case 'auto':
+                darkMode = runtimeData.defaultColorMode === 'dark'
+                break
+            case 'dark':
+                darkMode = true
+                break
+            case 'light':
+                darkMode = false
+                break
+        }
+        if (darkMode === this._darkMode.value) return
+        this._darkMode.value = darkMode
+        this.setDarkMode(darkMode)
+    },
+    /**
+     * 设置暗色模式
+     * @param dark 是否启用
+     */
+    setDarkMode(dark: boolean) {
+        if (this.hasInit) {
+            document.body.style.transition = '0.3s'
+        }
+        if (dark) {
+            document.body.classList.remove('light')
+            document.body.classList.add('dark')
+        }else {
+            document.body.classList.remove('dark')
+            document.body.classList.add('light')
+        }
+    },
 
     async supportVibrancyCheck(): Promise<boolean> {
         // 透明 UI 附加样式
@@ -253,6 +295,10 @@ const win = markRaw({
 
     get margin() {
         return this._needMargin.value
+    },
+
+    get darkMode() {
+        return this._darkMode.value
     },
 })
 

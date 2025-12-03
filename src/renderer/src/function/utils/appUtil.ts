@@ -287,12 +287,8 @@ export function updateWinColor(color: string) {
         const blue = parseInt(color.substr(4, 2), 16)
         // 平衡颜色亮度
         const hsl = rgbToHsl(red, green, blue)
-        const media = window.matchMedia('(prefers-color-scheme: dark)')
-        const autodark = runtimeData.sysConfig.opt_auto_dark
-        const dark = runtimeData.sysConfig.opt_dark
         if (
-            (autodark && media.matches) ||
-            (!autodark && dark)
+            win.darkMode
         ) {
             hsl[2] = 0.8
         } else {
@@ -607,6 +603,7 @@ import { htmlPopBox, popBox } from './popBox'
 import UpdatePan from '@renderer/popboxes/UpdatePan.vue'
 import WelPan from '@renderer/popboxes/WelPan.vue'
 import { ReplySeg, TxtSeg } from '../model/seg'
+import win from '@renderer/runtime/win'
 /**
 * 初始化快速连接信息
 * @param address 地址

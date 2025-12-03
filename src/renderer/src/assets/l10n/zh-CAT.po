@@ -131,9 +131,6 @@ msgstr "猫猫那么可爱，真的不让看吗（小声"
 msgid "访问 GitHub 仓库"
 msgstr "访问 CatHub 仓库"
 
-msgid "Biubiu ——，自动变黑！"
-msgstr "看不清了！喵！"
-
 msgid "主题与颜色"
 msgstr "装饰和毛色"
 
@@ -304,3 +301,6 @@ msgstr "这条消息被喵喵吃掉了"
 
 msgid "已退群( {userId} )"
 msgstr "走丢了( {userId} )"
+
+msgid "你是亮色党还是暗色党？"
+msgstr "你是黑猫还是白毛？"

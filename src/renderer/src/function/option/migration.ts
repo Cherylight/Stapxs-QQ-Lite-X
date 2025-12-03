@@ -1,7 +1,7 @@
 import { loadAllOptions } from './utils'
 
 const migrationFunc = {
-    //#region 0 -> 1
+    // 0 -> 1
     0: async (old: Record<string, any>): Promise<Record<string, any>> => {
         const tmp = {}
         // 无需变动全局字段
@@ -108,8 +108,20 @@ const migrationFunc = {
         }
         re['_version'] = 1
         return re
-    }
-    //#endregion
+    },
+    // 1 -> 2
+    1: async (old: Record<string, any>): Promise<Record<string, any>> => {
+        if (old['#TAG:global##KEY:opt_auto_dark#'])
+            old['#TAG:global##KEY:opt_dark_mode#'] = 'auto'
+        else if (old['#TAG:global##KEY:opt_dark#'])
+            old['#TAG:global##KEY:opt_dark_mode#'] = 'dark'
+        else
+            old['#TAG:global##KEY:opt_dark_mode#'] = 'light'
+        delete old['#TAG:global##KEY:opt_auto_dark#']
+        delete old['#TAG:global##KEY:opt_dark#']
+        old['_version'] = 2
+        return old
+    },
 } satisfies Record<number, (old: Record<string, any>) => Promise<Record<string, any>>>
 
 /**

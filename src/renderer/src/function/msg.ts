@@ -232,6 +232,7 @@ const baseRuntime = {
             ),
         ),
     }),
+    defaultColorMode: 'light' as 'light' | 'dark',  // 系统颜色模式
     systemNoticesList: undefined,
     popBoxList: [],
     mergeMsgStack: [],
@@ -252,6 +253,7 @@ export function resetRuntime(resetAll = false) {
     }
 }
 
+// 跨域检测
 let testId = 0
 const testUrl = 'https://q1.qlogo.cn/g?b=qq&s=0&nk=0'
 setTimeout(() => {
@@ -272,3 +274,10 @@ setTimeout(() => {
             })
     })
 },0)
+
+// 系统颜色模式检测
+const media = globalThis.matchMedia('(prefers-color-scheme: dark)')
+runtimeData.defaultColorMode = media.matches ? 'dark' : 'light'
+media.addEventListener('change', (e)=>{
+    runtimeData.defaultColorMode = e.matches ? 'dark' : 'light'
+})

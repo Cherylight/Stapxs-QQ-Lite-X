@@ -8,14 +8,9 @@ import { BubbleBox, SessionBoxData } from '../model/box'
 import { loadWinColor, sendIdentifyData, updateWinColor } from '../utils/appUtil'
 import app, { i18n } from '@renderer/main'
 import { getPortableFileLang, getTrueLang } from '../utils/systemUtil'
-import { runtimeData } from '../msg'
-import { Logger, LogType, PopInfo, PopType } from '../base'
 import { backend } from '@renderer/runtime/backend'
 import win from '@renderer/runtime/win'
 import { OptionField } from './option'
-
-const logger = new Logger()
-const popInfo = new PopInfo()
 
 /**
  * 配置文件声明
@@ -82,57 +77,8 @@ export const OptionInfos = {
             sendIdentifyData({'use_language': name})
         }
     },
-    opt_dark: {
-        default: false,
-        onChange: setDarkMode,
-        onLoad: setDarkMode,
-    },
-    opt_auto_dark: {
-        default: true,
-        onChange: (value: boolean) => {
-            const media = globalThis.matchMedia('(prefers-color-scheme: dark)')
-            const opt = document.getElementById('opt_view_dark')
-            if (value) {
-                // 刷新一次颜色模式
-                if (media.matches) {
-                    setDarkMode()
-                } else {
-                    setDarkMode(false)
-                }
-                // 创建颜色模式变化监听
-                if (typeof media.addEventListener === 'function') {
-                    media.addEventListener('change', (e) => {
-                        if (runtimeData.sysConfig.opt_auto_dark) {
-                            const prefersDarkMode = e.matches
-                            logger.add(
-                                LogType.UI,
-                                '正在自动切换颜色模式为：' + prefersDarkMode,
-                            )
-                            if (prefersDarkMode) {
-                                setDarkMode()
-                            } else {
-                                setDarkMode(false)
-                            }
-                            // 刷新主题色
-                            if (runtimeData.sysConfig.opt_auto_win_color) {
-                                backend.addListener(undefined, 'sys:WinColorChanged', (_, params) => {
-                                    updateWinColor(params)
-                                })
-                                loadWinColor()
-                            }
-                        }
-                    })
-                }
-                // 将颜色模式设置项移除
-                if (opt) opt.style.display = 'none'
-            } else {
-                if (opt) opt.style.display = 'flex'
-                setDarkMode(Boolean(runtimeData.sysConfig.opt_dark))
-            }
-        },
-        onLoad: (value: boolean) => {
-            OptionInfos.opt_auto_dark.onChange(value)
-        }
+    opt_dark_mode: {
+        default: 'auto' as 'auto' | 'light' | 'dark',
     },
     theme_color: {
         default: 0,
@@ -351,92 +297,3 @@ export const OptionInfos = {
     },
     //#endregion
 } satisfies Record<string, OptionField<any>>
-
-
-
-//#region == 工具 ===========================================================
-/**
- * 设置暗黑模式
- * @param value 是否启用暗黑模式
- */
-function setDarkMode(value = true) {
-    if (value === true) {
-        changeColorMode('dark')
-    } else {
-        changeColorMode('light')
-    }
-}
-
-/**
- * 修改颜色模式
- * @param mode 颜色模式
- */
-function changeColorMode(mode: 'light' | 'dark') {
-    if (!runtimeData.tags.firstLoad) {
-        // 启用颜色渐变动画
-        document.body.style.transition =
-            '0.3s'
-    } else {
-        runtimeData.tags.firstLoad = false
-    }
-    // 切换颜色
-    const match_list = ['color-.*.css', 'prism-.*.css', 'append-.*.css']
-    const css_list = document.getElementsByTagName('link')
-    for (const element of css_list) {
-        const name = element.href
-        match_list.forEach((value) => {
-            if (name.match(value) != null) {
-                // 检查切换的文件是否可以被访问到
-                if (name != undefined) {
-                    let newName = name
-                    if (name.indexOf('dark') > -1) {
-                        newName = name.replace('dark', 'light')
-                    } else {
-                        newName = name.replace('light', 'dark')
-                    }
-                    const xhr = new XMLHttpRequest()
-                    xhr.open('HEAD', newName, false)
-                    xhr.send()
-                    if (xhr.status != 200) {
-                        // 无法访问到对应的颜色模式文件，放弃切换
-                        popInfo.add(
-                            PopType.ERR,
-                            '无法切换颜色模式：访问颜色模式文件失败。',
-                        )
-                        return
-                    }
-                }
-                const newLink = document.createElement('link')
-                newLink.setAttribute('rel', 'stylesheet')
-                newLink.setAttribute('type', 'text/css')
-                if (mode === 'dark') {
-                    newLink.setAttribute('href', name.replace('light', 'dark'))
-                } else {
-                    newLink.setAttribute('href', name.replace('dark', 'light'))
-                }
-                const head = document.getElementsByTagName('head').item(0)
-                if (head !== null) {
-                    head.replaceChild(newLink, element)
-                }
-            }
-        })
-    }
-    // 刷新页面主题色
-    const meta = document.getElementsByName('theme-color')[0]
-    if (meta) {
-        (meta as HTMLMetaElement).content = getComputedStyle(
-            document.documentElement,
-        ).getPropertyValue('--color-main')
-    }
-    // 记录
-    runtimeData.tags.darkMode = mode === 'dark'
-    // Capacitor: 状态栏颜色（Android）
-    if(backend.isMobile()) {
-        backend.call('StatusBar', 'setStyle', false, { style: mode.toUpperCase() })
-    }
-    // Capacitor: VConsole 颜色
-    if(backend.function && 'vConsole' in backend.function && backend.function.vConsole) {
-        backend.function.vConsole.setOption('theme', mode)
-    }
-}
-//#endregion

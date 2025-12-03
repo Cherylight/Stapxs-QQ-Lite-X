@@ -161,6 +161,17 @@
                 </button>
             </div>
             <div class="opt-item">
+                <font-awesome-icon :icon="['fas', 'trash']" />
+                <div>
+                    <span>{{ $t('打开欢迎窗口') }}</span>
+                    <span>{{ $t('Welcome to use Stapxs QQ Lite X') }}</span>
+                </div>
+                <button style="width: 100px; font-size: 0.8rem"
+                    class="ss-button" @click="openWelcomeWindow">
+                    {{ $t('执行') }}
+                </button>
+            </div>
+            <div class="opt-item">
                 <font-awesome-icon :icon="['fas', 'file-invoice']" />
                 <div>
                     <span>{{ $t('输出运行时') }}</span>
@@ -250,9 +261,10 @@ import {
     computed,
 } from 'vue'
 import driver from '@renderer/function/driver'
-import { ensurePopBox, htmlPopBox } from '@renderer/function/utils/popBox'
+import { ensurePopBox, htmlPopBox, popBox } from '@renderer/function/utils/popBox'
 import { copyToClipboard, getVersion } from '@renderer/function/utils/systemUtil'
 import win from '@renderer/runtime/win'
+import WelPan from '@renderer/popboxes/WelPan.vue'
 
 const illegalProxyUrl = computed(() => {
     if (!runtimeData.sysConfig.proxyUrl) return false
@@ -597,7 +609,13 @@ const illegalProxyUrl = computed(() => {
                         win._forceTilingState.value = false
                         break
                 }
-            }
+            },
+            openWelcomeWindow() {
+                popBox({
+                    template: WelPan,
+                    allowAutoClose: false,
+                })
+            },
         },
     })
 </script>

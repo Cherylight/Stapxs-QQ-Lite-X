@@ -21,6 +21,7 @@ import { Message } from './message'
 import { GroupSession, Session } from './session'
 import { runtimeData } from '../msg'
 import { Msg } from './msg'
+import win from '@renderer/runtime/win'
 
 // 对于会话而言，收纳盒是有序的，对于收纳盒，会话是无序的，所以不把content塞到这个表里
 export interface SessionBoxData {
@@ -336,7 +337,7 @@ export class SessionBox {
     }
 
     get color(): string {
-        if (runtimeData.tags.darkMode) return `hsl(${this._color.value}deg, 50%, 35%)`
+        if (win.darkMode) return `hsl(${this._color.value}deg, 50%, 35%)`
         return `hsl(${this._color.value}deg, 50%, 90%)`
     }
 
