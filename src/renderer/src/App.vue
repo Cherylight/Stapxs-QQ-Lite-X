@@ -85,7 +85,6 @@
 
 <script setup lang="ts">
 import Umami from '@stapxs/umami-logger-typescript'
-import Spacing from 'spacingjs/src/spacing'
 import * as App from './function/utils/appUtil'
 
 import { Logger, LogType, PopInfo, popList } from '@renderer/function/base'
@@ -210,8 +209,6 @@ async function init() {
     // 加载开发者相关功能
     if (dev) {
         document.title = 'Stapxs QQ Lite X (Dev)'
-        // 布局检查工具
-        // Spacing.start()
         // FPS 检查
         rafLoop()
     }

@@ -257,8 +257,8 @@ import { BrowserInfo, detect } from 'detect-browser'
 import app, { uptime } from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
 import {
-    defineComponent,
     computed,
+    shallowRef
 } from 'vue'
 import driver from '@renderer/function/driver'
 import { ensurePopBox, htmlPopBox, popBox } from '@renderer/function/utils/popBox'
@@ -266,356 +266,354 @@ import { copyToClipboard, getVersion } from '@renderer/function/utils/systemUtil
 import win from '@renderer/runtime/win'
 import WelPan from '@renderer/popboxes/WelPan.vue'
 
+const $t = app.config.globalProperties.$t
+const dev = import.meta.env.DEV
+const appmsg_text = shallowRef('')
+const winState = shallowRef<'none' | 'tiling' | 'win'>('none')
+
 const illegalProxyUrl = computed(() => {
     if (!runtimeData.sysConfig.proxyUrl) return false
     if (!runtimeData.sysConfig.proxyUrl.includes('{url}')) return true
     return false
 })
-</script>
 
-<script lang="ts">
-    export default defineComponent({
-        name: 'ViewOptDev',
-        data() {
-            return {
-                dev: import.meta.env.DEV,
-                runtimeData: runtimeData,
-                ws_text: '',
-                parse_text: '',
-                appmsg_text: '',
-                winState: 'none' as 'none' | 'tiling' | 'win'
+function sendTestAppmsg(event: KeyboardEvent) {
+    if (event.key === 'Enter' && appmsg_text.value !== '') {
+        new PopInfo().add(PopType.INFO, appmsg_text.value, false)
+        appmsg_text.value = ''
+    }
+}
+
+function sendAbab() {
+    new PopInfo().add(
+        PopType.INFO,
+        app.config.globalProperties.$t('你不是人（逃'),
+    )
+}
+
+function printRuntime() {
+    if(backend.isMobile()) {
+        const switcher = document.getElementById('__vconsole')?.getElementsByClassName('vc-switch')[0]
+        if (switcher) {
+            (switcher as HTMLDivElement).click()
+        // safeArea
+        backend.call('SafeArea', 'getSafeArea', true).then((safeArea) => {
+            if (safeArea) {
+                const vcPanel = document.getElementById('__vconsole')?.getElementsByClassName('vc-panel')[0]
+                if (vcPanel) {
+                    // vc-content、vc-toolbar
+                    const vcContent = vcPanel.getElementsByClassName('vc-content')[0] as HTMLDivElement
+                    const vcToolbar = vcPanel.getElementsByClassName('vc-toolbar')[0] as HTMLDivElement
+                    if (vcContent && vcToolbar) {
+                        vcContent.style.marginBottom = safeArea.bottom + 'px'
+                        vcToolbar.style.marginBottom = safeArea.bottom + 'px'
+                    }
+                }
             }
-        },
-        methods: {
-            sendTestAppmsg(event: KeyboardEvent) {
-                if (event.keyCode === 13 && this.appmsg_text !== '') {
-                    new PopInfo().add(PopType.INFO, this.appmsg_text, false)
-                    this.appmsg_text = ''
-                }
-            },
-            sendAbab() {
-                new PopInfo().add(
-                    PopType.INFO,
-                    app.config.globalProperties.$t('你不是人（逃'),
-                )
-            },
-            printRuntime() {
-                if(backend.isMobile()) {
-                    const switcher = document.getElementById('__vconsole')?.getElementsByClassName('vc-switch')[0]
-                    if (switcher) {
-                        (switcher as HTMLDivElement).click()
-                    // safeArea
-                    backend.call('SafeArea', 'getSafeArea', true).then((safeArea) => {
-                        if (safeArea) {
-                            const vcPanel = document.getElementById('__vconsole')?.getElementsByClassName('vc-panel')[0]
-                            if (vcPanel) {
-                                // vc-content、vc-toolbar
-                                const vcContent = vcPanel.getElementsByClassName('vc-content')[0] as HTMLDivElement
-                                const vcToolbar = vcPanel.getElementsByClassName('vc-toolbar')[0] as HTMLDivElement
-                                if (vcContent && vcToolbar) {
-                                    vcContent.style.marginBottom = safeArea.bottom + 'px'
-                                    vcToolbar.style.marginBottom = safeArea.bottom + 'px'
-                                }
-                            }
-                        }
-                    })
+        })
+        }
+    }
+    /* eslint-disable no-console */
+    console.log('=========================')
+    console.log(runtimeData)
+    console.log('=========================')
+    /* eslint-enable no-console */
+    if(!backend.isMobile()) {
+        backend.call(undefined, 'win:openDevTools', false)
+    }
+}
+
+async function printVersionInfo() {
+    new PopInfo().add(
+        PopType.INFO,
+        app.config.globalProperties.$t('正在收集调试消息……'),
+    )
+
+    // 索要框架信息
+    const addInfo = await backend.call('Onebot', 'opt:getSystemInfo', true)
+    if(backend.isMobile() && backend.function && 'vConsole' in backend.function && backend.function.vConsole) {
+        addInfo.vconsole = ['vConsole Version', backend.function.vConsole.version ?? 'Not loaded']
+    }
+
+    const browser = detect() as BrowserInfo
+    let info = '```\n'
+    info +=
+        'Debug Info - ' +
+        new Date().toLocaleString() +
+        '\n================================\n'
+    const systemInfo = [
+        ['OS Name', browser.os],
+        ['Browser Name', browser.name],
+        ['Browser Version', browser.version],
+    ] as [key: string, value: any][]
+    if (addInfo) {
+        const get = addInfo as { [key: string]: [string, string] }
+        for (const key in get) {
+            info += `    ${get[key][0]}  -> ${get[key][1]}\n`
+        }
+    }
+    // 获取安装信息，这儿主要判断几种已提交的包管理安装方式
+    if (backend.isDesktop() && backend.release) {
+        const process = globalThis.electron?.process
+        switch (process && process.platform) {
+            case 'linux': {
+                // archlinux
+                if (backend.release.toLowerCase().indexOf('arch') > 0) {
+                    let pacmanInfo =
+                        await backend.call(undefined, 'sys:runCommand', true,
+                            'pacman -Q stapxs-qq-lite-bin',
+                        )
+                    if (pacmanInfo.success)
+                        systemInfo.push(['Install Type', 'aur'])
+                    else if(backend.function && 'invoke' in backend.function){
+                        // 也有可能是 stapxs-qq-lite，这是我自己打的原生包
+                        pacmanInfo = await backend.function.invoke(
+                                'sys:runCommand',
+                                'pacman -Q stapxs-qq-lite',
+                            )
+                        if (pacmanInfo.success)
+                            systemInfo.push(['Install Type', 'pacman'])
                     }
                 }
-                /* eslint-disable no-console */
-                console.log('=========================')
-                console.log(runtimeData)
-                console.log('=========================')
-                /* eslint-enable no-console */
-                if(!backend.isMobile()) {
-                    backend.call(undefined, 'win:openDevTools', false)
-                }
+                break
+            }
+        }
+    }
+    info += 'System Info:\n'
+    info += createVersionInfo(systemInfo)
+
+    const applicationInfo = [
+        ['Uptime', Math.floor(((Date.now() - uptime) / 1000) * 100) / 100 + ' s'],
+        ['Package Version', getVersion()],
+        ['Service Work', runtimeData.tags.sw],
+    ] as [key: string, value: any][]
+
+    info += 'Application Info:\n'
+    info += createVersionInfo(applicationInfo)
+
+    const adapeterInfo = [
+        ['status', !runtimeData.nowAdapter || driver.isConnected() ? 'connected' : 'not connected'],
+    ] as [key: string, value: any][]
+
+    if (!runtimeData.nowAdapter)
+        adapeterInfo.push(['info', 'Not connected'])
+    else {
+        const data = await runtimeData.nowAdapter.getAdapterInfo()
+        if (!data)
+            adapeterInfo.push(['info', 'Get info failed'])
+        else {
+            for (const key in data) {
+                adapeterInfo.push([key, data[key]])
+            }
+        }
+    }
+    info += 'Adapter Info:\n'
+    info += createVersionInfo(adapeterInfo)
+
+    const viewInfo = [
+        ['Doc Width', document.getElementById('app')?.offsetWidth + ' px'],
+    ] as [key: string, value: any][]
+
+    // capactior：索要 safeArea
+    if (backend.isMobile()) {
+        const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
+        if (safeArea) {
+            // 按照前端习惯，这儿的 safeArea 顺序是 top, right, bottom, left
+            const safeAreaStr = safeArea.top + ', ' + safeArea.right + ', ' + safeArea.bottom + ', ' + safeArea.left
+            viewInfo.push(['Safe Area', safeAreaStr])
+        }
+    }
+    info += 'View Info:\n'
+    info += createVersionInfo(viewInfo)
+
+    const networkInfo = [] as [key: string, value: any][]
+    const testList = [
+        ['Github          ', 'https://api.github.com'],
+        ['Link API        ', 'https://api.stapxs.cn'],
+    ]
+    for (const item of testList) {
+        const start = Date.now()
+        try {
+            await fetch(item[1], { method: 'GET' })
+            const end = Date.now()
+            networkInfo.push([item[0], end - start + ' ms'])
+        } catch (e) {
+            networkInfo.push([item[0], 'failed'])
+        }
+    }
+    info += 'Network Info:\n'
+    info += createVersionInfo(networkInfo)
+    info += '```'
+    // 构建 popBox 内容
+    htmlPopBox('<textarea class="debug-info">' + info + '</textarea>', {
+        svg: 'screwdriver-wrench',
+        title: $t('调试信息'),
+        button: [
+            {
+                text: app.config.globalProperties.$t('复制'),
+                noClose: true,
+                fun: () => {
+                    copyToClipboard(info)
+                        .then(
+                            () => new PopInfo().add(PopType.INFO, $t('复制成功'))
+                        ).catch(
+                            () => new PopInfo().add(PopType.ERR, $t('复制失败'))
+                        )
+                },
             },
-            async printVersionInfo() {
-                new PopInfo().add(
-                    PopType.INFO,
-                    app.config.globalProperties.$t('正在收集调试消息……'),
-                )
-
-                // 索要框架信息
-                const addInfo = await backend.call('Onebot', 'opt:getSystemInfo', true)
-                if(backend.isMobile() && backend.function && 'vConsole' in backend.function && backend.function.vConsole) {
-                    addInfo.vconsole = ['vConsole Version', backend.function.vConsole.version ?? 'Not loaded']
-                }
-
-                const browser = detect() as BrowserInfo
-                let info = '```\n'
-                info +=
-                    'Debug Info - ' +
-                    new Date().toLocaleString() +
-                    '\n================================\n'
-                const systemInfo = [
-                    ['OS Name', browser.os],
-                    ['Browser Name', browser.name],
-                    ['Browser Version', browser.version],
-                ] as [key: string, value: any][]
-                if (addInfo) {
-                    const get = addInfo as { [key: string]: [string, string] }
-                    for (const key in get) {
-                        info += `    ${get[key][0]}  -> ${get[key][1]}\n`
-                    }
-                }
-                // 获取安装信息，这儿主要判断几种已提交的包管理安装方式
-                if (backend.isDesktop() && backend.release) {
-                    const process = globalThis.electron?.process
-                    switch (process && process.platform) {
-                        case 'linux': {
-                            // archlinux
-                            if (backend.release.toLowerCase().indexOf('arch') > 0) {
-                                let pacmanInfo =
-                                    await backend.call(undefined, 'sys:runCommand', true,
-                                        'pacman -Q stapxs-qq-lite-bin',
-                                    )
-                                if (pacmanInfo.success)
-                                    systemInfo.push(['Install Type', 'aur'])
-                                else if(backend.function && 'invoke' in backend.function){
-                                    // 也有可能是 stapxs-qq-lite，这是我自己打的原生包
-                                    pacmanInfo = await backend.function.invoke(
-                                            'sys:runCommand',
-                                            'pacman -Q stapxs-qq-lite',
-                                        )
-                                    if (pacmanInfo.success)
-                                        systemInfo.push(['Install Type', 'pacman'])
-                                }
-                            }
-                            break
-                        }
-                    }
-                }
-                info += 'System Info:\n'
-                info += this.createVersionInfo(systemInfo)
-
-                const applicationInfo = [
-                    ['Uptime', Math.floor(((Date.now() - uptime) / 1000) * 100) / 100 + ' s'],
-                    ['Package Version', getVersion()],
-                    ['Service Work', runtimeData.tags.sw],
-                ] as [key: string, value: any][]
-
-                info += 'Application Info:\n'
-                info += this.createVersionInfo(applicationInfo)
-
-                const adapeterInfo = [
-                    ['status', !runtimeData.nowAdapter || driver.isConnected() ? 'connected' : 'not connected'],
-                ] as [key: string, value: any][]
-
-                if (!runtimeData.nowAdapter)
-                    adapeterInfo.push(['info', 'Not connected'])
-                else {
-                    const data = await runtimeData.nowAdapter.getAdapterInfo()
-                    if (!data)
-                        adapeterInfo.push(['info', 'Get info failed'])
-                    else {
-                        for (const key in data) {
-                            adapeterInfo.push([key, data[key]])
-                        }
-                    }
-                }
-                info += 'Adapter Info:\n'
-                info += this.createVersionInfo(adapeterInfo)
-
-                const viewInfo = [
-                    ['Doc Width', document.getElementById('app')?.offsetWidth + ' px'],
-                ] as [key: string, value: any][]
-
-                // capactior：索要 safeArea
-                if (backend.isMobile()) {
-                    const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
-                    if (safeArea) {
-                        // 按照前端习惯，这儿的 safeArea 顺序是 top, right, bottom, left
-                        const safeAreaStr = safeArea.top + ', ' + safeArea.right + ', ' + safeArea.bottom + ', ' + safeArea.left
-                        viewInfo.push(['Safe Area', safeAreaStr])
-                    }
-                }
-                info += 'View Info:\n'
-                info += this.createVersionInfo(viewInfo)
-
-                const networkInfo = [] as [key: string, value: any][]
-                const testList = [
-                    ['Github          ', 'https://api.github.com'],
-                    ['Link API        ', 'https://api.stapxs.cn'],
-                ]
-                for (const item of testList) {
-                    const start = Date.now()
-                    try {
-                        await fetch(item[1], { method: 'GET' })
-                        const end = Date.now()
-                        networkInfo.push([item[0], end - start + ' ms'])
-                    } catch (e) {
-                        networkInfo.push([item[0], 'failed'])
-                    }
-                }
-                info += 'Network Info:\n'
-                info += this.createVersionInfo(networkInfo)
-                info += '```'
-                // 构建 popBox 内容
-                htmlPopBox('<textarea class="debug-info">' + info + '</textarea>', {
-                    svg: 'screwdriver-wrench',
-                    title: this.$t('调试信息'),
-                    button: [
-                        {
-                            text: app.config.globalProperties.$t('复制'),
-                            noClose: true,
-                            fun: () => {
-                                copyToClipboard(info)
-                                    .then(
-                                        () => new PopInfo().add(PopType.INFO, this.$t('复制成功'))
-                                    ).catch(
-                                        () => new PopInfo().add(PopType.ERR, this.$t('复制失败'))
-                                    )
-                            },
-                        },
-                        {
-                            text: app.config.globalProperties.$t('确定'),
-                            master: true,
-                        },
-                    ],
-                })
+            {
+                text: app.config.globalProperties.$t('确定'),
+                master: true,
             },
-            printSetUpInfo() {
-                const json = JSON.stringify(OptionManager.rawConfigs)
-                htmlPopBox(
-                    '<textarea style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;">' +
-                        json +
-                        '</textarea>', {
-                    svg: 'upload',
-                    title: this.$t('导出设置项'),
-                    button: [
-                        {
-                            text: app.config.globalProperties.$t('复制'),
-                            noClose: true,
-                            fun: () => {
-                                copyToClipboard(json)
-                                    .then(
-                                        () => new PopInfo().add(PopType.INFO, this.$t('复制成功'))
-                                    ).catch(
-                                        () => new PopInfo().add(PopType.ERR, this.$t('复制失败'))
-                                    )
-                            },
-                        },
-                        {
-                            text: app.config.globalProperties.$t('确定'),
-                            master: true,
-                        },
-                    ],
-                })
-            },
-            importSetUpInfo() {
-                htmlPopBox(
-                    '<textarea id="importSetUpInfoTextArea" style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;"></textarea>',{
-                    svg: 'download',
-                    title: this.$t('导入设置项'),
-                    button: [
-                        {
-                            text: app.config.globalProperties.$t('取消'),
-                        },
-                        {
-                            text: app.config.globalProperties.$t('确定'),
-                            master: true,
-                            fun: async () => {
-                                const input = document.getElementById(
-                                    'importSetUpInfoTextArea',
-                                ) as HTMLTextAreaElement
-                                if (input) {
-                                    try {
-                                        await OptionManager.loadAllFromString(input.value)
-                                        location.reload()
-                                    } catch (e) {
-                                        new PopInfo().add(
-                                            PopType.ERR,
-                                            app.config.globalProperties.$t(
-                                                '导入设置项失败',
-                                            ),
-                                        )
-                                    }
-                                }
-                            },
-                        },
-                    ],
-                })
-            },
-            async resetApp() {
-                const ensure = await ensurePopBox(this.$t(
-                    '确认要重置应用吗，重置应用将会失去所有设置内容（包括设置的置顶群组），但是可能可以解决一些因为浏览器缓存导致的奇怪问题。',
-                ))
-
-                if (!ensure) return
-
-                localStorage.clear()
-                const cookies = document.cookie.split(';')
-                for (const cookie of cookies) {
-                    document.cookie = cookie.replace(/^ +/, '')
-                        .replace(/=.*/,'=;expires=' + new Date().toUTCString() + ';path=/')
-                }
-                backend.call(undefined, 'opt:clearAll', false)
-                location.reload()
-            },
-            restartapp() {
-                backend.call(undefined, 'win:relaunch', false)
-            },
-            // 查看配置文件
-            rmNeedlessOption() {
-                // const needless: string[] = []
-                // for (const key of Object.keys(runtimeData.sysConfig)) {
-                //     if (optDefault[key] === undefined) {
-                //         needless.push(key)
-                //     }
-                // }
-                // if (needless.length === 0) {
-                //     new PopInfo().add(
-                //         PopType.INFO,
-                //         this.$t('没有需要删除的配置项'),
-                //     )
-                //     return
-                // }
-                // htmlPopBox(`
-                //         <header>以下配置将被删除</header>
-                //         <div style="color: var(--color-red);font-weight: 700;">
-                //     ` + needless.join('<br>') + '</div>', {
-                //     title: this.$t('删除无用配置'),
-                //     button: [
-                //         {
-                //             text: this.$t('取消'),
-                //             master: true,
-                //         },
-                //         {
-                //             text: this.$t('确定'),
-                //             fun: async () => {
-                //                 // TODO 删除配置
-                //             },
-                //         },
-                //     ],
-                // })
-            },
-            createVersionInfo(data: [key: string, value: any][]) {
-                let info = ''
-                for (const [ key, value ] of data) {
-                    info += `    ${key.padEnd(20)}-> ${value}\n`
-                }
-                return info
-            },
-            async forceWinState() {
-                switch (this.winState) {
-                    case 'none':
-                        win._forceTilingState.value = undefined
-                        break
-                    case 'tiling':
-                        win._forceTilingState.value = true
-                        break
-                    case 'win':
-                        win._forceTilingState.value = false
-                        break
-                }
-            },
-            openWelcomeWindow() {
-                popBox({
-                    template: WelPan,
-                    allowAutoClose: false,
-                })
-            },
-        },
+        ],
     })
+}
+
+function printSetUpInfo() {
+    const json = JSON.stringify(OptionManager.rawConfigs)
+    htmlPopBox(
+        '<textarea style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;">' +
+            json +
+            '</textarea>', {
+        svg: 'upload',
+        title: $t('导出设置项'),
+        button: [
+            {
+                text: app.config.globalProperties.$t('复制'),
+                noClose: true,
+                fun: () => {
+                    copyToClipboard(json)
+                        .then(
+                            () => new PopInfo().add(PopType.INFO, $t('复制成功'))
+                        ).catch(
+                            () => new PopInfo().add(PopType.ERR, $t('复制失败'))
+                        )
+                },
+            },
+            {
+                text: app.config.globalProperties.$t('确定'),
+                master: true,
+            },
+        ],
+    })
+}
+
+function importSetUpInfo() {
+    htmlPopBox(
+        '<textarea id="importSetUpInfoTextArea" style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;"></textarea>',{
+        svg: 'download',
+        title: $t('导入设置项'),
+        button: [
+            {
+                text: app.config.globalProperties.$t('取消'),
+            },
+            {
+                text: app.config.globalProperties.$t('确定'),
+                master: true,
+                fun: async () => {
+                    const input = document.getElementById(
+                        'importSetUpInfoTextArea',
+                    ) as HTMLTextAreaElement
+                    if (input) {
+                        try {
+                            await OptionManager.loadAllFromString(input.value)
+                            location.reload()
+                        } catch (e) {
+                            new PopInfo().add(
+                                PopType.ERR,
+                                app.config.globalProperties.$t(
+                                    '导入设置项失败',
+                                ),
+                            )
+                        }
+                    }
+                },
+            },
+        ],
+    })
+}
+
+async function resetApp() {
+    const ensure = await ensurePopBox($t(
+        '确认要重置应用吗，重置应用将会失去所有设置内容（包括设置的置顶群组），但是可能可以解决一些因为浏览器缓存导致的奇怪问题。',
+    ))
+
+    if (!ensure) return
+
+    localStorage.clear()
+    const cookies = document.cookie.split(';')
+    for (const cookie of cookies) {
+        document.cookie = cookie.replace(/^ +/, '')
+            .replace(/=.*/,'=;expires=' + new Date().toUTCString() + ';path=/')
+    }
+    backend.call(undefined, 'opt:clearAll', false)
+    location.reload()
+}
+
+function restartapp() {
+    backend.call(undefined, 'win:relaunch', false)
+}
+
+// 查看配置文件
+function rmNeedlessOption() {
+    // const needless: string[] = []
+    // for (const key of Object.keys(runtimeData.sysConfig)) {
+    //     if (optDefault[key] === undefined) {
+    //         needless.push(key)
+    //     }
+    // }
+    // if (needless.length === 0) {
+    //     new PopInfo().add(
+    //         PopType.INFO,
+    //         $t('没有需要删除的配置项'),
+    //     )
+    //     return
+    // }
+    // htmlPopBox(`
+    //         <header>以下配置将被删除</header>
+    //         <div style="color: var(--color-red);font-weight: 700;">
+    //     ` + needless.join('<br>') + '</div>', {
+    //     title: $t('删除无用配置'),
+    //     button: [
+    //         {
+    //             text: $t('取消'),
+    //             master: true,
+    //         },
+    //         {
+    //             text: $t('确定'),
+    //             fun: async () => {
+    //                 // TODO 删除配置
+    //             },
+    //         },
+    //     ],
+    // })
+}
+function createVersionInfo(data: [key: string, value: any][]) {
+    let info = ''
+    for (const [ key, value ] of data) {
+        info += `    ${key.padEnd(20)}-> ${value}\n`
+    }
+    return info
+}
+
+async function forceWinState() {
+    switch (winState.value) {
+        case 'none':
+            win._forceTilingState.value = undefined
+            break
+        case 'tiling':
+            win._forceTilingState.value = true
+            break
+        case 'win':
+            win._forceTilingState.value = false
+            break
+    }
+}
+
+function openWelcomeWindow() {
+    popBox({
+        template: WelPan,
+        allowAutoClose: false,
+    })
+}
 </script>

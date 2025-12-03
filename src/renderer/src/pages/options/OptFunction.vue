@@ -264,42 +264,30 @@
 <script setup lang="ts">
 import Switch from '@renderer/components/Switch.vue'
 import OptionManager from '@renderer/function/option/option'
-</script>
-
-<script lang="ts">
 import { runtimeData } from '@renderer/function/msg'
 import { popBox } from '@renderer/function/utils/popBox'
 import UmamiInfoPan from '@renderer/popboxes/UmamiInfoPan.vue'
 import { backend } from '@renderer/runtime/backend'
-import { defineComponent } from 'vue'
+import { shallowRef } from 'vue'
 
-    export default defineComponent({
-        name: 'ViewOptFunction',
-        data() {
-            return {
-                runtimeData: runtimeData,
-                ndt: 0,
-                ndv: false,
-                backend,
-            }
-        },
-        methods: {
-            showUmamiInfo() {
-                popBox({
-                    template: UmamiInfoPan,
-                    full: true,
-                })
-            },
+const ndt = shallowRef(0)
+const ndv = shallowRef(false)
 
-            msgND: function () {
-                this.ndt++
-                setTimeout(() => {
-                    this.ndv = false
-                }, 500)
-            },
-        },
+function showUmamiInfo() {
+    popBox({
+        template: UmamiInfoPan,
+        full: true,
     })
+}
+
+function msgND() {
+    ndt.value++
+    setTimeout(() => {
+        ndv.value = false
+    }, 500)
+}
 </script>
+
 <style>
     .ss-switch input:checked ~ div {
         background: var(--color-main) !important;

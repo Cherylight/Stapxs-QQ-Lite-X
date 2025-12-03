@@ -68,7 +68,7 @@
                         <span>{{ $t('换个心情 🎵 ~') }}</span>
                     </div>
                     <div class="theme-color-col">
-                        <label v-for="(name, index) in colors" :key="'color_id_' + index"
+                        <label v-for="(name, index) in COLOR_NAMES" :key="'color_id_' + index"
                             :title="name" class="ss-radio">
                             <input type="radio" name="theme_color" :data-id="index"
                                 :checked="runtimeData.sysConfig.theme_color == index"
@@ -349,11 +349,32 @@
 
 <script setup lang="ts">
 import Switch from '@renderer/components/Switch.vue'
-import OptionManager from '@renderer/function/option/option'
-import { defineComponent, toRaw, shallowRef } from 'vue'
 import DarkModeSwitch from '@renderer/components/DarkModeSwitch.vue'
 
+import OptionManager from '@renderer/function/option/option'
+import { toRaw, shallowRef, watchEffect } from 'vue'
+import { getDeviceType } from '@renderer/function/utils/systemUtil'
+import { BrowserInfo, detect } from 'detect-browser'
+import { runtimeData } from '../../function/msg'
+
+import { sendIdentifyData } from '@renderer/function/utils/appUtil'
+import { closePopBox, ensurePopBox, textPopBox } from '@renderer/function/utils/popBox'
+import { backend } from '@renderer/runtime/backend'
+import languages from '../../assets/l10n/_l10nconfig.json'
+import app from '@renderer/main'
+import win from '@renderer/runtime/win'
+
+const COLOR_NAMES = [
+    '林槐蓝',
+    '墨竹青',
+    '少女粉',
+    '微软紫',   // 小林认为微软是紫色的，它就是紫色的
+    '坏猫黄',
+    '玄素黑',
+]
+const browser = detect() as BrowserInfo
 const isVibrancy = shallowRef(runtimeData.sysConfig.vibrancy)
+
 
 const { $t } = app.config.globalProperties
 
@@ -374,162 +395,125 @@ async function changeVibrancy(){
         sendIdentifyData({ use_transparent: true })
     }
 }
-</script>
 
-<script lang="ts">
-import { getDeviceType } from '@renderer/function/utils/systemUtil'
-import { BrowserInfo, detect } from 'detect-browser'
-import { runtimeData } from '../../function/msg'
-
-import { sendIdentifyData } from '@renderer/function/utils/appUtil'
-import { closePopBox, ensurePopBox, textPopBox } from '@renderer/function/utils/popBox'
-import { backend } from '@renderer/runtime/backend'
-import languages from '../../assets/l10n/_l10nconfig.json'
-import app from '@renderer/main'
-import win from '@renderer/runtime/win'
-    export default defineComponent({
-        name: 'ViewOptTheme',
-        data() {
-            return {
-                backend: backend,
-                runtimeData: runtimeData,
-                languages: languages,
-                // 别问我为什么微软是紫色的
-                colors: [
-                    '林槐蓝',
-                    '墨竹青',
-                    '少女粉',
-                    '微软紫',
-                    '坏猫黄',
-                    '玄素黑',
-                ],
-                browser: detect() as BrowserInfo,
-                initialScaleShow: 0.5,
-                fsAdaptationShow: 0,
-                usedIcon: ''
-            }
-        },
-        mounted() {
-            // 一次性初始化一次缩放级别
-            const watch = this.$watch(
-                () => runtimeData.sysConfig,
-                () => {
-                    this.initialScaleShow = toRaw(
-                        runtimeData.sysConfig.initial_scale,
-                    )
-                    this.fsAdaptationShow = toRaw(
-                        runtimeData.sysConfig.fs_adaptation,
-                    )
-                    watch()
-                },
-            )
-            // 获取当前使用的图标
-            const Onebot = window.Capacitor?.Plugins?.Onebot
-            if (Onebot) {
-                Onebot.addListener('onebot:icon', (data: any) => {
-                    this.usedIcon = data.name.replace('AppIcon', '')
-                })
-                Onebot.getUsedIcon()
-            }
-        },
-        methods: {
-            scaleSave() {
-                // eslint-disable-next-line prefer-const
-                let makeSureBoxId: string
-                // 5 秒后自动取消防止误操作导致无法恢复
-                const timerId = setTimeout(() => {
-                    runtimeData.sysConfig.initial_scale = 0.85
-                    this.initialScaleShow = 0.85
-                    closePopBox(makeSureBoxId)
-
-                    textPopBox(this.$t('缩放比例调整已取消，已恢复默认缩放比例。'), {
-                        svg: 'up-down-left-right',
-                        title: this.$t('确认缩放比例'),
-                        button: [
-                            {
-                                text: this.$t('取消'),
-                                master: true,
-                            }
-                        ],
-                    })
-                }, 5000)
-                // 保存提醒
-                makeSureBoxId = textPopBox(this.$t('点击确认以应用缩放比例，预览将在 5 秒后取消……'), {
-                    svg: 'up-down-left-right',
-                    title: this.$t('确认缩放比例'),
-                    button: [
-                        {
-                            text: this.$t('确定'),
-                            fun: () => {
-                                clearTimeout(timerId)
-                            },
-                        }
-                    ],
-                })
-            },
-
-            setInitialScaleShow(event: Event) {
-                const sender = event.target as HTMLInputElement
-                this.initialScaleShow = Number(sender.value)
-            },
-            setFsAdaptationShow(event: Event) {
-                const sender = event.target as HTMLInputElement
-                this.fsAdaptationShow = Number(sender.value)
-            },
-
-            restartapp() {
-                backend.call(undefined, 'win:relaunch', false)
-            },
-
-            isMobile() {
-                return (
-                    getDeviceType() === 'Android' || getDeviceType() === 'iOS'
-                )
-            },
-
-            getIconList() {
-                const iconList = import.meta.glob('@renderer/assets/img/icons/*.png', { eager: true })
-                const iconListInfo = [] as { name: string, icon: any }[]
-                Object.keys(iconList).forEach((key: string) => {
-                    const name = key.split('/').pop()?.split('.')[0].replace('AppIcon', '')
-                    if(name || name === '') {
-                        if(!win.darkMode && !name.endsWith('Dark')) {
-                            iconListInfo.push({ name: name, icon: (iconList[key] as any).default })
-                        } else if(win.darkMode && name.endsWith('Dark')) {
-                            iconListInfo.push({ name: name.replace('Dark', ''), icon: (iconList[key] as any).default })
-                        }
-                    }
-                })
-                return iconListInfo
-            },
-
-            changeIcon(name: string) {
-                backend.call('Onebot', 'changeIcon', false, { name: name != '' ? (name + 'AppIcon') : name })
-                this.usedIcon = name
-            },
-
-            /**
-             * 设置背景图片
-             */
-            setBackground(event: Event) {
-                const sender = event.target as HTMLInputElement
-                const img = sender.files?.[0]
-                if (!img) return
-                img.arrayBuffer().then((buffer) => {
-                    const base64String = btoa(
-                        new Uint8Array(buffer)
-                            .reduce((data, byte) => data + String.fromCharCode(byte), ''),
-                    )
-                    const imgSrc = `data:${img.type};base64,${base64String}`
-                    runtimeData.sysConfig.background_img = imgSrc
-                })
-            },
-            /**
-             * 移除背景图片
-             */
-            removeBackground() {
-                runtimeData.sysConfig.background_img = ''
-            },
-        },
+//#region == 背景图片 =============================================================
+/**
+ * 设置背景图片
+ */
+function setBackground(event: Event) {
+    const sender = event.target as HTMLInputElement
+    const img = sender.files?.[0]
+    if (!img) return
+    img.arrayBuffer().then((buffer) => {
+        const base64String = btoa(
+            new Uint8Array(buffer)
+                .reduce((data, byte) => data + String.fromCodePoint(byte), ''),
+        )
+        const imgSrc = `data:${img.type};base64,${base64String}`
+        runtimeData.sysConfig.background_img = imgSrc
     })
+}
+/**
+ * 移除背景图片
+ */
+function removeBackground() {
+    runtimeData.sysConfig.background_img = ''
+}
+//#endregion
+
+//#region == 手机相关 =============================================================
+
+const initialScaleShow = shallowRef<number>(0.5)
+const fsAdaptationShow = shallowRef<number>(0)
+const usedIcon = shallowRef<string>('')
+// 一次性初始化一次缩放级别
+watchEffect(()=>{
+    initialScaleShow.value = toRaw(
+        runtimeData.sysConfig.initial_scale,
+    )
+    fsAdaptationShow.value = toRaw(
+        runtimeData.sysConfig.fs_adaptation,
+    )
+})
+// 获取当前使用的图标
+const Onebot = window.Capacitor?.Plugins?.Onebot
+if (Onebot) {
+    Onebot.addListener('onebot:icon', (data: any) => {
+        usedIcon.value = data.name.replace('AppIcon', '')
+    })
+    Onebot.getUsedIcon()
+}
+
+function scaleSave() {
+    // eslint-disable-next-line prefer-const
+    let makeSureBoxId: string
+    // 5 秒后自动取消防止误操作导致无法恢复
+    const timerId = setTimeout(() => {
+        runtimeData.sysConfig.initial_scale = 0.85
+        initialScaleShow.value = 0.85
+        closePopBox(makeSureBoxId)
+
+        textPopBox($t('缩放比例调整已取消，已恢复默认缩放比例。'), {
+            svg: 'up-down-left-right',
+            title: $t('确认缩放比例'),
+            button: [
+                {
+                    text: $t('取消'),
+                    master: true,
+                }
+            ],
+        })
+    }, 5000)
+    // 保存提醒
+    makeSureBoxId = textPopBox($t('点击确认以应用缩放比例，预览将在 5 秒后取消……'), {
+        svg: 'up-down-left-right',
+        title: $t('确认缩放比例'),
+        button: [
+            {
+                text: $t('确定'),
+                fun: () => {
+                    clearTimeout(timerId)
+                },
+            }
+        ],
+    })
+}
+
+function setInitialScaleShow(event: Event) {
+    const sender = event.target as HTMLInputElement
+    initialScaleShow.value = +sender.value
+}
+
+function setFsAdaptationShow(event: Event) {
+    const sender = event.target as HTMLInputElement
+    fsAdaptationShow.value = +sender.value
+}
+
+function isMobile() {
+    return (
+        getDeviceType() === 'Android' || getDeviceType() === 'iOS'
+    )
+}
+
+function getIconList() {
+    const iconList = import.meta.glob('@renderer/assets/img/icons/*.png', { eager: true })
+    const iconListInfo = [] as { name: string, icon: any }[]
+    for (const key in iconList) {
+        const name = key.split('/').pop()?.split('.')[0].replace('AppIcon', '')
+        if(name || name === '') {
+            if(!win.darkMode && !name.endsWith('Dark')) {
+                iconListInfo.push({ name: name, icon: (iconList[key] as any).default })
+            } else if(win.darkMode && name.endsWith('Dark')) {
+                iconListInfo.push({ name: name.replace('Dark', ''), icon: (iconList[key] as any).default })
+            }
+        }
+    }
+    return iconListInfo
+}
+
+function changeIcon(name: string) {
+    backend.call('Onebot', 'changeIcon', false, { name: name != '' ? (name + 'AppIcon') : name })
+    usedIcon.value = name
+}
+//#endregion
 </script>
