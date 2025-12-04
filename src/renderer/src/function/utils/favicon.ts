@@ -26,7 +26,7 @@ export function refreshFavicon() {
 
 function main(num: number) {
     const width = num.toString().length * 150
-    const color = getComputedStyle(document.documentElement).getPropertyValue('--color-main').trim()
+    const color = getComputedStyle(document.body).getPropertyValue('--color-main').trim()
     // 对比缓存
     if (cacheInfo === `${num}-${color}`) return
     // 存储缓存信息

@@ -103,7 +103,7 @@ export const OptionInfos = {
             }
             sendIdentifyData({ use_theme_color: COLOR_NAMES[id] })
             // 避免 css 未加载完
-            setTimeout(refreshFavicon, 10)
+            setTimeout(refreshFavicon, 100)
         },
         onLoad: (id: number) => {
             OptionInfos.theme_color.onChange(id)
