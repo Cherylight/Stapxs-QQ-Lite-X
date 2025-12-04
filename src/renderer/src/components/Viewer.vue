@@ -188,7 +188,7 @@
 </template>
 
 <script setup lang="ts">
-import { PopInfo, PopType } from '@renderer/function/base'
+import { popInfo } from '@renderer/function/base'
 import { mousemoveMask } from '@renderer/function/input'
 import { Img } from '@renderer/function/model/img'
 import { runtimeData } from '@renderer/function/msg'
@@ -422,7 +422,7 @@ async function download() {
     if (runtimeData.tags.canCors) {
         const data = await getBlob()
         if (!data) {
-            new PopInfo().add(PopType.ERR, $t('下载失败'))
+            popInfo.error( $t('下载失败'))
             return
         }
         downloadFile(URL.createObjectURL(data), 'img.png', () => undefined, () => undefined)
@@ -507,7 +507,7 @@ function editUndo() {
 async function downloadCanvas() {
     const data = await getBlob()
     if (!data) {
-        new PopInfo().add(PopType.ERR, $t('下载失败'))
+        popInfo.error( $t('下载失败'))
         return
     }
     downloadFile(URL.createObjectURL(data), 'img.png', () => undefined, () => undefined)
@@ -1158,13 +1158,13 @@ function getImgCursorClassByTool(): string {
  */
 async function copyBlob(blob?: Blob) {
     if (!blob) {
-        new PopInfo().add(PopType.ERR, $t('复制失败'))
+        popInfo.error( $t('复制失败'))
         return
     }
     await copyToClipboard([
         new window.ClipboardItem({ 'image/png': blob })
     ])
-    new PopInfo().add(PopType.INFO, $t('复制成功'))
+    popInfo.info($t('复制成功'))
 }
 
 async function getBlob(): Promise<Blob|undefined> {

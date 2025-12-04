@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import { AdapterInterface } from '@renderer/function/adapter/interface'
-import { PopInfo, PopType } from '@renderer/function/base'
+import { popInfo } from '@renderer/function/base'
 import { User } from '@renderer/function/model/user'
 import { resetRuntime, runtimeData } from '@renderer/function/msg'
 import { openLoginPan } from '@renderer/function/utils/systemUtil'
@@ -145,17 +145,17 @@ function goLogin() {
 async function setNick(event: KeyboardEvent) {
     if (event.key === 'Enter' && selfNick.value !== '') {
         if (!runtimeData.nowAdapter?.setNickname) {
-            new PopInfo().add(PopType.ERR, $t('当前适配器不支持设置昵称'))
+            popInfo.error( $t('当前适配器不支持设置昵称'))
             return
         }
 
         const re = await runtimeData.nowAdapter?.setNickname(selfNick.value)
 
         if (re) {
-            new PopInfo().add(PopType.INFO, $t('检查更新结果ing'))
+            popInfo.info($t('检查更新结果ing'))
             await refreshSelfInfo()
         }else {
-            new PopInfo().add(PopType.ERR, $t('个性签名设置失败'))
+            popInfo.error( $t('个性签名设置失败'))
         }
     }
 }
@@ -167,35 +167,35 @@ async function setNick(event: KeyboardEvent) {
 async function setLNick(event: KeyboardEvent) {
     if (event.key === 'Enter' && selfSign.value !== '') {
         if (!runtimeData.nowAdapter?.setSign) {
-            new PopInfo().add(PopType.ERR, $t('当前适配器不支持设置个性签名'))
+            popInfo.error( $t('当前适配器不支持设置个性签名'))
             return
         }
         const re = await runtimeData.nowAdapter?.setSign(selfSign.value)
         if (re) {
-            new PopInfo().add(PopType.INFO, $t('检查更新结果ing'))
+            popInfo.info($t('检查更新结果ing'))
             await refreshSelfInfo()
         }else {
-            new PopInfo().add(PopType.ERR, $t('个性签名设置失败'))
+            popInfo.error( $t('个性签名设置失败'))
         }
     }
 }
 
 async function refreshSelfInfo() {
     if (!runtimeData.nowAdapter) {
-        new PopInfo().add(PopType.ERR, $t('连接中断...'))
+        popInfo.error( $t('连接中断...'))
         return
     }
     const selfInfo = await runtimeData.nowAdapter.getUserInfo(runtimeData.loginInfo.uin, false)
     if (!selfInfo) {
-        new PopInfo().add(PopType.ERR, $t('检查更新失败'))
+        popInfo.error( $t('检查更新失败'))
         return
     }
     if (selfInfo) {
         runtimeData.selfInfo = new User(selfInfo)
         runtimeData.loginInfo.nickname = selfInfo.nickname?.toString() ?? ''
-        new PopInfo().add(PopType.INFO, $t('设置成功'))
+        popInfo.info($t('设置成功'))
     }else {
-        new PopInfo().add(PopType.ERR, $t('设置失败'))
+        popInfo.error( $t('设置失败'))
     }
 }
 </script>

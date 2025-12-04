@@ -249,7 +249,7 @@ import BcTab from 'vue3-bcui/packages/bc-tab'
 import OptInfo from '@renderer/pages/options/OptInfo.vue'
 
 import { Role } from '@renderer/function/adapter/enmu'
-import { PopInfo, PopType } from '@renderer/function/base'
+import { popInfo } from '@renderer/function/base'
 import { Ann } from '@renderer/function/model/ann'
 import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
 import { Member, User } from '@renderer/function/model/user'
@@ -323,7 +323,7 @@ async function removeUser(mem: Member) {
     if (!ensure) return
 
     if (!runtimeData.nowAdapter?.kickMember) {
-        new PopInfo().add(PopType.INFO, $t('当前适配器不支持移除群成员'))
+        popInfo.info($t('当前适配器不支持移除群成员'))
         return
     }
 
@@ -333,12 +333,11 @@ async function removeUser(mem: Member) {
 }
 
 function copyText(text: string | number) {
-    const popInfo = new PopInfo()
     copyToClipboard(String(text))
         .then(
-            () => popInfo.add(PopType.INFO, $t('复制成功'))
+            () => popInfo.info($t('复制成功'))
         ).catch(
-            () => popInfo.add(PopType.ERR, $t('复制失败'))
+            () => popInfo.error($t('复制失败'))
         )
 }
 
@@ -352,7 +351,7 @@ async function banMember(mem: Member, banTime: number) {
         closeChatInfoPan()
 
         if (!runtimeData.nowAdapter?.banMember) {
-            new PopInfo().add(PopType.INFO, $t('当前适配器不支持禁言成员'))
+            popInfo.info($t('当前适配器不支持禁言成员'))
             return
         }
 
@@ -368,7 +367,7 @@ async function updateMemberCard(mem: Member, newValue: string) {
     closeChatInfoPan()
 
     if (!runtimeData.nowAdapter?.setMemberCard) {
-        new PopInfo().add(PopType.INFO, $t('当前适配器不支持修改群昵称'))
+        popInfo.info($t('当前适配器不支持修改群昵称'))
         return
     }
     await runtimeData.nowAdapter.setMemberCard(chat as GroupSession, mem, newValue)
@@ -386,7 +385,7 @@ async function updateMemberTitle(mem: Member, value: string) {
     closeChatInfoPan()
 
     if (!runtimeData.nowAdapter?.setMemberTitle) {
-        new PopInfo().add(PopType.INFO, $t('当前适配器不支持修改群头衔'))
+        popInfo.info($t('当前适配器不支持修改群头衔'))
         return
     }
     await runtimeData.nowAdapter.setMemberTitle(chat as GroupSession, mem, value)

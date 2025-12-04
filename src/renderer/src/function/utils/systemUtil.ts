@@ -4,7 +4,7 @@ import l10nConfig from '@renderer/assets/l10n/_l10nconfig.json'
 import { backend } from '@renderer/runtime/backend'
 import PO from 'pofile'
 import packageInfo from '../../../../../package.json'
-import { logger, PopInfo, PopType } from '../base'
+import { logger, popInfo } from '../base'
 import { DnsElem } from '../elements/information'
 import { popBox } from './popBox'
 import LoginPan from '@renderer/popboxes/LoginPan.vue'
@@ -516,7 +516,7 @@ export async function copyToClipboard(text: string)
 export async function copyToClipboard(content: ClipboardItem[])
 export async function copyToClipboard(content: ClipboardItem[] | string) {
     if (window.navigator.clipboard === undefined) {
-        new PopInfo().add(PopType.ERR, i18n.global.t('当前环境不支持剪贴板操作'))
+        popInfo.error( i18n.global.t('当前环境不支持剪贴板操作'))
         throw new Error('当前环境不支持剪贴板操作')
     }
     if (typeof content === 'string')

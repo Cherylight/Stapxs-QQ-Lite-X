@@ -169,22 +169,24 @@ export const logger = {
 
 // =============== 系统消息 ===============
 
-export enum PopType {
-    INFO = 'circle-info',
-    ERR = 'circle-exclamation',
+export type PopType = 'INFO' | 'ERR'
+
+const PopIconMap: Record<PopType, string> = {
+    INFO: 'circle-info',
+    ERR: 'circle-exclamation',
 }
 
-export class PopInfo {
+export const popInfo = {
     /**
      *
      * @param typeInfo 消息类型
      * @param args 消息内容
      * @param isAutoClose 是否自动关闭（默认为 true）
      */
-    add(icon: PopType, args: string, isAutoClose = true) {
+    add(type: PopType, args: string, isAutoClose = true) {
         const data: PopInfoElem = {
             id: popList.length,
-            svg: icon,
+            svg: PopIconMap[type],
             text: args,
             autoClose: isAutoClose,
         }
@@ -195,7 +197,15 @@ export class PopInfo {
                 this.remove(data.id)
             }, 5000)
         }
-    }
+    },
+
+    info(args: string, isAutoClose = true) {
+        this.add('INFO', args, isAutoClose)
+    },
+
+    error(args: string, isAutoClose = true) {
+        this.add('ERR', args, isAutoClose)
+    },
 
     /**
      * 移除一条消息
@@ -208,7 +218,7 @@ export class PopInfo {
         if (index !== -1) {
             popList.splice(index, 1)
         }
-    }
+    },
 
     /**
      * 清空所有消息

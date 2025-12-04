@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import FileBody from '@renderer/components/FileBody.vue'
 
-import { PopInfo, PopType } from '@renderer/function/base'
+import { popInfo } from '@renderer/function/base'
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
 import { GroupSession } from '@renderer/function/model/session'
 import { runtimeData } from '@renderer/function/msg'
@@ -90,7 +90,7 @@ async function addFile(): Promise<void> {
  */
 async function addFolder(): Promise<void> {
     if (!runtimeData.nowAdapter?.createFileFolder) {
-        new PopInfo().add(PopType.INFO, $t('当前适配器不支持新建文件夹'))
+        popInfo.info($t('当前适配器不支持新建文件夹'))
         return
     }
 

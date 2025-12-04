@@ -2,7 +2,7 @@ import { i18n } from '@renderer/main'
 import { GroupSession, UserSession } from '../model/session'
 import { Msg } from '../model/msg'
 import { runtimeData } from '../msg'
-import { PopInfo, PopType } from '../base'
+import { popInfo } from '../base'
 import { closePopBox, noticePopBox, textPopBox } from './popBox'
 import { TimeoutSet } from '../model/data'
 import { GroupFileFolder } from '../model/file'
@@ -21,16 +21,16 @@ export class FileSender {
 
         // 检测
         if (!runtimeData.nowAdapter?.getHistoryMsg) {
-            new PopInfo().add(PopType.ERR, $t('当前适配器不支持发送文件！'))
+            popInfo.error( $t('当前适配器不支持发送文件！'))
             return
         }
 
         if (target.type === 'group' && !runtimeData.nowAdapter?.sendGroupFile) {
-            new PopInfo().add(PopType.ERR, $t('当前适配器不支持发送群文件！'))
+            popInfo.error( $t('当前适配器不支持发送群文件！'))
             return
         }
         if (target.type === 'user' && !runtimeData.nowAdapter?.sendPrivateFile) {
-            new PopInfo().add(PopType.ERR, $t('当前适配器不支持发送私聊文件！'))
+            popInfo.error( $t('当前适配器不支持发送私聊文件！'))
             return
         }
 

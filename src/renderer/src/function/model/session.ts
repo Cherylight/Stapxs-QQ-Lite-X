@@ -18,7 +18,7 @@ import {
 } from 'vue'
 import { Role } from '../adapter/enmu'
 import { SessionData } from '../adapter/interface'
-import { logger, PopInfo, PopType } from '../base'
+import { logger, popInfo } from '../base'
 import { runtimeData } from '../msg'
 import { Notify } from '../notify'
 import { queueWait } from '../utils/systemUtil'
@@ -389,8 +389,7 @@ export abstract class Session {
             await this.runHook('afterLoadHistoryHook', 'fail', [])
             logger.error(e as Error, '加载历史消息失败')
             this.lastLoadFailFlag.value = true
-            new PopInfo().add(
-                PopType.ERR,
+            popInfo.error(
                 app.config.globalProperties.$t('获取历史记录失败'),
             )
             this.loadHistoryLock.value = undefined
@@ -900,8 +899,7 @@ export class GroupSession extends Session {
         await this.activate()
 
         if (!runtimeData.nowAdapter?.getGroupAnnouncement) {
-            new PopInfo().add(
-                PopType.ERR,
+            popInfo.error(
                 app.config.globalProperties.$t('当前适配器不支持获取群公告'),
             )
             this.annsLoaded = true
@@ -911,8 +909,7 @@ export class GroupSession extends Session {
 
         const data = await runtimeData.nowAdapter.getGroupAnnouncement(this)
         if (!data) {
-            new PopInfo().add(
-                PopType.ERR,
+            popInfo.error(
                 app.config.globalProperties.$t('获取群公告失败'),
             )
             this.annsLoaded = true
@@ -959,8 +956,7 @@ export class GroupSession extends Session {
         await this.activate()
 
         if (!runtimeData.nowAdapter?.getGroupFile) {
-            new PopInfo().add(
-                PopType.ERR,
+            popInfo.error(
                 app.config.globalProperties.$t('当前适配器不支持获取群文件'),
             )
             this.filesLoaded = true
@@ -970,8 +966,7 @@ export class GroupSession extends Session {
 
         const data = await runtimeData.nowAdapter?.getGroupFile(this)
         if (!data) {
-            new PopInfo().add(
-                PopType.ERR,
+            popInfo.error(
                 app.config.globalProperties.$t('获取群文件失败'),
             )
             this.filesLoaded = true
@@ -1023,8 +1018,7 @@ export class GroupSession extends Session {
         await this.activate()
 
         if (!runtimeData.nowAdapter?.getGroupEssence){
-            new PopInfo().add(
-                PopType.ERR,
+            popInfo.error(
                 app.config.globalProperties.$t('当前适配器不支持获取群精华消息'),
             )
             this.essenceMsgLoaded = true
@@ -1034,8 +1028,7 @@ export class GroupSession extends Session {
 
         const data = await runtimeData.nowAdapter.getGroupEssence(this)
         if (!data) {
-            new PopInfo().add(
-                PopType.ERR,
+            popInfo.error(
                 app.config.globalProperties.$t('获取群精华消息失败'),
             )
             this.essenceMsgLoaded = true
@@ -1149,8 +1142,7 @@ export class UserSession extends Session {
         if (useCache && this.userCache) return this.userCache
         const data = await runtimeData.nowAdapter?.getUserInfo(this.id, useCache)
         if (!data) {
-            new PopInfo().add(
-                PopType.ERR,
+            popInfo.error(
                 app.config.globalProperties.$t('获取用户信息失败'),
             )
             return

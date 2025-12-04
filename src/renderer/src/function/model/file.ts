@@ -9,7 +9,7 @@
 import app from '@renderer/main'
 import { shallowRef, ShallowRef } from 'vue'
 import { GroupFileData, GroupFolderData } from '../adapter/interface'
-import { PopInfo, PopType } from '../base'
+import { popInfo } from '../base'
 import { runtimeData } from '../msg'
 import { downloadFile } from '../utils/appUtil'
 import { getSizeFromBytes } from '../utils/systemUtil'
@@ -97,7 +97,7 @@ export class GroupFile {
         const data = await runtimeData.nowAdapter.getGroupFileUrl!(this)
 
         if (!data) {
-            new PopInfo().add(PopType.ERR, $t('获取下载连接失败'))
+            popInfo.error( $t('获取下载连接失败'))
             return false
         }
 
@@ -166,7 +166,7 @@ export class GroupFileFolder {
 
         const data = await runtimeData.nowAdapter.getGroupFolderFile!(this.group, this.id)
         if (!data) {
-            new PopInfo().add(PopType.ERR, $t('获取文件夹内容失败'))
+            popInfo.error( $t('获取文件夹内容失败'))
             return false
         }
 

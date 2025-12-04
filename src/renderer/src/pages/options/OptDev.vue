@@ -251,7 +251,7 @@
 <script setup lang="ts">
 import Switch from '@renderer/components/Switch.vue'
 import OptionManager from '@renderer/function/option/option'
-import { PopInfo, PopType } from '@renderer/function/base'
+import { popInfo } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import { BrowserInfo, detect } from 'detect-browser'
 import app, { uptime } from '@renderer/main'
@@ -279,16 +279,13 @@ const illegalProxyUrl = computed(() => {
 
 function sendTestAppmsg(event: KeyboardEvent) {
     if (event.key === 'Enter' && appmsg_text.value !== '') {
-        new PopInfo().add(PopType.INFO, appmsg_text.value, false)
+        popInfo.info(appmsg_text.value, false)
         appmsg_text.value = ''
     }
 }
 
 function sendAbab() {
-    new PopInfo().add(
-        PopType.INFO,
-        app.config.globalProperties.$t('你不是人（逃'),
-    )
+    popInfo.info(app.config.globalProperties.$t('你不是人（逃'))
 }
 
 function printRuntime() {
@@ -324,10 +321,7 @@ function printRuntime() {
 }
 
 async function printVersionInfo() {
-    new PopInfo().add(
-        PopType.INFO,
-        app.config.globalProperties.$t('正在收集调试消息……'),
-    )
+    popInfo.info(app.config.globalProperties.$t('正在收集调试消息……'))
 
     // 索要框架信息
     const addInfo = await backend.call('Onebot', 'opt:getSystemInfo', true)
@@ -455,9 +449,9 @@ async function printVersionInfo() {
                 fun: () => {
                     copyToClipboard(info)
                         .then(
-                            () => new PopInfo().add(PopType.INFO, $t('复制成功'))
+                            () => popInfo.info($t('复制成功'))
                         ).catch(
-                            () => new PopInfo().add(PopType.ERR, $t('复制失败'))
+                            () => popInfo.error( $t('复制失败'))
                         )
                 },
             },
@@ -484,9 +478,9 @@ function printSetUpInfo() {
                 fun: () => {
                     copyToClipboard(json)
                         .then(
-                            () => new PopInfo().add(PopType.INFO, $t('复制成功'))
+                            () => popInfo.info($t('复制成功'))
                         ).catch(
-                            () => new PopInfo().add(PopType.ERR, $t('复制失败'))
+                            () => popInfo.error( $t('复制失败'))
                         )
                 },
             },
@@ -519,8 +513,7 @@ function importSetUpInfo() {
                             await OptionManager.loadAllFromString(input.value)
                             location.reload()
                         } catch (e) {
-                            new PopInfo().add(
-                                PopType.ERR,
+                            popInfo.error(
                                 app.config.globalProperties.$t(
                                     '导入设置项失败',
                                 ),

@@ -46,7 +46,7 @@
                         <div v-if="isMultiselectMode" class="select-tag">
                             <div v-if="msgBarEl!.multiCanForward()">
                                 <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-xmark']" @click="
-                                    new PopInfo().add(PopType.ERR, msgBarEl!.multiCanForward());
+                                    popInfo.error( msgBarEl!.multiCanForward());
                                 " />
                                 <span>{{ $t('合并转发') }}</span>
                             </div>
@@ -56,7 +56,7 @@
                             </div>
                             <div v-if="msgBarEl!.multiCanForward()">
                                 <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-xmark']" @click="
-                                    new PopInfo().add(PopType.ERR, msgBarEl!.multiCanForward());
+                                    popInfo.error( msgBarEl!.multiCanForward());
                                 " />
                                 <span>{{ $t('逐条转发') }}</span>
                             </div>
@@ -110,7 +110,7 @@
 import Menu from './Menu.vue'
 import MsgBar from './MsgBar.vue'
 
-import { logger, PopInfo, PopType } from '@renderer/function/base'
+import { logger, popInfo } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { Message } from '@renderer/function/model/message'
 import { Msg } from '@renderer/function/model/msg'
@@ -286,12 +286,11 @@ function copyMsg() {
     const msg = menuDisplay.selectMsg
     if (!msg) return
 
-    const popInfo = new PopInfo()
     copyToClipboard(msg.plaintext())
         .then(
-            () => popInfo.add(PopType.INFO, $t('复制成功'))
+            () => popInfo.info($t('复制成功'))
         ).catch(
-            () => popInfo.add(PopType.ERR, $t('复制失败'))
+            () => popInfo.error($t('复制失败'))
         )
 
     closeMsgMenu()
@@ -374,12 +373,11 @@ function copyMsgs() {
 
     })
     msg = msg.trim()
-    const popInfo = new PopInfo()
     copyToClipboard(msg)
         .then(
-            () => popInfo.add(PopType.INFO, $t('复制成功'))
+            () => popInfo.info($t('复制成功'))
         ).catch(
-            () => popInfo.add(PopType.ERR, $t('复制失败'))
+            () => popInfo.error($t('复制失败'))
         )
 }
 function closeMultiselect() {

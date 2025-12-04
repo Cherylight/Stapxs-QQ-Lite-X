@@ -440,7 +440,7 @@ import CardMessage from './msg-component/CardMessage.vue'
 import { UserInfoPan } from './UserInfoPan.vue'
 
 import { Role } from '@renderer/function/adapter/enmu'
-import { logger, PopInfo, PopType } from '@renderer/function/base'
+import { logger } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import Emoji from '@renderer/function/model/emoji'
 import { Img } from '@renderer/function/model/img'
@@ -657,7 +657,7 @@ defineExpose({
                 if (!this.data.session) return
                 const msg = this.data.session.getMsgById(message_id)
                 if (!msg) {
-                    new PopInfo().add(PopType.INFO, this.$t('定位消息失败'))
+                    popInfo.info(this.$t('定位消息失败'))
                     return
                 }
                 scrollToMsgFunc(msg, true)
@@ -1156,7 +1156,7 @@ defineExpose({
             },
             openMerge(seg: ForwardSeg){
                 if (!seg.id) {
-                    new PopInfo().add(PopType.ERR, this.$t('请先等发送完成...'))
+                    popInfo.error( this.$t('请先等发送完成...'))
                     return
                 }
                 runtimeData.mergeMsgStack.push(seg)

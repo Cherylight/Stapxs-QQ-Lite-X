@@ -4,7 +4,7 @@ import {
     markRaw,
 } from 'vue'
 import { AdapterInterface } from './adapter/interface'
-import { logger, PopInfo, PopType } from './base'
+import { logger, popInfo } from './base'
 import { URL } from './model/data'
 import { User } from './model/user'
 import { resetRuntime, runtimeData } from './msg'
@@ -14,8 +14,6 @@ const SSL_WHITE_LIST = new Set<string>([
     'localhost',
     '127.0.0.1'
 ])
-
-const popInfo = new PopInfo()
 
 function $t(key: string): string {
     return app.config.globalProperties.$t(key)
@@ -124,7 +122,7 @@ export async function login(originUrl: string, token: string): Promise<boolean> 
     if (re === true) return re
 
     // 登陆失败的垃圾回收
-    new PopInfo().add(PopType.ERR, $t('登录失败: ') + re)
+    popInfo.error( $t('登录失败: ') + re)
     runtimeData.connectInfo.address = undefined
     runtimeData.connectInfo.token = undefined
     runtimeData.nowAdapter?.close()
@@ -156,7 +154,7 @@ async function preCheck(
     if (!protocol) return $t('连接地址格式错误，请参考如何连接')
     if (!url) return $t('连接地址格式错误，请参考如何连接')
     if (protocol === 'ws') {
-        popInfo.add(PopType.INFO, $t('协议仅支持ob/mk,详情请看如何连接.ws默认按ob处理'))
+        popInfo.info($t('协议仅支持ob/mk,详情请看如何连接.ws默认按ob处理'))
         protocol = 'ob'
     }
 

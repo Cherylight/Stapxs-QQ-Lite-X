@@ -37,7 +37,7 @@
 import MsgBar from '@renderer/components/MsgBar.vue'
 import TinySessionBody from '@renderer/components/TinySessionBody.vue'
 
-import { logger, PopInfo, PopType } from '@renderer/function/base'
+import { logger, popInfo } from '@renderer/function/base'
 import { Msg, SelfMsg, SelfPreMsg } from '@renderer/function/model/msg'
 import { Session } from '@renderer/function/model/session'
 import { runtimeData } from '@renderer/function/msg'
@@ -149,10 +149,10 @@ async function runForward(){
                         whileSendMsg = await createMergeSendMsg(msgs)
                     }
                     sendMsg(whileSendMsg)
-                    new PopInfo().add(PopType.INFO, $t('转发成功'))
+                    popInfo.info($t('转发成功'))
                 } catch (e) {
                     logger.error(e as Error, '转发失败')
-                    new PopInfo().add(PopType.ERR, $t('转发失败'))
+                    popInfo.error( $t('转发失败'))
                 }
             },
         },],

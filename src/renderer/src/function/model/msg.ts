@@ -13,7 +13,7 @@ import {
     shallowRef
 } from 'vue'
 import type { EssenceData, ForwardNodeData, MsgData, SegData, SenderData } from '../adapter/interface'
-import { PopInfo, PopType } from '../base'
+import { popInfo } from '../base'
 import { runtimeData } from '../msg'
 import { delay } from '../utils/systemUtil'
 import { Time, TimeoutSet } from './data'
@@ -311,7 +311,7 @@ export class SelfMsg extends Msg {
         if (!msgId) {
             SelfMsg.lock--
             this.state = 'failed'
-            new PopInfo().add(PopType.ERR, '发送消息失败')
+            popInfo.error( '发送消息失败')
             return false
         }
         this.message_id = msgId
@@ -338,7 +338,7 @@ export class SelfMsg extends Msg {
         }
 
         if (!msg) {
-            new PopInfo().add(PopType.ERR, '更新消息失败...')
+            popInfo.error( '更新消息失败...')
             // 不知道自己组装的消息和tx的消息有多大差距...按照sent处理吧
             this.state = 'sent'
             return true

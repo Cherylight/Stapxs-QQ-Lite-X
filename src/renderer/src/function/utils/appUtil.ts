@@ -6,7 +6,7 @@ import appInfo from '../../../../../package.json'
 
 
 import { KeyboardInfo } from '@capacitor/keyboard'
-import { logger, PopInfo, PopType } from '@renderer/function/base'
+import { logger, popInfo } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import {
     hslToRgb,
@@ -19,8 +19,6 @@ import {
 import { GroupSession, Session, UserSession } from '../model/session'
 import { Notify } from '../notify'
 import { changeSession, sendMsgRaw } from './msgUtil'
-
-const popInfo = new PopInfo()
 
 /**
  * 滚动到目标消息（不自动加载）
@@ -139,8 +137,7 @@ export async function reloadUsers(useCache: boolean = true) {
     await Promise.all(task)
 
 	if (!groupData || !friendData) {
-		new PopInfo().add(
-			PopType.ERR,
+		popInfo.error(
 			app.config.globalProperties.$t('加载用户列表失败，请稍后再试。'),
 		)
 		return
@@ -382,7 +379,7 @@ export function createIpc() {
     // bot 功能
     backend.addListener(undefined, 'bot:flushUser', () => {
         reloadUsers()
-        popInfo.add(PopType.INFO, app.config.globalProperties.$t('刷新用户列表成功'))
+        popInfo.info(app.config.globalProperties.$t('刷新用户列表成功'))
     })
     backend.addListener(undefined, 'bot:logout', () => {
         runtimeData.sysConfig.auto_connect = false

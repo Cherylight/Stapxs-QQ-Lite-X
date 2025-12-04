@@ -4,10 +4,8 @@ import app from '../main'
 import { CapacitorGlobal } from '@capacitor/core'
 import { IpcRenderer } from '@electron-toolkit/preload'
 import { InvokeArgs, InvokeOptions } from '@tauri-apps/api/core'
-import { logger, PopInfo, PopType } from '../function/base'
+import { logger, popInfo } from '../function/base'
 import win from './win'
-
-const popInfo = new PopInfo()
 
 export const backend = {
     type: 'web' as 'electron' | 'tauri' | 'capacitor' | 'web',
@@ -112,7 +110,7 @@ export const backend = {
         this.de = await this.call(undefined, 'win:getDe', true)
         if(this.type == 'tauri' && !this.proxy) {
             logger.error(null, 'Tauri 代理服务似乎没有正常启动，此服务异常将会影响应用内的大部分外部资源的加载。')
-            popInfo.add(PopType.ERR, $t('Tauri 代理服务似乎没有正常启动'), false)
+            popInfo.error( $t('Tauri 代理服务似乎没有正常启动'))
         }
     },
 

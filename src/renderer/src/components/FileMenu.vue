@@ -52,7 +52,7 @@ import {
     useTemplateRef,
 } from 'vue'
 import { FileSender } from '@renderer/function/utils/fileSender'
-import { PopInfo, PopType } from '@renderer/function/base'
+import { popInfo } from '@renderer/function/base'
 import { ensurePopBox, inputPopBox } from '@renderer/function/utils/popBox'
 import { Role } from '@renderer/function/adapter/enmu'
 
@@ -141,7 +141,7 @@ async function renameFile() {
     const file = currentFile.value as GroupFile
 
     if (!runtimeData.nowAdapter?.renameGroupFile) {
-        new PopInfo().add(PopType.INFO, $t('当前适配器不支持重命名文件'))
+        popInfo.info($t('当前适配器不支持重命名文件'))
         return
     }
 
@@ -160,7 +160,7 @@ async function renameFolder() {
     const folder = currentFile.value as GroupFileFolder
 
     if (!runtimeData.nowAdapter?.renameGroupFileFolder) {
-        new PopInfo().add(PopType.INFO, $t('当前适配器不支持重命名文件夹'))
+        popInfo.info($t('当前适配器不支持重命名文件夹'))
         return
     }
 
@@ -181,13 +181,13 @@ async function deleteFile(): Promise<void> {
     close()
     if (file instanceof GroupFile) {
         if (!runtimeData.nowAdapter?.deleteGroupFile) {
-            new PopInfo().add(PopType.INFO, $t('当前适配器不支持删除文件'))
+            popInfo.info($t('当前适配器不支持删除文件'))
             return
         }
         await runtimeData.nowAdapter.deleteGroupFile(file)
     } else {
         if (!runtimeData.nowAdapter?.deleteGroupFileFolder) {
-            new PopInfo().add(PopType.INFO, $t('当前适配器不支持删除文件夹'))
+            popInfo.info($t('当前适配器不支持删除文件夹'))
             return
         }
         if (file.count > 0) {

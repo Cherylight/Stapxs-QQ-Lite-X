@@ -1,7 +1,7 @@
 import app from '@renderer/main'
 import { toRaw } from 'vue'
 import type { AtAllSegData, AtSegData, ErrorSegData, FaceSegData, FileSegData, ForwardSegData, ImgSegData, JsonSegData, MdSegData, MfaceSegData, PokeSegData, ReplySegData, SegData, TextSegData, UnknownSegData, VideoSegData, XmlSegData } from '../adapter/interface'
-import { PopInfo, PopType } from '../base'
+import { popInfo } from '../base'
 import { downloadFile } from '../utils/appUtil'
 import { getSizeFromBytes } from '../utils/systemUtil'
 import Emoji from './emoji'
@@ -371,11 +371,11 @@ export class FileSeg extends Seg {
     download(): void {
         const { $t } = app.config.globalProperties
         if (this.url === '') {
-            new PopInfo().add(PopType.INFO, $t('url加载失败，无法下载'))
+            popInfo.info($t('url加载失败，无法下载'))
             return
         }
         if (this.download_percent !== undefined) {
-            new PopInfo().add(PopType.INFO, $t('别催了，已经在下了(>_<)'))
+            popInfo.info($t('别催了，已经在下了(>_<)'))
             return
         }
         this.download_percent = 0

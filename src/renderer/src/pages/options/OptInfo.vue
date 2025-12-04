@@ -69,7 +69,7 @@ import { reloadUsers } from '@renderer/function/utils/appUtil'
 import { delay } from '@renderer/function/utils/systemUtil'
 import app from '@renderer/main'
 
-import { PopInfo, PopType } from '@renderer/function/base'
+import { popInfo } from '@renderer/function/base'
 import { closePopBox, ensurePopBox, textPopBox } from '@renderer/function/utils/popBox'
 import {
     shallowRef,
@@ -117,7 +117,7 @@ async function setGroupName(event: KeyboardEvent) {
     if (!chat) return
     if (event.key === 'Enter') {
         if (!runtimeData.nowAdapter?.setGroupName) {
-            new PopInfo().add(PopType.INFO, $t('当前适配器不支持设置群名称'))
+            popInfo.info($t('当前适配器不支持设置群名称'))
             return
         }
         await runtimeData.nowAdapter.setGroupName(chat, nowChatName.value)
@@ -135,7 +135,7 @@ async function leaveGroup() {
     if (!ensure) return
 
     if (!runtimeData.nowAdapter?.leaveGroup) {
-        new PopInfo().add(PopType.INFO, $t('当前适配器不支持退出群聊'))
+        popInfo.info($t('当前适配器不支持退出群聊'))
         return
     }
     await runtimeData.nowAdapter.leaveGroup(chat)

@@ -73,7 +73,7 @@
             <div v-if="tags.isMultiselectMode" class="select-tag ss-card">
                 <div v-if="msgBar!.multiCanForward()">
                     <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-xmark']" @click="
-                        new PopInfo().add(PopType.ERR, msgBar!.multiCanForward());
+                        popInfo.error( msgBar!.multiCanForward());
                     " />
                     <span>{{ $t('合并转发') }}</span>
                 </div>
@@ -83,7 +83,7 @@
                 </div>
                 <div v-if="msgBar!.multiCanForward()">
                     <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-xmark']" @click="
-                        new PopInfo().add(PopType.ERR, msgBar!.multiCanForward());
+                        popInfo.error( msgBar!.multiCanForward());
                     " />
                     <span>{{ $t('逐条转发') }}</span>
                 </div>
@@ -240,7 +240,7 @@ import MergePan from '@renderer/components/MergePan.vue'
 import MsgBar from '@renderer/components/MsgBar.vue'
 import MsgPrevPanComponent, { MsgPrevPan } from '@renderer/components/MsgPrevPan.vue'
 import UserInfoPanComponent, { UserInfoPan } from '@renderer/components/UserInfoPan.vue'
-import { logger, PopInfo, PopType } from '@renderer/function/base'
+import { logger, popInfo } from '@renderer/function/base'
 import {
     MenuEventData,
 } from '@renderer/function/elements/information'
@@ -628,11 +628,7 @@ function initMenuDisplay() {
  */
 function replyMsg(msg: Msg) {
     if (!msg.message_id) {
-        new PopInfo().add(
-            PopType.ERR,
-            $t('无法回复该消息'),
-            true,
-        )
+        popInfo.error($t('无法回复该消息'))
         return
     }
 
@@ -647,11 +643,7 @@ async function changeRespond(id: string, msg: Msg) {
     closeMsgMenu()
 
     if (!runtimeData.nowAdapter?.setResponse) {
-        new PopInfo().add(
-            PopType.ERR,
-            $t('当前适配器不支持表情回应'),
-            true,
-        )
+        popInfo.error($t('当前适配器不支持表情回应'))
         return
     }
 
@@ -683,11 +675,7 @@ async function removeUser() {
     closeUserMenu()
 
     if (!runtimeData.nowAdapter?.kickMember) {
-        new PopInfo().add(
-            PopType.ERR,
-            $t('当前适配器不支持移除成员'),
-            true,
-        )
+        popInfo.error($t('当前适配器不支持移除成员'))
         return
     }
 
@@ -739,19 +727,11 @@ async function sendPoke(user: IUser) {
 }
 async function sendGroupPoke(target: IUser) {
     if (!(target instanceof Member)) {
-        new PopInfo().add(
-            PopType.ERR,
-            $t('无法戳一戳该用户'),
-            true,
-        )
+        popInfo.error($t('无法戳一戳该用户'))
         return
     }
     if (!runtimeData.nowAdapter?.sendGroupPoke) {
-        new PopInfo().add(
-            PopType.ERR,
-            $t('当前适配器不支持戳一戳'),
-            true,
-        )
+        popInfo.error($t('当前适配器不支持戳一戳'))
         return
     }
 
@@ -762,11 +742,7 @@ async function sendGroupPoke(target: IUser) {
 }
 async function sendPrivatePoke() {
     if (!runtimeData.nowAdapter?.sendPrivatePoke) {
-        new PopInfo().add(
-            PopType.ERR,
-            $t('当前适配器不支持戳一戳'),
-            true,
-        )
+        popInfo.error($t('当前适配器不支持戳一戳'))
         return
     }
 
@@ -828,12 +804,11 @@ function copyMsg() {
     const msg = menuDisplay.menuSelectedMsg
     if (!msg) return
 
-    const popInfo = new PopInfo()
     copyToClipboard(msg.plaintext())
         .then(
-            () => popInfo.add(PopType.INFO, $t('复制成功'))
+            () => popInfo.info($t('复制成功'))
         ).catch(
-            () => popInfo.add(PopType.ERR, $t('复制失败'))
+            () => popInfo.error($t('复制失败'))
         )
 
     closeMsgMenu()
@@ -844,12 +819,11 @@ function copyMsg() {
 function copySelectMsg() {
     if (menuDisplay.selectCache === '') return
 
-    const popInfo = new PopInfo()
     copyToClipboard(menuDisplay.selectCache)
         .then(
-            () => popInfo.add(PopType.INFO, $t('复制成功'))
+            () => popInfo.info($t('复制成功'))
         ).catch(
-            () => popInfo.add(PopType.ERR, $t('复制失败'))
+            () => popInfo.error($t('复制失败'))
         )
 
     closeMsgMenu()
@@ -902,8 +876,7 @@ async function copyImg() {
     const item = new ClipboardItem({ [blob.type]: blob })
     try {
         await copyToClipboard([item])
-        const popInfo = new PopInfo()
-        popInfo.add(PopType.INFO, $t('复制成功'))
+        popInfo.info($t('复制成功'))
     }catch {/**/}
 }
 /**
@@ -923,11 +896,7 @@ async function recallMsg() {
     if (!msg) return
 
     if (!runtimeData.nowAdapter?.recallMsg) {
-        new PopInfo().add(
-            PopType.ERR,
-            $t('当前适配器不支持撤回消息'),
-            true,
-        )
+        popInfo.error($t('当前适配器不支持撤回消息'))
         return
     }
 
@@ -1031,12 +1000,11 @@ function copyMsgs() {
 
     })
     msg = msg.trim()
-    const popInfo = new PopInfo()
     copyToClipboard(msg)
         .then(
-            () => popInfo.add(PopType.INFO, $t('复制成功'))
+            () => popInfo.info($t('复制成功'))
         ).catch(
-            () => popInfo.add(PopType.ERR, $t('复制失败'))
+            () => popInfo.error($t('复制失败'))
         )
 }
 function closeMultiselect() {

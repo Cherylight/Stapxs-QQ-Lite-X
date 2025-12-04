@@ -169,7 +169,7 @@ import FacePan from '@renderer/components/FacePan.vue'
 
 import { IUser, Member } from '@renderer/function/model/user'
 import { GroupSession, Session, TempSession, UserSession } from '@renderer/function/model/session'
-import { logger, PopInfo, PopType } from '@renderer/function/base'
+import { logger, popInfo } from '@renderer/function/base'
 import imageCompression from 'browser-image-compression'
 import app from '@renderer/main'
 import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
@@ -561,17 +561,13 @@ async function selectImg() {
  * @param file 文件对象
  */
 async function setImg(file: File) {
-    const popInfo = new PopInfo()
     if (file.size === 0) return
 
     // 图片太大
     if (file.size > 3145728) {
         const options = { maxSizeMB: 3, useWebWorker: true }
         try {
-            popInfo.add(
-                PopType.INFO,
-                $t('正在压缩图片 ……'),
-            )
+            popInfo.info($t('正在压缩图片 ……'))
             const compressedFile = await imageCompression(
                 file,
                 options,
@@ -586,7 +582,7 @@ async function setImg(file: File) {
             setImg(compressedFile)
         } catch (error) {
             logger.error(error as Error, '图片压缩失败')
-            popInfo.add(PopType.INFO, $t('压缩图片失败'))
+            popInfo.error($t('压缩图片失败'))
         }
         return
     }

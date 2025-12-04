@@ -12,7 +12,7 @@
 
 import app from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
-import { logger, PopInfo, PopType } from './base'
+import { logger, popInfo } from './base'
 import { runtimeData } from './msg'
 import { openLoginPan } from './utils/systemUtil'
 
@@ -206,8 +206,7 @@ class BackendWs implements Ws {
         }
         this._onCloseHook = onclose
         backend.call('Onebot', 'onebot:close', false)
-        new PopInfo().add(
-            PopType.INFO,
+        popInfo.info(
             app.config.globalProperties.$t('正在断开链接……'),
         )
         return promise
@@ -400,7 +399,7 @@ class Driver {
         this.ws.onError(async(err) => {
             // 自动重连
             if (this.state === DriverState.Close) return
-            new PopInfo().add(PopType.INFO, '连接不稳定')
+            popInfo.info('连接不稳定')
             const re = await this.connectWs(true)
 
             if (re) return
@@ -409,7 +408,7 @@ class Driver {
             this.state = DriverState.Error
             this.onErrHook?.(err)
             runtimeData.nowAdapter = undefined
-            new PopInfo().add(PopType.ERR, '连接中断')
+            popInfo.error( '连接中断')
             // 打开登陆弹窗
             openLoginPan()
         })

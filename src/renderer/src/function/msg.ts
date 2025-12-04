@@ -34,7 +34,7 @@ import {
     shallowReactive,
     watchEffect,
 } from 'vue'
-import { logger, PopInfo, PopType } from './base'
+import { logger, popInfo } from './base'
 import {
     RunTimeDataElem,
 } from './elements/information'
@@ -68,8 +68,7 @@ const noticeFunctions = {
         switch (msg.sub_type) {
             case 'increase': {
                 // 添加系统通知
-                new PopInfo().add(
-                    PopType.INFO,
+                popInfo.info(
                     app.config.globalProperties.$t('添加好友 {name} 成功！', {
                         name: msg.nickname,
                     }),

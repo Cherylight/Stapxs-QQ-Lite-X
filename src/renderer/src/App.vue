@@ -54,7 +54,7 @@
             <div v-for="msg in popList" :key="'appmsg-' + msg.id">
                 <div><font-awesome-icon :icon="['fas', msg.svg]" /></div>
                 <a>{{ msg.text }}</a>
-                <div v-if="!msg.autoClose" @click="new PopInfo().remove(msg.id)">
+                <div v-if="!msg.autoClose" @click="popInfo.remove(msg.id)">
                     <font-awesome-icon :icon="['fas', 'xmark']" />
                 </div>
             </div>
@@ -87,7 +87,7 @@
 import Umami from '@stapxs/umami-logger-typescript'
 import * as App from './function/utils/appUtil'
 
-import { logger, PopInfo, popList } from '@renderer/function/base'
+import { logger, popInfo, popList } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import { i18n, uptime } from '@renderer/main'
 import {
