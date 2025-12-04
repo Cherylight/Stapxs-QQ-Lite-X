@@ -12,7 +12,7 @@ import { openLink } from '@renderer/function/utils/appUtil'
 import { getDeviceType } from '@renderer/function/utils/systemUtil'
 import app from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
-import { Logger } from '../base'
+import { logger } from '../base'
 import { linkView } from '../utils/linkViewUtil'
 import { JsonSeg, XmlSeg } from './seg'
 
@@ -125,7 +125,7 @@ export class MsgBodyFuns {
             }
             return div.outerHTML
         } catch (ex) {
-            new Logger().error(ex as Error, 'xml 消息解析错误')
+            logger.error(ex as Error, 'xml 消息解析错误')
             return (
                 '<span v-else class="msg-unknown">( ' +
                 app.config.globalProperties.$t('解析消息错误') +

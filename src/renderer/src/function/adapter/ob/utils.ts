@@ -1,12 +1,10 @@
 import app from '@renderer/main'
 import { v4 as uuid } from 'uuid'
-import { Logger } from '../../base'
 import driver from '../../driver'
 import { Gender, Role } from '../enmu'
 import { SenderData } from '../interface'
 import { ObRequest, ObResponse } from './type'
-
-const logger = new Logger()
+import { logger } from '@renderer/function/base'
 
 class WsError extends Error {
     params: any

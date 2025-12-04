@@ -440,7 +440,7 @@ import CardMessage from './msg-component/CardMessage.vue'
 import { UserInfoPan } from './UserInfoPan.vue'
 
 import { Role } from '@renderer/function/adapter/enmu'
-import { Logger, LogType, PopInfo, PopType } from '@renderer/function/base'
+import { logger, PopInfo, PopType } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import Emoji from '@renderer/function/model/emoji'
 import { Img } from '@renderer/function/model/img'
@@ -773,7 +773,6 @@ defineExpose({
             },
 
             async getLink(){
-                const logger = new Logger()
                 const link = this.findLink()
                 if(!link) return
 
@@ -832,14 +831,13 @@ defineExpose({
                     }
                 }
 
-                logger.add(LogType.DEBUG, 'Link View: ', data)
+                logger.debug('Link View: ' + data)
                 if (data) {
                     this.loadLinkPreview(protocol + domain, data)
                 }
             },
 
             loadLinkPreview(domain: string, res: any) {
-                const logger = new Logger()
                 logger.debug('获取链接预览成功: ' + res['og:title'])
                 if(res != undefined) {
                     if (res.type == undefined) {

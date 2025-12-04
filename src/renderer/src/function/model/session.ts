@@ -18,7 +18,7 @@ import {
 } from 'vue'
 import { Role } from '../adapter/enmu'
 import { SessionData } from '../adapter/interface'
-import { Logger, PopInfo, PopType } from '../base'
+import { logger, PopInfo, PopType } from '../base'
 import { runtimeData } from '../msg'
 import { Notify } from '../notify'
 import { queueWait } from '../utils/systemUtil'
@@ -316,7 +316,7 @@ export abstract class Session {
             })
             await Promise.race([mainPromise(), timeoutPromise])
         }catch (e) {
-            new Logger().error(e as Error, '添加消息失败')
+            logger.error(e as Error, '添加消息失败')
         }
 
         // 保存消息
@@ -387,7 +387,7 @@ export abstract class Session {
             )
         } catch (e) {
             await this.runHook('afterLoadHistoryHook', 'fail', [])
-            new Logger().error(e as Error, '加载历史消息失败')
+            logger.error(e as Error, '加载历史消息失败')
             this.lastLoadFailFlag.value = true
             new PopInfo().add(
                 PopType.ERR,
@@ -736,7 +736,7 @@ export class GroupSession extends Session {
         await this.reloadUserList()
         this.me = this.getUserById(runtimeData.loginInfo.uin) ?? null
         if (!this.me)
-            new Logger().error(null, `群 ${this.id} 成员列表中没有自己(${runtimeData.loginInfo.uin})的信息`)
+            logger.error(null, `群 ${this.id} 成员列表中没有自己(${runtimeData.loginInfo.uin})的信息`)
 
         // 加载历史记录 ============================================
         if(this.messageList.length < 20)await this.loadHistory()

@@ -87,7 +87,7 @@
 import Umami from '@stapxs/umami-logger-typescript'
 import * as App from './function/utils/appUtil'
 
-import { Logger, LogType, PopInfo, popList } from '@renderer/function/base'
+import { logger, PopInfo, popList } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import { i18n, uptime } from '@renderer/main'
 import {
@@ -116,7 +116,6 @@ import FileMenu from './components/FileMenu.vue'
 //#region == 定义变量 ===================================================
 type PageType = 'Home' | 'Options' | 'Friends' | 'Messages' | 'Boxes'
 const dev = import.meta.env.DEV
-const logger = new Logger()
 const pageInfo = shallowReactive<{
     page: PageType
     showChat: boolean
@@ -219,7 +218,7 @@ async function init() {
     } else {
         logger.debug('stapxs-qq-lite.user:$/mnt/app/bin/main', true)
     }
-    logger.add(LogType.DEBUG, '系统配置', runtimeData.sysConfig)
+    logger.debug('系统配置' + runtimeData.sysConfig)
 
     // 基础初始化完成
     logger.system('欢迎回来，开发者。Stapxs QQ Lite X 正处于 ' + (dev ? 'development' : 'production') + ' 模式。正在为您加载更多功能。')

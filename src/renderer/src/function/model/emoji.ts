@@ -7,7 +7,7 @@
 
 import index from '@renderer/assets/img/qq-face/public/assets/qq_emoji/_index.json'
 import app from '@renderer/main'
-import { Logger } from '../base'
+import { logger } from '../base'
 import { randomChoice } from '../utils/systemUtil'
 
 export default class Emoji {
@@ -169,11 +169,11 @@ export default class Emoji {
         ]
         for (const id of testList) {
             if (!this.allList.has(id))
-                new Logger().error(null, `Emoji not found: ${id}`)
+                logger.error(null, `表情未找到: ${id}`)
         }
         for (const id of this.superList) {
             if (!this.allSuperList.has(id))
-                new Logger().error(null, `Super Emoji not found: ${id}`)
+                logger.error(null, `超级表情未找到: ${id}`)
         }
     }
 

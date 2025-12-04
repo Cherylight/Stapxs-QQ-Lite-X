@@ -4,7 +4,7 @@ import {
     markRaw,
 } from 'vue'
 import { AdapterInterface } from './adapter/interface'
-import { Logger, PopInfo, PopType } from './base'
+import { logger, PopInfo, PopType } from './base'
 import { URL } from './model/data'
 import { User } from './model/user'
 import { resetRuntime, runtimeData } from './msg'
@@ -259,7 +259,7 @@ export async function isPublicHost(host: string): Promise<string | false> {
         return false
     } catch (e) {
         // 解析失败
-        new Logger().error(e as Error, 'DNS 解析失败: ')
+        logger.error(e as Error, 'DNS 解析失败: ')
         return false
     }
 }

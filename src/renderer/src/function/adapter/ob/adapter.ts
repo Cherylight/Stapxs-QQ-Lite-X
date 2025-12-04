@@ -25,7 +25,6 @@ import {
     shallowRef,
     ShallowRef,
 } from 'vue'
-import { Logger } from '../../base'
 import type {
     AdapterInterface,
     AtAllSegData,
@@ -98,8 +97,7 @@ import type {
     ObXmlSeg,
 } from './type'
 import { $t, createSender, getGender, getRole, ObConnector } from './utils'
-
-const logger = new Logger()
+import { logger } from '@renderer/function/base'
 
 // 定义 API 装饰器：在方法外层包裹 try/catch，失败时返回 undefined
 export function api(

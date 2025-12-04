@@ -1,6 +1,6 @@
 import horizontalStyles from '@renderer/assets/css/append/mobile/append_mobile_horizontal.css?raw'
 import verticalCss from '@renderer/assets/css/append/mobile/append_mobile_vertical.css?raw'
-import { Logger } from '@renderer/function/base'
+import { logger } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import { computed, ComputedRef, shallowRef, watchEffect, markRaw } from 'vue'
 import { backend } from './backend'
@@ -31,8 +31,6 @@ const win = markRaw({
      * 初始化
      */
     async init() {
-        const logger = new Logger()
-
         // computed 初始化
         this._needBar = computed(()=>{
             if (backend.isWeb()) return false
@@ -123,7 +121,6 @@ const win = markRaw({
 
     async loadAppendStyle() {
         const platform = backend.platform
-        const logger = new Logger()
         logger.info('正在装载补充样式……')
         // UI 2.0 附加样式
         if (backend.isDesktop()) {
@@ -176,7 +173,7 @@ const win = markRaw({
         await import('@renderer/assets/css/append/append_vibrancy.css')
         if (backend.platform === 'linux')
             await import('@renderer/assets/css/append/append_linux_vibrancy.css')
-        new Logger().info('透明 UI 附加样式加载完成')
+        logger.info('透明 UI 附加样式加载完成')
 
         if (runtimeData.sysConfig.vibrancy) this.useVibrancy()
     },
@@ -188,7 +185,7 @@ const win = markRaw({
         if (runtimeData.tags.vibrancy) return
         document.body.classList.add('vibrancy')
         runtimeData.tags.vibrancy = true
-        new Logger().info('透明 UI 附加样式启用')
+        logger.info('透明 UI 附加样式启用')
     },
     /**
      * 移除透明效果
@@ -197,7 +194,7 @@ const win = markRaw({
         if (!runtimeData.tags.vibrancy) return
         document.body.classList.remove('vibrancy')
         runtimeData.tags.vibrancy = false
-        new Logger().info('已移除透明 UI 效果禁用')
+        logger.info('已移除透明 UI 效果禁用')
     },
     /**
      * 刷新暗色模式

@@ -12,11 +12,9 @@
 
 import app from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
-import { Logger, PopInfo, PopType } from './base'
+import { logger, PopInfo, PopType } from './base'
 import { runtimeData } from './msg'
 import { openLoginPan } from './utils/systemUtil'
-
-const logger = new Logger()
 
 type OnMessageData = string
 

@@ -45,7 +45,6 @@ import {
     XmlSegData
 } from '../interface'
 
-import { Logger } from '@renderer/function/base'
 import { handleEvent } from '@renderer/function/event'
 import { Resource } from '@renderer/function/model/resource'
 import { AtAllSeg, AtSeg, FaceSeg, ForwardSeg, ImgSeg, JsonSeg, MfaceSeg, ReplySeg, Seg, TxtSeg, UnknownSeg, VideoSeg, XmlSeg } from '@renderer/function/model/seg'
@@ -65,6 +64,7 @@ import * as ISeg from './incomeSeg'
 import MkInfo from './MkInfo.vue'
 import * as OSeg from './outgoingSeg'
 import { $t, createSender, fileToBase64, getGender, getRole } from './utils'
+import { logger } from '@renderer/function/base'
 
 
 // 提取输出类型的工具类型
@@ -109,8 +109,6 @@ interface MkErrorResponse {
 }
 
 type MkResponse<T extends MilkyApiOutputTypes> = MkOkResponse<T> | MkErrorResponse
-
-const logger = new Logger()
 
 // 定义 API 装饰器：在方法外层包裹 try/catch，失败时返回 undefined
 function api(

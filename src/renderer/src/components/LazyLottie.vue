@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { Logger } from '@renderer/function/base'
+import { logger } from '@renderer/function/base'
 import { useTemplateRef, onMounted, onUnmounted } from 'vue'
 import { Vue3Lottie as Lottie } from 'vue3-lottie'
 
@@ -27,7 +27,7 @@ const playAnimation = () => {
     try {
         lottieRef.value.play?.()
     } catch (e) {
-        new Logger().error(e as Error, 'Lottie播放错误')
+        logger.error(e as Error, 'Lottie播放错误')
     }
 }
 

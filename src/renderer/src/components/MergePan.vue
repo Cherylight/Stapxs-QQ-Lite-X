@@ -110,7 +110,7 @@
 import Menu from './Menu.vue'
 import MsgBar from './MsgBar.vue'
 
-import { Logger, PopInfo, PopType } from '@renderer/function/base'
+import { logger, PopInfo, PopType } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { Message } from '@renderer/function/model/message'
 import { Msg } from '@renderer/function/model/msg'
@@ -225,7 +225,7 @@ function isMergeOpen() {
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
 function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
-    new Logger().debug('右击消息：' + data)
+    logger.debug('右击消息：' + data)
 
     if (!menuEl.value) return
     if (menuEl.value.isShow()) return

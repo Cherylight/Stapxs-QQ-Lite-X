@@ -1,11 +1,9 @@
-import { Logger } from '../base'
+import { logger } from '../base'
 import { getApi } from './systemUtil'
 import jp from 'jsonpath'
 
 export const linkView = {
     async bilibili(url: string) {
-        const logger = new Logger()
-
         const combinedQuantity = (numObj: any) => {
             try {
                 const num = Number(numObj)
@@ -52,8 +50,6 @@ export const linkView = {
     },
 
     async music163(url: string) {
-        const logger = new Logger()
-
         const urlObj = new URL(url)
         const params = new URLSearchParams(urlObj.search)
         const id = params.get('id')

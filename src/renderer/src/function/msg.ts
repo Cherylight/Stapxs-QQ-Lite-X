@@ -34,7 +34,7 @@ import {
     shallowReactive,
     watchEffect,
 } from 'vue'
-import { Logger, LogType, PopInfo, PopType } from './base'
+import { logger, PopInfo, PopType } from './base'
 import {
     RunTimeDataElem,
 } from './elements/information'
@@ -45,9 +45,6 @@ import { Notify } from './notify'
 import { htmlPopBox } from './utils/popBox'
 import { FileSender } from './utils/fileSender'
 import { AppConfig } from './option/option'
-
-// 其他 tag
-const logger = new Logger()
 
 // ==============================================================
 const noticeFunctions = {
@@ -169,11 +166,8 @@ export async function newMsg(msg: Msg) {
     const num = randomNum(0, 10000)
     qed_try_times++
     if (num >= 4500 && num <= 5500) {
-        logger.add(
-            LogType.INFO,
+        logger.info(
             num.toString() + '，这只是个神秘的数字...',
-            undefined,
-            true,
         )
     }
     if (num === 495) {  // QED怎么能和芙兰无关？(◣_◢)吃我一发 QED [495年的波纹]

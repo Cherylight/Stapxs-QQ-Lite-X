@@ -4,7 +4,7 @@ import l10nConfig from '@renderer/assets/l10n/_l10nconfig.json'
 import { backend } from '@renderer/runtime/backend'
 import PO from 'pofile'
 import packageInfo from '../../../../../package.json'
-import { Logger, PopInfo, PopType } from '../base'
+import { logger, PopInfo, PopType } from '../base'
 import { DnsElem } from '../elements/information'
 import { popBox } from './popBox'
 import LoginPan from '@renderer/popboxes/LoginPan.vue'
@@ -495,7 +495,7 @@ export async function getApi(url: string) {
             return data
         }
     } catch (error) {
-        new Logger().error(error as Error, '前端请求 API 失败，尝试后端请求……')
+        logger.error(error as Error, '前端请求 API 失败，尝试后端请求……')
         if(!backend.isWeb()) {
             return await backend.call('Onebot', 'sys:getApi', true, url)
         } else {

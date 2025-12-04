@@ -240,7 +240,7 @@ import MergePan from '@renderer/components/MergePan.vue'
 import MsgBar from '@renderer/components/MsgBar.vue'
 import MsgPrevPanComponent, { MsgPrevPan } from '@renderer/components/MsgPrevPan.vue'
 import UserInfoPanComponent, { UserInfoPan } from '@renderer/components/UserInfoPan.vue'
-import { Logger, LogType, PopInfo, PopType } from '@renderer/function/base'
+import { logger, PopInfo, PopType } from '@renderer/function/base'
 import {
     MenuEventData,
 } from '@renderer/function/elements/information'
@@ -483,7 +483,7 @@ const menuDisplay = shallowReactive({...menuDisplayDefault})
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
 function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
-    new Logger().debug('右击消息：' + data)
+    logger.debug('右击消息：' + data)
 
     const menu = msgMenu
     if (!menu.value) return
@@ -1128,7 +1128,7 @@ function exitWin() {
     } else {
         // 自身
         closeSession()
-        new Logger().add(LogType.UI, '右滑打开侧边栏触发完成')
+        logger.add('UI', '右滑打开侧边栏触发完成')
     }
 }
 
@@ -1147,7 +1147,7 @@ Session.afterLoadHistoryHook.push((_arg1, _arg2, _arg3) => {
     const oldScrollHeight = pan.scrollHeight
 
     nextTick(() => {
-        new Logger().debug(`滚动前高度：${oldScrollHeight}，当前高度：${pan.scrollHeight}，滚动位置：${pan.scrollHeight - oldScrollHeight}`)
+        logger.debug(`滚动前高度：${oldScrollHeight}，当前高度：${pan.scrollHeight}，滚动位置：${pan.scrollHeight - oldScrollHeight}`)
         scrollTo(
             pan.scrollTop + pan.scrollHeight - oldScrollHeight,
             false

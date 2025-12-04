@@ -6,7 +6,7 @@ import appInfo from '../../../../../package.json'
 
 
 import { KeyboardInfo } from '@capacitor/keyboard'
-import { LogType, Logger, PopInfo, PopType } from '@renderer/function/base'
+import { logger, PopInfo, PopType } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import {
     hslToRgb,
@@ -21,7 +21,6 @@ import { Notify } from '../notify'
 import { changeSession, sendMsgRaw } from './msgUtil'
 
 const popInfo = new PopInfo()
-const logger = new Logger()
 
 /**
  * 滚动到目标消息（不自动加载）
@@ -421,7 +420,7 @@ export function createIpc() {
         openLink(link ?? event.payload)
     })
     backend.addListener(undefined, 'app:error', (event, text) => {
-        new Logger().add(LogType.ERR, text ?? event.payload)
+        logger.error(null, text ?? event.payload)
     })
     backend.addListener(undefined, 'app:jumpChat', (event, data) => {
         const info = data ?? event.payload

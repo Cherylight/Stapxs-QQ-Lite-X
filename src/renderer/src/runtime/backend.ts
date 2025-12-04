@@ -4,10 +4,9 @@ import app from '../main'
 import { CapacitorGlobal } from '@capacitor/core'
 import { IpcRenderer } from '@electron-toolkit/preload'
 import { InvokeArgs, InvokeOptions } from '@tauri-apps/api/core'
-import { Logger, LogType, PopInfo, PopType } from '../function/base'
+import { logger, PopInfo, PopType } from '../function/base'
 import win from './win'
 
-const logger = new Logger()
 const popInfo = new PopInfo()
 
 export const backend = {
@@ -181,7 +180,7 @@ export const backend = {
                 }
             }
         } catch (ex) {
-            logger.add(LogType.DEBUG, `调用后端方法 ${(type ?? '') + ' - '}${name} 失败`, ex)
+            logger.add('DEBUG', `调用后端方法 ${(type ?? '') + ' - '}${name} 失败`, ex)
             return undefined
         }
     },
@@ -197,7 +196,7 @@ export const backend = {
         if (this.type == 'electron' && this.function && 'sendSync' in this.function) {
             return this.function.sendSync(name, ...args)
         } else {
-            logger.add(LogType.ERR, '调用后端方法失败', new Error('此方法只支持 electron 平台'))
+            logger.error(new Error('此方法只支持 electron 平台'), '调用后端方法失败')
             return undefined
         }
     },

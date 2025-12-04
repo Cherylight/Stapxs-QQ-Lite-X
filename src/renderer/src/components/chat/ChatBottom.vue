@@ -169,7 +169,7 @@ import FacePan from '@renderer/components/FacePan.vue'
 
 import { IUser, Member } from '@renderer/function/model/user'
 import { GroupSession, Session, TempSession, UserSession } from '@renderer/function/model/session'
-import { Logger, LogType, PopInfo, PopType } from '@renderer/function/base'
+import { logger, PopInfo, PopType } from '@renderer/function/base'
 import imageCompression from 'browser-image-compression'
 import app from '@renderer/main'
 import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
@@ -351,9 +351,8 @@ function mainKey(event: KeyboardEvent) {
     }
 }
 function mainKeyUp(event: KeyboardEvent) {
-    const logger = new Logger()
     if (event.key === '@' && !onAtFind.value && session instanceof GroupSession) {
-        logger.add(LogType.UI, '开始匹配群成员列表 ……')
+        logger.add('UI', '开始匹配群成员列表 ……')
         atFindMode.value = true
     }
 }
@@ -577,8 +576,7 @@ async function setImg(file: File) {
                 file,
                 options,
             )
-            new Logger().add(
-                LogType.INFO,
+            logger.info(
                 '图片压缩成功，原大小：' +
                     file.size / 1024 / 1024 +
                     ' MB，压缩后大小：' +
@@ -587,7 +585,7 @@ async function setImg(file: File) {
             )
             setImg(compressedFile)
         } catch (error) {
-            new Logger().error(error as Error, '图片压缩失败')
+            logger.error(error as Error, '图片压缩失败')
             popInfo.add(PopType.INFO, $t('压缩图片失败'))
         }
         return
