@@ -9,7 +9,6 @@ import { loadWinColor, sendIdentifyData, updateWinColor } from '../utils/appUtil
 import app, { i18n } from '@renderer/main'
 import { getPortableFileLang, getTrueLang } from '../utils/systemUtil'
 import { backend } from '@renderer/runtime/backend'
-import win from '@renderer/runtime/win'
 import { OptionField } from './option'
 
 /**
@@ -91,7 +90,7 @@ export const OptionInfos = {
                 '坏猫黄',
                 '玄素黑',
             ]
-            document.documentElement.style.setProperty(
+            document.body.style.setProperty(
                 '--color-main',
                 'var(--color-main-' + id + ')',
             )
@@ -212,11 +211,6 @@ export const OptionInfos = {
     },
     vibrancy: {
         default: false,
-        onChange: (value: boolean) => {
-            if (!win.hasInit) return
-            if (value) win.useVibrancy()
-            else win.removeVibrancy()
-        }
     },
     //#endregion
     //#region == Function ===============================

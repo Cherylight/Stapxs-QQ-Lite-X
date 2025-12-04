@@ -15,6 +15,7 @@ const win = markRaw({
 
     _forceTilingState: shallowRef<undefined|boolean>(),
     _darkMode: shallowRef<boolean>(false),
+    _vibrancyMode: shallowRef<boolean>(false),
 
     hasInit: false,
 
@@ -82,9 +83,15 @@ const win = markRaw({
             }
         }
         // 添加配置监听
+        // 亮暗模式
         this.refreshDarkMode()
         watchEffect(()=>{
             this.refreshDarkMode()
+        })
+        // 透明模式
+        this.refreshVibrancyState()
+        watchEffect(()=>{
+            this.refreshVibrancyState()
         })
 
         this.hasInit = true
@@ -174,28 +181,35 @@ const win = markRaw({
         if (backend.platform === 'linux')
             await import('@renderer/assets/css/append/append_linux_vibrancy.css')
         logger.info('透明 UI 附加样式加载完成')
-
-        if (runtimeData.sysConfig.vibrancy) this.useVibrancy()
     },
 
     /**
-     * 添加透明效果
+     * 刷新透明效果状态
      */
-    useVibrancy() {
-        if (runtimeData.tags.vibrancy) return
-        document.body.classList.add('vibrancy')
-        runtimeData.tags.vibrancy = true
-        logger.info('透明 UI 附加样式启用')
+    refreshVibrancyState() {
+        if (this.hasInit) this.changeAnimation()
+
+        const useVibrancy = runtimeData.sysConfig.vibrancy
+        if (useVibrancy === this._vibrancyMode.value) return
+        this.setVibrancy(useVibrancy)
     },
     /**
-     * 移除透明效果
+     * 设置透明效果
      */
-    removeVibrancy() {
-        if (!runtimeData.tags.vibrancy) return
-        document.body.classList.remove('vibrancy')
-        runtimeData.tags.vibrancy = false
-        logger.info('已移除透明 UI 效果禁用')
+    setVibrancy(use: boolean) {
+        if (use) {
+            document.body.classList.add('vibrancy')
+            runtimeData.tags.vibrancy = true
+            logger.info('透明 UI 附加样式启用')
+        }else {
+            document.body.classList.remove('vibrancy')
+            runtimeData.tags.vibrancy = false
+            logger.info('已移除透明 UI 效果禁用')
+        }
+
+        this._vibrancyMode.value = use
     },
+
     /**
      * 刷新暗色模式
      */
@@ -213,7 +227,6 @@ const win = markRaw({
                 break
         }
         if (darkMode === this._darkMode.value) return
-        this._darkMode.value = darkMode
         this.setDarkMode(darkMode)
     },
     /**
@@ -221,9 +234,7 @@ const win = markRaw({
      * @param dark 是否启用
      */
     setDarkMode(dark: boolean) {
-        if (this.hasInit) {
-            document.body.style.transition = '0.3s'
-        }
+        if (this.hasInit) this.changeAnimation()
         if (dark) {
             document.body.classList.remove('light')
             document.body.classList.add('dark')
@@ -231,6 +242,17 @@ const win = markRaw({
             document.body.classList.remove('dark')
             document.body.classList.add('light')
         }
+        this._darkMode.value = dark
+    },
+
+    /**
+     * 样式切换动画
+     */
+    changeAnimation(time: number = 300) {
+        document.body.style.transition = `${time}ms`
+        setTimeout(() => {
+            document.body.style.transition = ''
+        }, time)
     },
 
     async supportVibrancyCheck(): Promise<boolean> {
@@ -297,6 +319,9 @@ const win = markRaw({
     get darkMode() {
         return this._darkMode.value
     },
+    get vibrancyMode() {
+        return this._vibrancyMode.value
+    }
 })
 
 export default win
