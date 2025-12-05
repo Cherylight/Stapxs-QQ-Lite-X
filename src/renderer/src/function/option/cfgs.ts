@@ -278,6 +278,9 @@ export const OptionInfos = {
     preview_notice: {
         default: false
     },
+    close_ad: {
+        default: false
+    },
     //#endregion
     //#region == Dev ====================================
     log_level: {

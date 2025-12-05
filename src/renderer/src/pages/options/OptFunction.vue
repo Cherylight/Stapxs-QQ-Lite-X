@@ -204,7 +204,7 @@
             </div>
         </div>
         <div class="ss-card">
-            <header>{{ $t('浏览') }}</header>
+            <header>{{ $t('其他') }}</header>
             <div class="opt-item">
                 <div :class="{changed: !OptionManager.checkDefault('close_browser')}" />
                 <font-awesome-icon :icon="['fas', 'globe']" />
@@ -213,6 +213,15 @@
                     <span>{{ $t('让我看看你的浏览器 👀') }}</span>
                 </div>
                 <Switch v-model="runtimeData.sysConfig.close_browser" />
+            </div>
+            <div class="opt-item">
+                <div :class="{changed: !OptionManager.checkDefault('close_ad')}" />
+                <font-awesome-icon :icon="['fas', 'rectangle-ad']" />
+                <div>
+                    <span>{{ $t('关闭50次弹窗') }}</span>
+                    <span>{{ $t('非常感谢您的支持，Star对我真的很重要') }}</span>
+                </div>
+                <Switch v-model="runtimeData.sysConfig.close_ad" />
             </div>
         </div>
         <div class="ss-card">

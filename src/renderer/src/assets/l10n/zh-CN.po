@@ -1083,9 +1083,6 @@ msgstr ""
 msgid "查看 {count} 条转发消息"
 msgstr ""
 
-msgid "浏览"
-msgstr ""
-
 msgid "禁用内置浏览器"
 msgstr ""
 
@@ -2273,3 +2270,13 @@ msgstr ""
 
 msgid "暗色模式"
 msgstr ""
+
+msgid "关闭50次弹窗"
+msgstr ""
+
+msgid "非常感谢您的支持，Star对我真的很重要"
+msgstr ""
+
+msgid "tip: 可以去设置里禁止该弹窗"
+msgstr ""
+
