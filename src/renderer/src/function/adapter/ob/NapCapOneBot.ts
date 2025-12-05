@@ -465,7 +465,7 @@ export default class NapCapOneBot extends OneBotAdapter {
                 type: 'image',
                 url: await this.createResource(data.data.url, type),
                 isFace: data.data.sub_type === 7 || data.data.sub_type === 1,
-                summary: data.data.summary,
+                summary: data.data.summary || '[图片]',
             }
         }else {
             return {
