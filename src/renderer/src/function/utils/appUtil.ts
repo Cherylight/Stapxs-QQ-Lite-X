@@ -617,17 +617,41 @@ function setQuickLogin(address: string, port: number) {
 * 检查更新
 */
 export function checkUpdate() {
+    if (import.meta.env.DEV) return
+    if (import.meta.env.VITE_HASH) testVersionCheck()
+    else stableVersionCheck()
+}
+
+interface GhCommits {
+    commit: {
+        message: string,
+    }
+    html_url: string
+    sha: string
+}
+
+async function testVersionCheck() {
+    const url = `https://api.github.com/repos/${runtimeData.repoName}/commits/test`
+    const data: GhCommits = await fetch(url).then((response) => response.json())
+    const nowHash = import.meta.env.VITE_HASH
+    const latestHash = data.sha.slice(0, 7)
+    if (nowHash === latestHash) return
+    showTestLog(data)
+}
+
+function stableVersionCheck() {
     // 获取最新的 release 信息d
-    const packageUrl =
-        'https://api.github.com/repos/chzxxuanzheng/Stapxs-QQ-Lite-X/releases/latest'
-    fetch(packageUrl).then((response) => {
-        if (response.ok) {
-            response.json().then((data) => {
-                showUpdateLog(data)
-            })
-        }
-    })
-    localStorage.setItem('version', appInfo.version)
+    // TODO
+    // const packageUrl =
+    //     'https://api.github.com/repos/chzxxuanzheng/Stapxs-QQ-Lite-X/releases/latest'
+    // fetch(packageUrl).then((response) => {
+    //     if (response.ok) {
+    //         response.json().then((data) => {
+    //             showUpdateLog(data)
+    //         })
+    //     }
+    // })
+    // localStorage.setItem('version', appInfo.version)
 }
 
 /**
@@ -643,11 +667,6 @@ function showUpdateLog(data: any) {
     const latestVersion = data.tag_name.substring(1)
 
     if (semver.lt(appVersion,latestVersion)) {
-        // 开发模式禁止检查更新
-        if (import.meta.env.DEV){
-            logger.system(`开发者阁下，有新版本发布了：${latestVersion}。有时间的话同步下仓库`)
-            return
-        }
         // 有更新
         showReleaseLog(data, false)
     }
@@ -689,41 +708,90 @@ function showReleaseLog(data: any, isUpdated: boolean) {
         updated: isUpdated,
     }
     const buttonGoUpdate = (!backend.isWeb()) ? [
-              {
-                  text: $t('知道了'),
-              },
-              {
-                  text: $t('下载更新…'),
-                  master: true,
-                  noClose: true,
-                  fun: () => openLink(data.html_url, true),
-              },
-          ]: [
-              {
-                  text: $t('查看…'),
-                  noClose: true,
-                  fun: () => openLink(data.html_url),
-              },
-              {
-                  text: $t('刷新页面'),
-                  master: true,
-                  fun: () => location.reload(),
-              },
-          ]
+        {
+            text: $t('知道了'),
+        },
+        {
+            text: $t('下载更新…'),
+            master: true,
+            noClose: true,
+            fun: () => openLink(
+                data.html_url,
+                true
+            ),
+        },
+    ]: [
+        {
+            text: $t('查看…'),
+            noClose: true,
+            fun: () => openLink(data.html_url),
+        },
+        {
+            text: $t('刷新页面'),
+            master: true,
+            fun: () => location.reload(),
+        },
+    ]
     popBox({
         template: UpdatePan,
         templateValue: toRaw(info),
         button: isUpdated? [
-                  {
-                      text: $t('查看…'),
-                      noClose: true,
-                      fun: () => openLink(data.html_url, true),
-                  },
-                  {
-                      text: $t('知道了'),
-                      master: true,
-                  },
-              ]: buttonGoUpdate,
+            {
+                text: $t('查看…'),
+                noClose: true,
+                fun: () => openLink(data.html_url, true),
+            },
+            {
+                text: $t('知道了'),
+                master: true,
+            },
+        ]: buttonGoUpdate,
+    })
+}
+function showTestLog(data: GhCommits) {
+    const { $t } = app.config.globalProperties
+    const pages = () => h('div', [
+        h('p', $t('新提交: {hash}', {
+            hash: data.sha.slice(0, 7),
+        })),
+        h('div', {
+            style: 'background-color: var(--color-font-r); padding: 10px; border-radius: 10px; margin-top: -10px;',
+        }, [
+            h('span', {
+                style: 'white-space: pre-wrap;'
+            }, data.commit.message)
+        ])
+    ])
+    const buttonGoUpdate = (!backend.isWeb()) ? [
+        {
+            text: $t('知道了'),
+        },
+        {
+            text: $t('下载更新…'),
+            master: true,
+            noClose: true,
+            fun: () => openLink(
+                'https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X/actions/workflows/build-electron.yml',
+                true
+            ),
+        },
+    ]: [
+        {
+            text: $t('查看…'),
+            noClose: true,
+            fun: () => openLink(data.html_url),
+        },
+        {
+            text: $t('刷新页面'),
+            master: true,
+            fun: () => location.reload(),
+        },
+    ]
+    popBox({
+        template: pages,
+        svg: 'bullhorn',
+        title: $t('发现测试版本更新'),
+        button: buttonGoUpdate,
     })
 }
 
@@ -732,7 +800,7 @@ const openCheckList: ((times: number)=>boolean)[] = []
 * 显示使用次数弹窗
 */
 export function checkOpenTimes() {
-    // if (import.meta.env.DEV) return     // 开发环境不显示
+    if (import.meta.env.DEV) return     // 开发环境不显示
     const times = +(localStorage.getItem('times') ?? 0)
     for (const func of openCheckList) {
         if(func(times)) break

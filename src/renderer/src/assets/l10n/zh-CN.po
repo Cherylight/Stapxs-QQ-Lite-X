@@ -2280,3 +2280,5 @@ msgstr ""
 msgid "tip: 可以去设置里禁止该弹窗"
 msgstr ""
 
+msgid "新提交: {hash}"
+msgstr ""
