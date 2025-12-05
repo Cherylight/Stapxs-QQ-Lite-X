@@ -59,8 +59,7 @@ import type {
     RkeyType
 } from './type'
 import { createSender, fileToBase64, getGender, ObConnector } from './utils'
-
-import { compareVersions } from 'compare-versions'
+import semver from 'semver'
 
 export default class NapCapOneBot extends OneBotAdapter {
     override name = 'NapCap OneBot'
@@ -74,7 +73,7 @@ export default class NapCapOneBot extends OneBotAdapter {
         // 低版本适配
         if (!botInfo) return
         const UPLOAD_FILE_MIN_VERSION = '4.8.123'
-        if (compareVersions(botInfo.data.app_version, UPLOAD_FILE_MIN_VERSION) === -1) {
+        if (semver.lt(botInfo.data.app_version, UPLOAD_FILE_MIN_VERSION)) {
             this.sendGroupFile = undefined as any
             this.sendPrivateFile = undefined as any
         }
