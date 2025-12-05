@@ -116,6 +116,9 @@ const {
 	session?: Session,
 	box?: SessionBox,
 }>()
+const emit = defineEmits<{
+    close: [arg?: any],
+}>()
 init()
 //#endregion
 
@@ -280,15 +283,15 @@ function getTarget(): Session | SessionBox {
 
 function clickTop() {
     getTarget().setAlwaysTop(true)
-    close()
+    emit('close')
 }
 function clickCancelTop() {
     getTarget().setAlwaysTop(false)
-    close()
+    emit('close')
 }
 function clickRemove() {
     getTarget().unactive()
-    close()
+    emit('close')
 }
 function clickReload() {
     const target = getTarget() as Session
@@ -296,24 +299,24 @@ function clickReload() {
     setTimeout(() => {
         target.activate()
     }, 1000)
-    close()
+    emit('close')
 }
 function clickReaded() {
     getTarget().setRead()
-    close()
+    emit('close')
 }
 function clickRead() {
     if (!session) return
     session.showNotice = true
-    close()
+    emit('close')
 }
 function clickNoticeOpen() {
     (getTarget() as GroupSession)?.setNotice(true)
-    close()
+    emit('close')
 }
 function clickNoticeClose() {
     (getTarget() as GroupSession)?.setNotice(false)
-    close()
+    emit('close')
 }
 function clickPutInBox() {
     popBox({
@@ -327,7 +330,7 @@ function clickPutInBox() {
             },
         ],
     })
-    close()
+    emit('close')
 }
 function clickConfigBox() {
     popBox({
@@ -339,14 +342,14 @@ function clickConfigBox() {
             master: true,
         },],
     })
-    close()
+    emit('close')
 }
 function clickLeaveBox() {
     if (box && session) {
         box.removeSession(session)
         SessionBox.saveData()
     }
-    close()
+    emit('close')
 }
 function clickDeleteBox() {
     const target = getTarget() as SessionBox
@@ -354,7 +357,7 @@ function clickDeleteBox() {
         .then(ensure => {
             if (ensure) target.remove()
         })
-    close()
+    emit('close')
 }
 //#endregion
 </script>
