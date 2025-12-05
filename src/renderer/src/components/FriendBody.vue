@@ -73,12 +73,12 @@
 <script setup lang="ts">
 import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
 import { runtimeData } from '@renderer/function/msg'
-import { computed, inject } from 'vue'
-import FriendMenu from './FriendMenu.vue'
+import { computed } from 'vue'
 
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
 import { vOverflowHide } from '@renderer/function/utils/vcmd'
 import BoxTag from './BoxTag.vue'
+import { friendMenuInfo } from '@renderer/function/utils/contextMenu'
 
 const {
     data,
@@ -89,8 +89,6 @@ const {
     from?: 'message' | 'friend'
     box?: SessionBox
 }>()
-
-const menu = inject<Ref<InstanceType<typeof FriendMenu> | undefined>>('friendMenu')
 
 function shouldShowNotice(): boolean {
     if (!(data instanceof GroupSession)) return false
@@ -104,9 +102,8 @@ const active = computed(()=>{
 })
 const onmenu = computed(() => {
     if (active.value) return false
-    if (!menu?.value) return false
-    if (!menu.value.selectSession) return false
-    if (menu.value.selectSession.id !== data.id) return false
-    return menu.value.selectBox?.id === box?.id
+    if (!friendMenuInfo.session) return false
+    if (friendMenuInfo.session.id !== data.id) return false
+    return friendMenuInfo.box?.id === box?.id
 })
 </script>

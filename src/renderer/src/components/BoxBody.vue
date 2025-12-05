@@ -75,7 +75,13 @@
                         tag="div">
                         <FriendBody v-for="item in data.sortContentByTime"
                             :key="item.id"
-                            v-menu.prevent.stop="event => menu?.open('message', toRaw(item), event, data)"
+                            v-menu.prevent.stop="event => openFriendMenu(
+								event.x,
+								event.y,
+								'message',
+								toRaw(item),
+								toRaw(data)
+							)"
                             :data="item"
                             :from="from"
                             :box="data"
@@ -86,7 +92,13 @@
                     class="box-content">
                     <FriendBody v-for="item in data.sortContentByName"
                         :key="item.id"
-                        v-menu.prevent.stop="event => menu?.open('friend', item, event, data)"
+                        v-menu.prevent.stop="event => openFriendMenu(
+							event.x,
+							event.y,
+							'friend',
+							toRaw(item),
+							toRaw(data)
+						)"
                         :data="item"
                         :from="from"
                         :box="data"
@@ -101,7 +113,6 @@
 import { SessionBox } from '@renderer/function/model/box'
 import {
     computed,
-    inject,
     shallowRef,
     toRaw,
     watch,
@@ -113,7 +124,7 @@ import { randomChoice, randomNum } from '@renderer/function/utils/systemUtil'
 import { vMenu } from '@renderer/function/utils/vcmd'
 import { i18n } from '@renderer/main'
 import FriendBody from './FriendBody.vue'
-import FriendMenu from './FriendMenu.vue'
+import { friendMenuInfo, openFriendMenu } from '@renderer/function/utils/contextMenu'
 const $t = i18n.global.t
 //#region == 彩蛋相关 ============================================================
 const cialloList = [
@@ -152,7 +163,6 @@ const emit = defineEmits<{
 }>()
 
 const _open = shallowRef(false)
-const menu = inject<Ref<InstanceType<typeof FriendMenu> | undefined>>('friendMenu')
 //#endregion
 
 // 元素被打开时自动展开
@@ -161,9 +171,8 @@ watch(()=>runtimeData.nowBox?.id, autoOpenClose)
 autoOpenClose()
 
 const onmenu = computed(()=>{
-    if (!menu?.value) return false
-    if (!menu.value.selectBox) return false
-    return menu.value.selectBox.id === data.id
+    if (!friendMenuInfo.box) return false
+    return friendMenuInfo.box.id === data.id
 })
 const active = computed(() => {
     if (from !== 'message') return false

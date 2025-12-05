@@ -33,7 +33,13 @@
             <BoxBody
                 v-if="runtimeData.sysConfig.bubble_sort_user"
                 key="inMessage-bubble-box"
-                v-menu.prevent="event => menu?.open('message', BubbleBox.instance, event)"
+                v-menu.prevent="event => openFriendMenu(
+					event.x,
+					event.y,
+					'message',
+					undefined,
+					BubbleBox.instance,
+				)"
                 :data="markRaw(BubbleBox.instance)"
                 from="message"
                 @user-click="session => changeSession(session, BubbleBox.instance)" />
@@ -42,7 +48,12 @@
                 <FriendBody
                     v-if="item instanceof Session"
                     :key="'inMessage-' + item.id"
-                    v-menu.prevent="event => menu?.open('message', item, event)"
+                    v-menu.prevent="event => openFriendMenu(
+						event.x,
+						event.y,
+						'message',
+						item,
+					)"
                     :data="item"
                     from="message"
                     @click="changeSession(item)" />
@@ -50,7 +61,13 @@
                     v-else-if="item instanceof SessionBox"
                     :key="'inMessage-box-' + item.id"
                     ref="sessionBoxes"
-                    v-menu.prevent="event => menu?.open('message', item, event)"
+                    v-menu.prevent="event => openFriendMenu(
+						event.x,
+						event.y,
+						'message',
+						undefined,
+						item,
+					)"
                     :data="item"
                     from="message"
                     @user-click="(session)=>changeSession(session, item)" />
@@ -61,12 +78,10 @@
 
 <script setup lang="ts">
 import FriendBody from '@renderer/components/FriendBody.vue'
-import FriendMenu from '@renderer/components/FriendMenu.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { runtimeData } from '@renderer/function/msg'
 import {
-    inject,
     markRaw,
     onMounted,
     shallowRef,
@@ -86,6 +101,7 @@ import { Message } from '@renderer/function/model/message'
 import { Session } from '@renderer/function/model/session'
 import { changeSession } from '@renderer/function/utils/msgUtil'
 import { vMenu } from '@renderer/function/utils/vcmd'
+import { openFriendMenu } from '@renderer/function/utils/contextMenu'
 
 const { sideBarState } = defineProps<{
     sideBarState: 'fold' | 'open'
@@ -93,7 +109,6 @@ const { sideBarState } = defineProps<{
 
 const showSessionList = shallowRef<(Session | SessionBox)[]>([])
 // 旧群收纳盒的东西
-const menu: undefined | InstanceType<typeof FriendMenu> = inject('friendMenu')
 const sessionBoxes = useTemplateRef('sessionBoxes')
 
 onMounted(()=>{

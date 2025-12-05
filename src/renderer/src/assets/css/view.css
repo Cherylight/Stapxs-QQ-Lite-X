@@ -2112,3 +2112,18 @@ input.input-pop-box {
     border-radius: 7px;
     margin-bottom: 10px;
 }
+
+.default-menu-enter-active {
+    animation: default-menu-enter 0.3s ease-in-out;
+}
+.default-menu-leave-active {
+    animation: default-menu-enter 0.3s ease-in-out reverse;
+}
+@keyframes default-menu-enter {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

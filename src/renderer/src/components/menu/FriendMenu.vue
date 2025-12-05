@@ -9,7 +9,7 @@
  *      原本的只能在Message.vue中使用的右键菜单，现在抽离出来，方便其他组件使用
 -->
 <template>
-    <Menu ref="menu" name="chat-menu">
+    <div>
         <div class="ss-card msg-menu-body" @click.stop>
             <div v-if="displayTag.top" @click="clickTop">
                 <div><font-awesome-icon :icon="['fas', 'fa-thumbtack']" /></div>
@@ -27,11 +27,11 @@
                 <div><font-awesome-icon :icon="['fas', 'fa-undo']" /></div>
                 <a>{{ $t('重载') }}</a>
             </div>
-            <div v-if="displayTag.readed" @click="clickReaded">
+            <div v-if="displayTag.read" @click="clickReaded">
                 <div><font-awesome-icon :icon="['fas', 'fa-check-to-slot']" /></div>
                 <a>{{ $t('标记已读') }}</a>
             </div>
-            <div v-if="displayTag.read" @click="clickRead">
+            <div v-if="displayTag.unread" @click="clickRead">
                 <div><font-awesome-icon :icon="['fas', 'fa-flag']" /></div>
                 <a>{{ $t('标记未读') }}</a>
             </div>
@@ -60,13 +60,10 @@
                 <a style="color: var(--color-red)">{{ $t('删除') }}</a>
             </div>
         </div>
-    </Menu>
+    </div>
 </template>
 
 <script setup lang="ts">
-import Menu from './Menu.vue'
-
-import { MenuEventData } from '@renderer/function/elements/information'
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
 import { GroupSession, Session } from '@renderer/function/model/session'
 import { runtimeData } from '@renderer/function/msg'
@@ -78,24 +75,17 @@ import {
     markRaw,
     shallowReactive,
     ShallowReactive,
-    shallowRef,
-    ShallowRef,
-    useTemplateRef,
 } from 'vue'
 
 //#region == 声明变量 ================================================================
 const $t = i18n.global.t
-const menu = useTemplateRef('menu')
-const selectSession: ShallowRef<Session|undefined> = shallowRef(undefined)
-const selectBox: ShallowRef<SessionBox|undefined> = shallowRef(undefined)
-const from: ShallowRef<'message' | 'friend'> = shallowRef('message')
 const displayTag: ShallowReactive<{
     top: boolean,
     cancelTop: boolean,
     remove: boolean,
     reload: boolean,
-    readed: boolean,
     read: boolean,
+    unread: boolean,
     noticeOpen: boolean,
     noticeClose: boolean,
     putInBox: boolean,
@@ -107,8 +97,8 @@ const displayTag: ShallowReactive<{
     cancelTop: false,
     remove: false,
     reload: false,
-    readed: false,
     read: false,
+    unread: false,
     noticeOpen: false,
     noticeClose: false,
     putInBox: false,
@@ -117,43 +107,25 @@ const displayTag: ShallowReactive<{
     deleteBox: false,
 })
 
-// 导出
-defineExpose({
-    selectSession,
-    selectBox,
-    open,
-})
+const {
+	from,
+	session,
+	box,
+} = defineProps<{
+	from: 'message' | 'friend',
+	session?: Session,
+	box?: SessionBox,
+}>()
+init()
 //#endregion
 
 //#region == 方法函数 ================================================================
-async function open(
-    fromComponent: 'message' | 'friend',
-    session: Session | SessionBox,
-    event: MenuEventData,
-    fromBox?: SessionBox
-): Promise<void> {
-    if (!menu.value) return
-    if (menu.value?.isShow()) return
-
-    from.value = fromComponent
-    if (session instanceof SessionBox) {
-        selectBox.value = session
-        selectSession.value = undefined
-    } else {
-        selectSession.value = session
-        selectBox.value = fromBox
-    }
-
+async function init(): Promise<void> {
     for (const key in displayTag)
         displayTag[key] = false
 
-    if (session instanceof Session) checkSessionMenuConfig(fromComponent, session, fromBox)
-    else checkBoxMenuConfig(fromComponent, session)
-
-    await menu.value.showMenu(event.x, event.y)
-
-    selectSession.value = undefined
-    selectBox.value = undefined
+    if (session) checkSessionMenuConfig(from, session, box)
+    else checkBoxMenuConfig(from, box!)
 }
 
 /**
@@ -191,15 +163,15 @@ function checkSessionMenuConfig(
     // 已读与未读
     if (fromComponent === 'message') {
         if (session.showNotice) {
-            displayTag.read = false
-            displayTag.readed = true
-        } else {
+            displayTag.unread = false
             displayTag.read = true
-            displayTag.readed = false
+        } else {
+            displayTag.unread = true
+            displayTag.read = false
         }
     }else {
-        displayTag.readed = false
         displayTag.read = false
+        displayTag.unread = false
     }
     // 通知开关
     if (session instanceof GroupSession) {
@@ -225,18 +197,18 @@ function checkSessionMenuConfig(
 
 /**
  * 检查收纳盒菜单配置
- * @param session
+ * @param box
  */
 function checkBoxMenuConfig(
     fromComponent: 'message' | 'friend',
-    session: SessionBox,
+    box: SessionBox,
 ): void {
-    if (session.id === BubbleBox.instance.id) {
-        return checkBubbleBoxConfig(fromComponent, session)
+    if (box.id === BubbleBox.instance.id) {
+        return checkBubbleBoxConfig(fromComponent, box)
     }
     // 检测需要显示的菜单项
     // 置顶
-    if (session.alwaysTop) {
+    if (box.alwaysTop) {
         displayTag.top = false
         displayTag.cancelTop = true
     } else {
@@ -245,7 +217,7 @@ function checkBoxMenuConfig(
     }
     // 删除
     if (fromComponent === 'message') {
-        if (session.isActive) {
+        if (box.isActive) {
             displayTag.remove = true
         } else {
             displayTag.remove = false
@@ -255,13 +227,13 @@ function checkBoxMenuConfig(
     }
     // 已读与未读
     if (fromComponent === 'message') {
-        if (session.showNotice) {
-            displayTag.readed = true
+        if (box.showNotice) {
+            displayTag.read = true
         } else {
-            displayTag.readed = false
+            displayTag.read = false
         }
     }else {
-        displayTag.readed = false
+        displayTag.read = false
     }
 
     // 设置
@@ -291,23 +263,18 @@ function checkBubbleBoxConfig(
     // 已读与未读
     if (fromComponent === 'message') {
         if (session.showNotice) {
-            displayTag.readed = true
+            displayTag.read = true
         } else {
-            displayTag.readed = false
+            displayTag.read = false
         }
     }else {
-        displayTag.readed = false
+        displayTag.read = false
     }
 }
 
-function close(): void {
-    if (!menu.value) return
-    menu.value.closeMenu()
-}
-
 function getTarget(): Session | SessionBox {
-    if (selectSession.value) return selectSession.value
-    else if (selectBox.value) return selectBox.value
+    if (session) return session
+    else if (box) return box
     else throw new Error('没有选择会话或收纳盒')
 }
 
@@ -336,8 +303,8 @@ function clickReaded() {
     close()
 }
 function clickRead() {
-    if (!selectSession.value) return
-    selectSession.value.showNotice = true
+    if (!session) return
+    session.showNotice = true
     close()
 }
 function clickNoticeOpen() {
@@ -375,8 +342,8 @@ function clickConfigBox() {
     close()
 }
 function clickLeaveBox() {
-    if (selectBox.value && selectSession.value) {
-        selectBox.value.removeSession(selectSession.value)
+    if (box && session) {
+        box.removeSession(session)
         SessionBox.saveData()
     }
     close()

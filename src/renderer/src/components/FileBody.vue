@@ -78,12 +78,12 @@
 
 <script setup lang="ts">
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
-import { computed, inject, markRaw, shallowRef, TemplateRef } from 'vue'
+import { computed, markRaw, shallowRef } from 'vue'
 import { vMenu } from '@renderer/function/utils/vcmd'
-import FileMenu from './FileMenu.vue'
 import { MenuEventData } from '@renderer/function/elements/information'
+import { openContextMenu } from '@renderer/function/utils/contextMenu'
+import FileMenu from './menu/FileMenu.vue'
 
-const menu = inject<TemplateRef<InstanceType<typeof FileMenu>>>('fileMenu')
 const isOpenMenu = shallowRef(false)
 
 const { item } = defineProps<{
@@ -99,7 +99,12 @@ const folderItems = computed(() => {
 
 async function openMenu(event: MenuEventData): Promise<void> {
     isOpenMenu.value = true
-    await menu?.value?.open(item, event)
+    const menu = openContextMenu(
+        event.x, event.y,
+        FileMenu,
+        { file: markRaw(item) }
+    )
+    await menu.finish
     isOpenMenu.value = false
 }
 </script>

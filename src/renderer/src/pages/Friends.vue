@@ -45,8 +45,12 @@
                             <FriendBody v-for="item in class_.content"
                                 :key=" 'fb-' + item.id "
                                 v-menu.prevent="event => {
-                                    console.log(menu, menu === undefined)
-                                    menu!.open('friend', item, event)
+									openFriendMenu(
+										event.x,
+										event.y,
+										'friend',
+										item
+									)
                                 }"
                                 :data="item"
                                 from="friend"
@@ -59,7 +63,12 @@
                 <div>
                     <FriendBody v-for="item in searchInfo.originList"
                         :key="'fb-' + item.id"
-                        v-menu.prevent="event => menu?.open('friend', item, event)"
+                        v-menu.prevent="event => openFriendMenu(
+							event.x,
+							event.y,
+							'friend',
+							item
+						)"
                         :data="item as Session"
                         from="friend"
                         @click="userClick(item as Session)" />
@@ -70,7 +79,12 @@
                 <div>
                     <FriendBody v-for="item in searchInfo.query"
                         :key="'fb-' + item.id"
-                        v-menu.prevent="event => menu?.open('friend', item, event)"
+                        v-menu.prevent="event => openFriendMenu(
+							event.x,
+							event.y,
+							'friend',
+							item
+						)"
                         :data="item as Session"
                         from="friend"
                         @click="userClick(item as Session)" />
@@ -82,22 +96,19 @@
 
 <script setup lang="ts">
 import FriendBody from '@renderer/components/FriendBody.vue'
-import FriendMenu from '@renderer/components/FriendMenu.vue'
 
 import { Session, SessionClass } from '@renderer/function/model/session'
 import { reloadUsers } from '@renderer/function/utils/appUtil'
+import { openFriendMenu } from '@renderer/function/utils/contextMenu'
 import { changeSession } from '@renderer/function/utils/msgUtil'
 import { vAutoFocus, vMenu, vSearch } from '@renderer/function/utils/vcmd'
 import {
-    inject,
     shallowReactive
 } from 'vue'
 
 const { sideBarState } = defineProps<{
     sideBarState: 'fold' | 'open'
 }>()
-
-const menu: undefined | InstanceType<typeof FriendMenu> = inject('friendMenu')
 
 /**
  * 联系人被点击事件

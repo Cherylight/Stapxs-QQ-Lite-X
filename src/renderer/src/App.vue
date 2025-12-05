@@ -76,8 +76,7 @@
         <Viewer ref="viewer" />
 
         <!-- 菜单 -->
-        <FriendMenu ref="friendMenu" />
-        <FileMenu ref="fileMenu" />
+        <ContextMenus />
         <div id="mobile-css" />
     </div>
     <div class="bg-blur" :style="{ backdropFilter: `blur(${runtimeData.sysConfig.background_img_blur}px)` }" />
@@ -94,6 +93,7 @@ import {
     onMounted,
     provide,
     shallowReactive,
+    TransitionGroup,
     useTemplateRef
 } from 'vue'
 import driver from './function/driver'
@@ -101,7 +101,6 @@ import { Notify } from './function/notify'
 import { ensurePopBox } from './function/utils/popBox'
 import { getDeviceType, getVersion, openLoginPan } from './function/utils/systemUtil'
 
-import FriendMenu from './components/FriendMenu.vue'
 import GlobalSessionSearchBar from './components/GlobalSessionSearchBar.vue'
 import PopBox from './components/PopBox.vue'
 import Viewer from './components/Viewer.vue'
@@ -111,7 +110,7 @@ import Chat from './pages/Chat.vue'
 import SideBar from './pages/SideBar.vue'
 import { backend } from './runtime/backend'
 import win from './runtime/win'
-import FileMenu from './components/FileMenu.vue'
+import ContextMenus from './components/menu/ContextMenus.vue'
 
 //#region == 定义变量 ===================================================
 type PageType = 'Home' | 'Options' | 'Friends' | 'Messages' | 'Boxes'
@@ -132,13 +131,9 @@ const $t = i18n.global.t
 //#endregion
 
 //#region == 组件实例注册 ===============================================
-const friendMenu = useTemplateRef('friendMenu')
 const viewer = useTemplateRef('viewer')
 const baseApp = useTemplateRef('base-app')
-const fileMenu = useTemplateRef('fileMenu')
 provide('viewer', viewer)
-provide('friendMenu', friendMenu)
-provide('fileMenu', fileMenu)
 //#endregion
 
 //#region == 更新标题 ===================================================

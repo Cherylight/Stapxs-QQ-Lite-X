@@ -19,7 +19,7 @@
         @v-move-left="nextSideBar()"
         @v-move-right="prevSideBar()"
         @mouseenter="hoverStart()"
-        @mouseleave="hoverEnd($event)">
+        @mouseleave="hoverEnd()">
         <transition mode="out-in" :name="`change-side-bar-${changeSideBarDirection}`">
             <component :is="sideBarInfo.template"
                 ref="sideBar"
@@ -160,7 +160,6 @@ const foldState = computed<'open' | 'fold'>(() => {
         case 'hide':
             return 'open'
     }
-    throw new Error('解析侧边栏折叠状态失败')
 })
 
 /**
@@ -230,11 +229,9 @@ function hoverStart(timeout: number = 500) {
  * 鼠标移出
  * @param event 鼠标移除位置检测
  */
-function hoverEnd(event?: MouseEvent) {
+function hoverEnd() {
     if (!staticTime) return
-    if (event?.relatedTarget instanceof HTMLElement) {
-        if (event.relatedTarget.closest('.menu-component')) return
-    }
+
     const dTime = staticTime - Date.now()
     if (dTime <= 0) {
         isHover.value = false
@@ -267,26 +264,6 @@ function startDrag() {
         bar.value!.style.transition = ''
     })
 }
-
-// 刷新菜单展开情况
-useEventListener(window, 'menu-close', (event: CustomEvent<{
-    x?: number,
-    y?: number
-}>) => {
-    if (!isHover.value) return
-    if (!bar.value) return
-
-    if (!event.detail.x || !event.detail.y) return
-    const rect = bar.value.getBoundingClientRect()
-    if (
-        event.detail.x < rect.left ||
-        event.detail.x > rect.right ||
-        event.detail.y < rect.top ||
-        event.detail.y > rect.bottom
-    ) {
-        hoverEnd()
-    }
-})
 
 useEventListener(document, 'mouseout', (event)=>{
     if (runtimeData.sysConfig.auto_hide_side_bar !== 'hide') return

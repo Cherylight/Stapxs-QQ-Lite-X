@@ -126,139 +126,37 @@
         <UserInfoPanComponent :data="userInfoPanData" />
         <!-- msg 预览栏 -->
         <MsgPrevPanComponent :data="msgPrevPanData" />
-        <!-- 消息右击菜单 -->
-        <Menu ref="msgMenu" name="chat-menu">
-            <div>
-                <div v-if="chat instanceof GroupSession"
-                    v-show="menuDisplay.showRespond"
-                    :class="{
-                        'ss-card': true,
-                        'respond': true,
-                        'open': menuDisplay.respond
-                    }"
-                    @click.stop>
-                    <div @wheel="
-                        !menuDisplay.respond ?
-                            ($event.currentTarget as HTMLElement).scrollLeft += $event.deltaY
-                            : ''
-                    ">
-                        <EmojiFace
-                            v-for="num in Emoji.responseId"
-                            :key="'respond-' + num"
-                            :emoji="Emoji.get(num)"
-                            @click="menuDisplay.menuSelectedMsg ?
-                                changeRespond(String(num), menuDisplay.menuSelectedMsg as Msg): ''" />
-                    </div>
-                    <font-awesome-icon :icon="['fas', 'angle-up']" @click="menuDisplay.respond = true" />
-                </div>
-                <span id="anchor" @click.stop />
-                <div class="ss-card msg-menu-body" @click.stop>
-                    <div v-show="menuDisplay.add" @click="forwardSelf()">
-                        <div><font-awesome-icon :icon="['fas', 'plus']" /></div>
-                        <a>{{ $t('+ 1') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.reply" @click="menuReplyMsg(true)">
-                        <div><font-awesome-icon :icon="['fas', 'message']" /></div>
-                        <a>{{ $t('回复') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.forward" @click="showForWard()">
-                        <div><font-awesome-icon :icon="['fas', 'share']" /></div>
-                        <a>{{ $t('转发') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.select" @click="intoMultipleSelect()">
-                        <div><font-awesome-icon :icon="['fas', 'circle-check']" /></div>
-                        <a>{{ $t('多选') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.copy" @click="copyMsg">
-                        <div><font-awesome-icon :icon="['fas', 'clipboard']" /></div>
-                        <a>{{ $t('复制') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.copySelect" @click="copySelectMsg">
-                        <div><font-awesome-icon :icon="['fas', 'code']" /></div>
-                        <a>{{ $t('复制选中文本') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.copyImg" @click="copyImg">
-                        <div><font-awesome-icon :icon="['fas', 'object-ungroup']" /></div>
-                        <a>{{ $t('复制图片') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.downloadImg != false" @click="downloadImg">
-                        <div><font-awesome-icon :icon="['fas', 'floppy-disk']" /></div>
-                        <a>{{ $t('下载图片') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.revoke" @click="recallMsg">
-                        <div><font-awesome-icon :icon="['fas', 'xmark']" /></div>
-                        <a>{{ $t('撤回') }}</a>
-                    </div>
-                    <div @click="deleteMsg">
-                        <div><font-awesome-icon :icon="['fas', 'fa-trash']" style="color: var(--color-red)" /></div>
-                        <a>{{ $t('删除') }}</a>
-                    </div>
-                    <div v-show="menuDisplay.dev" @click="consoleLogMsg">
-                        <div><font-awesome-icon :icon="['fas', 'screwdriver-wrench']" /></div>
-                        <a>{{ $t('调试信息') }}</a>
-                    </div>
-                </div>
-            </div>
-        </Menu>
-        <Menu ref="userMenu" name="chat-menu">
-            <div class="ss-card msg-menu-body" @click.stop>
-                <div v-show="menuDisplay.at"
-                    @click="menuDisplay.menuSelectedUser ?
-                                chat.inputMsg.addSq(new AtSeg(menuDisplay.menuSelectedUser!.user_id)): '';
-                            chatBottom?.toMainInput();
-                            closeUserMenu();">
-                    <div><font-awesome-icon :icon="['fas', 'at']" /></div>
-                    <a>{{ $t('提及') }}</a>
-                </div>
-                <div v-show="menuDisplay.poke" @click="menuDisplay.menuSelectedUser ? sendPoke(menuDisplay.menuSelectedUser as Member) : ''">
-                    <div><font-awesome-icon :icon="['fas', 'fa-hand-point-up']" /></div>
-                    <a>{{ $t('戳一戳') }}</a>
-                </div>
-                <div v-show="menuDisplay.remove" @click="removeUser">
-                    <div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
-                    <a>{{ $t('移出群聊') }}</a>
-                </div>
-                <!-- TODO <div v-if="menuDisplay.menuSelectedUser instanceof Member" v-show="menuDisplay.config"
-                    @click="openChatInfoPan();
-                            infoRef?.openMoreConfig(menuDisplay.menuSelectedUser);
-                            closeUserMenu();">
-                    <div><font-awesome-icon :icon="['fas', 'cog']" /></div>
-                    <a>{{ $t('成员设置') }}</a>
-                </div> -->
-            </div>
-        </Menu>
-    </div>
+	</div>
 </template>
 
 <script setup lang="ts">
 import ChatBottom from '@renderer/components/chat/ChatBottom.vue'
 import ChatHead from '@renderer/components/chat/ChatHead.vue'
 import CustomHr from '@renderer/components/CustomHr.vue'
-import EmojiFace from '@renderer/components/EmojiFace.vue'
-import Menu from '@renderer/components/Menu.vue'
+import ChatMsgMenu from '@renderer/components/menu/ChatMsgMenu.vue'
+import ChatUserMenu from '@renderer/components/menu/ChatUserMenu.vue'
 import MergePan from '@renderer/components/MergePan.vue'
 import MsgBar from '@renderer/components/MsgBar.vue'
 import MsgPrevPanComponent, { MsgPrevPan } from '@renderer/components/MsgPrevPan.vue'
 import UserInfoPanComponent, { UserInfoPan } from '@renderer/components/UserInfoPan.vue'
+
 import { logger, popInfo } from '@renderer/function/base'
 import {
     MenuEventData,
 } from '@renderer/function/elements/information'
-import Emoji from '@renderer/function/model/emoji'
 import { InputMsg } from '@renderer/function/model/inputMsg'
 import { Msg } from '@renderer/function/model/msg'
 import { AtSeg } from '@renderer/function/model/seg'
 import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
-import { BaseUser, IUser, Member } from '@renderer/function/model/user'
+import { IUser, Member } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
-import { downloadFile, shouldAutoFocus } from '@renderer/function/utils/appUtil'
+import { shouldAutoFocus } from '@renderer/function/utils/appUtil'
+import { openContextMenu } from '@renderer/function/utils/contextMenu'
 import {
     closeSession,
     mergeForward,
-    sendMsgRaw,
     singleForward,
 } from '@renderer/function/utils/msgUtil'
-import { ensurePopBox } from '@renderer/function/utils/popBox'
 import {
     copyToClipboard,
     getViewTime,
@@ -285,8 +183,6 @@ const { vh } = useViewportUnits()
 //#region  == 模板引用 ======================================
 const msgBar = useTemplateRef('msgBar')
 const mergePan = useTemplateRef('mergePan')
-const msgMenu = useTemplateRef('msgMenu')
-const userMenu = useTemplateRef('userMenu')
 const msgPan = useTemplateRef('msgPan')
 const chatPan = useTemplateRef('chat-pan')
 const chatBottom = useTemplateRef('bottom')
@@ -419,7 +315,6 @@ function init() {
     // 重置部分状态数据
     Object.assign(tags, tagsDefault)
     chatBottom.value?.init()
-    initMenuDisplay()
     // 聚焦输入框
     // PS: 有虚拟键盘的设备会弹键盘,要做判断
     if (shouldAutoFocus()) chatBottom.value?.toMainInput()
@@ -454,28 +349,6 @@ function chatScroll(event: Event) {
 }
 
 //#region == 右键菜单 ==========================================
-const menuDisplayDefault = {
-    menuSelectedMsg: null as Msg | null,
-    menuSelectedUser: null as IUser | null,
-    add: true,
-    reply: true,
-    forward: true,
-    select: true,
-    copy: true,
-    selectCache: '',
-    copySelect: false,
-    copyImg: false,
-    downloadImg: false as string | false,
-    revoke: false,
-    at: true,
-    poke: false,
-    remove: false,
-    respond: false,
-    showRespond: true,
-    config: false,
-    dev: false,
-}
-const menuDisplay = shallowReactive({...menuDisplayDefault})
 /**
  * 显示消息右键菜单
  * @param data 右键菜单事件数据
@@ -483,85 +356,26 @@ const menuDisplay = shallowReactive({...menuDisplayDefault})
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
 function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
-    logger.debug('右击消息：' + data)
-
-    const menu = msgMenu
-    if (!menu.value) return
-    if (menu.value.isShow()) return
-
-    menuDisplay.menuSelectedMsg = msg
-
-    // 检查消息，确认菜单显示状态
-    // 关闭回应功能
-    if (runtimeData.sysConfig.close_respond) {
-        menuDisplay.showRespond = false
+    const intoMultiselect = (msg: Msg) => {
+        msgBar.value?.startMultiselect()
+        tags.isMultiselectMode = true
+		msgBar.value?.forceAddToMultiselectList(msg)
     }
-
-    // 判断能不能管理这个消息
-    if (chat instanceof GroupSession) {
-        let canAdmin = (msg.sender as Member | BaseUser).canBeAdmined(
-            chat.getMe().role,
-        )
-        if (msg.sender.user_id === runtimeData.loginInfo.uin) canAdmin = true
-
-        if (canAdmin) {
-            menuDisplay.revoke = true
-        }
-    }
-
-    // 消息不存在,但还可以多选和转发(x)
-    if (!msg.exist) {
-        // 已被撤回的自己的消息只显示复制
-        menuDisplay.reply = false
-        menuDisplay.revoke = false
-    }
-
-    const selection = document.getSelection()
-    const textBody = selection?.anchorNode?.parentElement
-    const textMsg = null as HTMLElement | null
-
-
-    if (
-        textMsg &&
-        textMsg.id == data.target.id &&
-        textBody &&
-        textBody.className.indexOf('msg-text') > -1 &&
-        selection.focusNode == selection.anchorNode
-    ) {
-        // 用于判定是否选中了 msg-text 且开始和结束是同一个 Node（防止跨消息复制）
-        menuDisplay.selectCache = selection.toString()
-        if (menuDisplay.selectCache.length > 0) {
-            menuDisplay.copySelect = true
-        }
-    }
-    // 不能转发卡片消息
-    // TODO: 有卡片签名的客户端适配
-    if (msg.hasCard()) {
-        // 如果包含以上消息类型，不能转发
-        menuDisplay.forward = false
-        menuDisplay.add = false
-    }
-    if (data.target.nodeName == 'IMG' && (data.target as HTMLImageElement).src.length > 0) {
-        // 右击图片需要显示的内容，这边特例设置为链接
-        menuDisplay.downloadImg = (
-            data.target as HTMLImageElement
-        ).src
-        if (runtimeData.tags.canCors) menuDisplay.copyImg = true
-    }
-
-    // 开发者工具
-    menuDisplay.dev = import.meta.env.DEV
-
-
-    const promise = menu.value.showMenu(data.x, data.y) as Promise<void>
-
-    // 初始化菜单显示状态
-    promise.then(() => {
-        setTimeout(() => {
-            initMenuDisplay()
-        }, 100)
-    })
-    return promise
+    const menu = openContextMenu(
+        data.x,
+        data.y,
+        ChatMsgMenu,
+        {
+            session: chat,
+            msg: msg,
+            eventData: data,
+            changeRespondFunc: changeRespond,
+            replyMsgFunc: replyMsg,
+            intoMultiselectFunc: intoMultiselect,
+        },
+		'chat-menu'
+    )
+    return menu.finish
 }
 
 /**
@@ -571,56 +385,24 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
 function showUserMenu(data: MenuEventData, user: IUser) {
-    const menu = userMenu
-    if (!menu.value) return
-    if (menu.value.isShow()) return
+	const setAtFunc = (member: Member) => {
+		chat.inputMsg.addSq(new AtSeg(member.user_id))
+		chatBottom.value?.toMainInput();
+	}
 
-    menuDisplay.menuSelectedUser = user
-
-    menuDisplay.showRespond = false
-    menuDisplay.at = true
-    menuDisplay.poke = true
-    menuDisplay.remove = true
-
-    let canAdmin: boolean
-    if (!(chat instanceof GroupSession)) canAdmin = false
-    else if (!(user instanceof Member)) canAdmin = false
-    else if (user.user_id === runtimeData.loginInfo.uin) canAdmin = false
-    else if (user.canBeAdmined(chat.getMe().role)) canAdmin = true
-    else canAdmin = false
-
-    if (!canAdmin) {
-        // 自己、私聊或者没有权限的时候不显示移除
-        menuDisplay.remove = false
-    }
-
-    // 原来私聊不能@
-    if (!(chat instanceof GroupSession)) menuDisplay.at = false
-
-    // 群成员设置
-    if(canAdmin) {
-        menuDisplay.config = true
-    }
-
-    // 显示用户菜单
-    const promise = menu.value.showMenu(data.x, data.y) as Promise<void>
-
-    // 初始化菜单显示状态
-    promise.then(() => {
-        setTimeout(() => {
-            initMenuDisplay()
-        }, 100)
-    })
-    return promise
-}
-
-/**
- * 初始化菜单状态
- */
-function initMenuDisplay() {
-    menuDisplay.menuSelectedMsg = null
-    menuDisplay.menuSelectedUser = null
-    Object.assign(menuDisplay, menuDisplayDefault)
+	const menu = openContextMenu(
+		data.x,
+		data.y,
+		ChatUserMenu,
+		{
+			session: chat,
+			user: user,
+			sendPokeFunc: sendPoke,
+			setAtFunc: setAtFunc,
+		},
+		'chat-menu'
+	)
+	return menu.finish
 }
 
 /**
@@ -633,6 +415,7 @@ function replyMsg(msg: Msg) {
     }
 
     chat.inputMsg.setReply(msg)
+    chatBottom.value?.toMainInput()
 }
 
 /**
@@ -640,8 +423,6 @@ function replyMsg(msg: Msg) {
  * @param num
  */
 async function changeRespond(id: string, msg: Msg) {
-    closeMsgMenu()
-
     if (!runtimeData.nowAdapter?.setResponse) {
         popInfo.error($t('当前适配器不支持表情回应'))
         return
@@ -658,47 +439,6 @@ async function changeRespond(id: string, msg: Msg) {
 
     if (!re) return
     msg.setEmoji(id, runtimeData.loginInfo.uin, !hasSend)
-}
-
-/**
- * 移出群聊
- */
-async function removeUser() {
-    const user = menuDisplay.menuSelectedUser
-    if (!user) return
-    const ensure = ensurePopBox(
-        $t('真的要将 {user} 移出群聊吗', { user: user.name })
-    )
-
-    if (!ensure) return
-
-    closeUserMenu()
-
-    if (!runtimeData.nowAdapter?.kickMember) {
-        popInfo.error($t('当前适配器不支持移除成员'))
-        return
-    }
-
-    await runtimeData.nowAdapter.kickMember(
-        chat as GroupSession,
-        user as Member,
-    )
-}
-
-/**
- * 关闭消息菜单
- */
-function closeMsgMenu() {
-    if (msgMenu.value?.isShow())
-        msgMenu.value.closeMenu()
-}
-
-/**
- * 关闭用户菜单
- */
-function closeUserMenu() {
-    if (userMenu.value?.isShow())
-        userMenu.value.closeMenu()
 }
 //#endregion
 
@@ -717,8 +457,6 @@ function closeUserMenu() {
  * 发送戳一戳
  */
 async function sendPoke(user: IUser) {
-    menuDisplay.poke = false
-
     if (chat instanceof GroupSession) {
         await sendGroupPoke(user)
     } else if (chat instanceof UserSession) {
@@ -750,178 +488,6 @@ async function sendPrivatePoke() {
         chat as UserSession,
     )
 }
-//#region == 消息菜单相关 ==================================================
-/**
- * +1
- */
-function forwardSelf() {
-    if (!menuDisplay.menuSelectedMsg) return
-    sendMsgRaw(
-        chat,
-        menuDisplay.menuSelectedMsg.message.map(
-            item=>item.copy()
-        ),
-    )
-    closeMsgMenu()
-}
-/**
- * 回复
- * @param closeMenu 是否关闭消息菜单
- */
-function menuReplyMsg(closeMenu = true) {
-    if (!menuDisplay.menuSelectedMsg) return
-    replyMsg(menuDisplay.menuSelectedMsg)
-    chatBottom.value?.toMainInput()
-    // 关闭消息菜单
-    if (closeMenu) {
-        closeMsgMenu()
-    }
-}
-/**
- * 转发
- */
-function showForWard() {
-    if (!menuDisplay.menuSelectedMsg) return
-
-    singleForward([menuDisplay.menuSelectedMsg as Msg])
-    closeMsgMenu()
-}
-/**
- * 多选
- */
-function intoMultipleSelect() {
-    msgBar.value?.startMultiselect()
-    tags.isMultiselectMode = true
-    if (menuDisplay.menuSelectedMsg) {
-        msgBar.value?.forceAddToMultiselectList(menuDisplay.menuSelectedMsg as Msg)
-    }
-    closeMsgMenu()
-}
-/**
- * 复制选中的消息
- */
-function copyMsg() {
-    const msg = menuDisplay.menuSelectedMsg
-    if (!msg) return
-
-    copyToClipboard(msg.plaintext())
-        .then(
-            () => popInfo.info($t('复制成功'))
-        ).catch(
-            () => popInfo.error($t('复制失败'))
-        )
-
-    closeMsgMenu()
-}
-/**
- * 复制缓存的选中的文本
- */
-function copySelectMsg() {
-    if (menuDisplay.selectCache === '') return
-
-    copyToClipboard(menuDisplay.selectCache)
-        .then(
-            () => popInfo.info($t('复制成功'))
-        ).catch(
-            () => popInfo.error($t('复制失败'))
-        )
-
-    closeMsgMenu()
-}
-/**
- * 复制图片
- */
-async function copyImg() {
-    if (!menuDisplay.downloadImg) return
-
-    // 关闭菜单
-    closeMsgMenu()
-
-    // 类型白名单
-    const typeWhiteList = [
-        'image/png',
-        'image/svg+xml',
-    ]
-
-    // 获取图片数据
-    const response = await fetch(menuDisplay.downloadImg)
-    let blob = await response.blob()
-
-    // 乱七八糟浏览器不一定支持的格式统统转png
-    if (!typeWhiteList.includes(blob.type)) {
-        // 创建 canvas 来转换格式
-        const img = new Image()
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-
-        await new Promise((resolve, reject) => {
-            img.onload = resolve
-            img.onerror = reject
-            img.src = URL.createObjectURL(blob)
-        })
-
-        canvas.width = img.width
-        canvas.height = img.height
-        ctx?.drawImage(img, 0, 0)
-
-        // 转换为 PNG blob
-        blob = await new Promise(resolve => {
-            canvas.toBlob((blob)=>{
-                resolve(blob as Blob)
-            }, 'image/png')
-        })
-
-        URL.revokeObjectURL(img.src)
-    }
-    const item = new ClipboardItem({ [blob.type]: blob })
-    try {
-        await copyToClipboard([item])
-        popInfo.info($t('复制成功'))
-    }catch {/**/}
-}
-/**
- * 下载选中的图片
- */
-function downloadImg() {
-    const url = menuDisplay.downloadImg
-    closeMsgMenu()
-    if (!url) return
-    downloadFile(url as string, 'img.png', () => undefined, () => undefined)
-}
-/**
- * 撤回消息
- */
-async function recallMsg() {
-    const msg = menuDisplay.menuSelectedMsg
-    if (!msg) return
-
-    if (!runtimeData.nowAdapter?.recallMsg) {
-        popInfo.error($t('当前适配器不支持撤回消息'))
-        return
-    }
-
-    // 关闭消息菜单
-    closeMsgMenu()
-
-    await runtimeData.nowAdapter.recallMsg(msg as Msg)
-}
-/**
- * 删除消息
- */
-async function deleteMsg() {
-    const msg = menuDisplay.menuSelectedMsg
-    if (!msg) return
-
-    chat.removeMsg(msg)
-
-    closeMsgMenu()
-}
-function consoleLogMsg() {
-    // eslint-disable-next-line no-console
-    console.log(menuDisplay.menuSelectedMsg)
-}
-//#endregion
-
 //#region == 多选菜单相关 ==================================================
 /**
  * 合并转发

@@ -9,47 +9,40 @@
  *      原本的只能在Message.vue中使用的右键菜单，现在抽离出来，方便其他组件使用
 -->
 <template>
-    <Menu ref="menu" name="chat-menu">
-        <div class="ss-card msg-menu-body" @click.stop>
-            <div v-if="displayTag.download" @click="download">
-                <div><font-awesome-icon :icon="['fas', 'angle-down']" /></div>
-                <a>{{ $t('下载') }}</a>
-            </div>
-            <div v-if="displayTag.open" @click="switchOpen">
-                <div><font-awesome-icon :icon="['fas', 'grip-lines']" /></div>
-                <a>{{ $t('打开') }}</a>
-            </div>
-            <div v-if="displayTag.close" @click="switchOpen">
-                <div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
-                <a>{{ $t('关闭') }}</a>
-            </div>
-            <div v-if="displayTag.upload" @click="upload">
-                <div><font-awesome-icon :icon="['fas', 'check-to-slot']" /></div>
-                <a>{{ $t('上传') }}</a>
-            </div>
-            <div v-if="displayTag.rename" @click="rename">
-                <div><font-awesome-icon :icon="['fas', 'edit']" /></div>
-                <a>{{ $t('重命名') }}</a>
-            </div>
-            <div v-if="displayTag.delete" @click="deleteFile">
-                <div><font-awesome-icon :icon="['fas', 'trash']" style="color: var(--color-red)" /></div>
-                <a style="color: var(--color-red)">{{ $t('删除') }}</a>
-            </div>
+    <div class="ss-card msg-menu-body">
+        <div v-if="displayTag.download" @click="download">
+            <div><font-awesome-icon :icon="['fas', 'angle-down']" /></div>
+            <a>{{ $t('下载') }}</a>
         </div>
-    </Menu>
+        <div v-if="displayTag.open" @click="switchOpen">
+            <div><font-awesome-icon :icon="['fas', 'grip-lines']" /></div>
+            <a>{{ $t('打开') }}</a>
+        </div>
+        <div v-if="displayTag.close" @click="switchOpen">
+            <div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
+            <a>{{ $t('关闭') }}</a>
+        </div>
+        <div v-if="displayTag.upload" @click="upload">
+            <div><font-awesome-icon :icon="['fas', 'check-to-slot']" /></div>
+            <a>{{ $t('上传') }}</a>
+        </div>
+        <div v-if="displayTag.rename" @click="rename">
+            <div><font-awesome-icon :icon="['fas', 'edit']" /></div>
+            <a>{{ $t('重命名') }}</a>
+        </div>
+        <div v-if="displayTag.delete" @click="deleteFile">
+            <div><font-awesome-icon :icon="['fas', 'trash']" style="color: var(--color-red)" /></div>
+            <a style="color: var(--color-red)">{{ $t('删除') }}</a>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { MenuEventData } from '@renderer/function/elements/information'
-import Menu from './Menu.vue'
-
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
 import { runtimeData } from '@renderer/function/msg'
 import { i18n } from '@renderer/main'
 import {
     shallowReactive,
-    shallowRef,
-    useTemplateRef,
 } from 'vue'
 import { FileSender } from '@renderer/function/utils/fileSender'
 import { popInfo } from '@renderer/function/base'
@@ -58,7 +51,6 @@ import { Role } from '@renderer/function/adapter/enmu'
 
 //#region == 声明变量 ================================================================
 const $t = i18n.global.t
-const menu = useTemplateRef('menu')
 const displayTag = shallowReactive({
     download: false,
     open: false,
@@ -67,23 +59,17 @@ const displayTag = shallowReactive({
     delete: false,
     rename: false
 })
-const currentFile = shallowRef<GroupFile | GroupFileFolder | undefined>()
-
-// 导出
-defineExpose({
-    open,
-})
+const { file } = defineProps<{ file: GroupFile | GroupFileFolder }>()
+const emit = defineEmits<{
+    close: [arg?: any],
+}>()
+init(file)
 //#endregion
 
 //#region == 方法函数 ================================================================
-async function open(
+async function init(
     file: GroupFile | GroupFileFolder,
-    event: MenuEventData
 ): Promise<void> {
-    if (!menu.value) return
-    if (menu.value?.isShow()) return
-
-    currentFile.value = file
     for (const key in displayTag) {
         displayTag[key] = false
     }
@@ -103,32 +89,26 @@ async function open(
         file.creator.user_id === runtimeData.selfInfo?.user_id
     )
         displayTag.delete = true
-
-    await menu.value.showMenu(event.x, event.y)
-
-    currentFile.value = undefined
 }
 
 function close(): void {
-    if (!menu.value) return
-    menu.value.closeMenu()
+    emit('close')
 }
 
 function download(): void {
-    (currentFile.value as GroupFile)?.download()
+    (file as GroupFile)?.download()
     close()
 }
 function switchOpen(): void {
-    (currentFile.value as GroupFileFolder)?.open()
+    (file as GroupFileFolder)?.open()
     close()
 }
 function upload(): void {
-    const folder: GroupFileFolder = currentFile.value as GroupFileFolder
+    const folder: GroupFileFolder = file as GroupFileFolder
     FileSender.autoUploadFile(folder.group, folder)
     close()
 }
 async function rename() {
-    const file = currentFile.value!
     close()
     if (file instanceof GroupFile) {
         await renameFile()
@@ -138,8 +118,6 @@ async function rename() {
     await file.group.loadFiles(false)
 }
 async function renameFile() {
-    const file = currentFile.value as GroupFile
-
     if (!runtimeData.nowAdapter?.renameGroupFile) {
         popInfo.info($t('当前适配器不支持重命名文件'))
         return
@@ -154,10 +132,10 @@ async function renameFile() {
 
     if (!newName || newName === '' || newName === file.name) return
 
-    await runtimeData.nowAdapter.renameGroupFile(file, newName)
+    await runtimeData.nowAdapter.renameGroupFile(file as GroupFile, newName)
 }
 async function renameFolder() {
-    const folder = currentFile.value as GroupFileFolder
+    const folder = file as GroupFileFolder
 
     if (!runtimeData.nowAdapter?.renameGroupFileFolder) {
         popInfo.info($t('当前适配器不支持重命名文件夹'))
@@ -176,8 +154,6 @@ async function renameFolder() {
     await runtimeData.nowAdapter.renameGroupFileFolder(folder, newName)
 }
 async function deleteFile(): Promise<void> {
-    const file = currentFile.value
-    if (!file) return
     close()
     if (file instanceof GroupFile) {
         if (!runtimeData.nowAdapter?.deleteGroupFile) {

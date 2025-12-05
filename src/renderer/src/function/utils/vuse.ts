@@ -216,22 +216,23 @@ export function usePasttime(time: number): ComputedRef<string> {
 export function useEventListener<T extends keyof DocumentEventMap>(
     target: Document|Window,
     event: T,
-    callback: (event: DocumentEventMap[T]) => void
-)
+    callback: (event: DocumentEventMap[T]) => void,
+    capture?: boolean
+): void
 export function useEventListener(
     target: Document|Window,
     event: Exclude<string, keyof DocumentEventMap>,
-    callback: ((event: Event) => void) | ((event: CustomEvent) => void)
-)
+    callback: ((event: Event) => void) | ((event: CustomEvent) => void),
+    capture?: boolean
+): void
 export function useEventListener(
     target: Document|Window,
     event: string,
-    callback: (event: any) => void
-) {
-    // 如果你想的话，
-    // 也可以用字符串形式的 CSS 选择器来寻找目标 DOM 元素
-    onMounted(() => target.addEventListener(event, callback))
-    onUnmounted(() => target.removeEventListener(event, callback))
+    callback: (event: any) => void,
+    capture: boolean = false
+): void {
+    onMounted(() => target.addEventListener(event, callback, { capture }))
+    onUnmounted(() => target.removeEventListener(event, callback, { capture }))
 }
 
 let viewportUnitsCache: { vw: ShallowRef<number>, vh: ShallowRef<number> } | undefined

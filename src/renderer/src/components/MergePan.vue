@@ -84,30 +84,9 @@
             </div>
         </Teleport>
     </Transition>
-    <Menu ref="msgMenu" name="chat-menu">
-        <div class="ss-card msg-menu-body" @click.stop>
-            <div v-show="menuDisplay.canForward" @click="showForWard()">
-                <div><font-awesome-icon :icon="['fas', 'share']" /></div>
-                <a>{{ $t('转发') }}</a>
-            </div>
-            <div @click="intoMultipleSelect()">
-                <div><font-awesome-icon :icon="['fas', 'circle-check']" /></div>
-                <a>{{ $t('多选') }}</a>
-            </div>
-            <div @click="copyMsg">
-                <div><font-awesome-icon :icon="['fas', 'clipboard']" /></div>
-                <a>{{ $t('复制') }}</a>
-            </div>
-            <div v-show="menuDisplay.downloadImgSrc" @click="downloadImg">
-                <div><font-awesome-icon :icon="['fas', 'floppy-disk']" /></div>
-                <a>{{ $t('下载图片') }}</a>
-            </div>
-        </div>
-    </Menu>
 </template>
 
 <script setup lang="ts">
-import Menu from './Menu.vue'
 import MsgBar from './MsgBar.vue'
 
 import { logger, popInfo } from '@renderer/function/base'
@@ -117,12 +96,14 @@ import { Msg } from '@renderer/function/model/msg'
 import { ForwardSeg } from '@renderer/function/model/seg'
 import { runtimeData } from '@renderer/function/msg'
 import { downloadFile } from '@renderer/function/utils/appUtil'
+import { openContextMenu } from '@renderer/function/utils/contextMenu'
 import { mergeForward, singleForward } from '@renderer/function/utils/msgUtil'
 import { copyToClipboard, getViewTime } from '@renderer/function/utils/systemUtil'
 import { vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import { useViewportUnits } from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
 import { nextTick, shallowReactive, shallowRef, useTemplateRef, watch } from 'vue'
+import ChatMsgMenu from './menu/ChatMsgMenu.vue'
 
 const { vw } = useViewportUnits()
 const stack = runtimeData.mergeMsgStack
@@ -137,7 +118,6 @@ const menuDisplay = shallowReactive({
 const isMultiselectMode = shallowRef(false)
 
 const msgBarEl = useTemplateRef('msgBar')
-const menuEl = useTemplateRef('msgMenu')
 const mergePanEl = useTemplateRef('mergePan')
 
 const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
@@ -225,85 +205,23 @@ function isMergeOpen() {
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
 function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
-    logger.debug('右击消息：' + data)
-
-    if (!menuEl.value) return
-    if (menuEl.value.isShow()) return
-
-    menuDisplay.selectMsg = msg
-    menuDisplay.canForward = true
-    menuDisplay.downloadImgSrc = ''
-
-    // 不能转发卡片消息
-    // TODO 有卡片签名的客户端适配
-    if (msg.hasCard()) {
-        // 如果包含以上消息类型，不能转发
-        menuDisplay.canForward = false
+    const intoMultiselect = (msg: Msg) => {
+		msgBarEl.value?.startMultiselect()
+		isMultiselectMode.value = true
+		msgBarEl.value?.forceAddToMultiselectList(msg)
     }
-    if (data.target.nodeName == 'IMG') {
-        // 右击图片需要显示的内容，这边特例设置为链接
-        menuDisplay.downloadImgSrc = (
-            data.target as HTMLImageElement
-        ).src
-    }
-
-    const promise = menuEl.value.showMenu(data.x, data.y) as Promise<void>
-
-    return promise
-}
-/**
- * 关闭消息菜单
- */
-function closeMsgMenu() {
-    if (menuEl.value && menuEl.value.isShow()) {
-        menuEl.value.closeMenu()
-    }
-}
-/**
- * 转发
- */
-function showForWard() {
-    if (!menuDisplay.selectMsg) return
-
-    singleForward([menuDisplay.selectMsg])
-    closeMsgMenu()
-}
-/**
- * 多选
- */
-function intoMultipleSelect() {
-    msgBarEl.value?.startMultiselect()
-    isMultiselectMode.value = true
-    if (menuDisplay.selectMsg) {
-        msgBarEl.value?.forceAddToMultiselectList(menuDisplay.selectMsg as unknown as Msg)
-    }
-    closeMsgMenu()
-}
-/**
- * 复制选中的消息
- */
-function copyMsg() {
-    const msg = menuDisplay.selectMsg
-    if (!msg) return
-
-    copyToClipboard(msg.plaintext())
-        .then(
-            () => popInfo.info($t('复制成功'))
-        ).catch(
-            () => popInfo.error($t('复制失败'))
-        )
-
-    closeMsgMenu()
-}
-/**
- * 下载选中的图片
- */
-function downloadImg() {
-    const url = menuDisplay.downloadImgSrc
-    if (url) {
-        downloadFile(url as string, 'img.png', () => undefined, () => undefined)
-    }
-    closeMsgMenu()
+    const menu = openContextMenu(
+        data.x,
+        data.y,
+        ChatMsgMenu,
+        {
+            msg: msg,
+            eventData: data,
+            intoMultiselectFunc: intoMultiselect,
+        },
+		'chat-menu'
+    )
+    return menu.finish
 }
 //#endregion
 

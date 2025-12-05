@@ -33,7 +33,13 @@
                 <BoxBody
                     v-for="box in SessionBox.sessionBoxes"
                     :key="box.id"
-                    v-menu.prevent="event => menu?.open('friend', box, event)"
+                    v-menu.prevent="event => openFriendMenu(
+						event.x,
+						event.y,
+						'friend',
+						undefined,
+						box
+					)"
                     :data="box"
                     from="friend"
                     @user-click="session=>changeSession(session, box)" />
@@ -52,16 +58,15 @@
 
 <script setup lang="tsx">
 import BoxBody from '@renderer/components/BoxBody.vue'
-import FriendMenu from '@renderer/components/FriendMenu.vue'
 
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
+import { openFriendMenu } from '@renderer/function/utils/contextMenu'
 import { changeSession } from '@renderer/function/utils/msgUtil'
 import { popBox } from '@renderer/function/utils/popBox'
 import { vAutoFocus, vMenu, vSearch } from '@renderer/function/utils/vcmd'
 import { i18n } from '@renderer/main'
 import ConfigBox from '@renderer/popboxes/ConfigBox.vue'
 import {
-    inject,
     markRaw,
     shallowReactive,
 } from 'vue'
@@ -77,7 +82,6 @@ const searchInfo = shallowReactive({
     query: shallowReactive([] as SessionBox[]),
     isSearch: false,
 })
-const menu: undefined | InstanceType<typeof FriendMenu> = inject('friendMenu')
 /**
  * 创建一个新的收纳盒
  */
@@ -106,65 +110,3 @@ function newBox() {
     })
 }
 </script>
-
-<style scoped>
-    .exp-body > div {
-        transform: scaleY(0);
-        height: 0;
-    }
-    .exp-body.open > div {
-        transform: scaleY(1);
-        height: unset;
-    }
-    .exp-body > header > div {
-        transition:
-            margin-right 0.3s,
-            transform 0.3s;
-        transform: scaleY(0);
-        margin-right: 0;
-        width: 0;
-    }
-    .exp-body.open > header > div {
-        transform: scaleY(1);
-        margin-right: 10px;
-        width: 5px;
-    }
-
-    .exp-header {
-        color: var(--color-font);
-        align-items: center;
-        border-radius: 7px;
-        cursor: pointer;
-        margin: 0 10px;
-        padding: 10px;
-        display: flex;
-    }
-    .exp-header:hover {
-        background: var(--color-card-2);
-    }
-    .exp-header > div {
-        background: var(--color-main);
-        margin-right: 10px;
-        border-radius: 7px;
-        height: 1rem;
-        width: 5px;
-    }
-    .exp-header > span {
-        flex: 1;
-    }
-    .exp-header > a {
-        color: var(--color-font-2);
-        font-size: 0.9rem;
-    }
-
-    @media (max-width: 700px) {
-        .exp-header:not(.open) {
-            display: none;
-        }
-    }
-    @media (max-width: 500px) {
-        .exp-header > span {
-            display: block !important;
-        }
-    }
-</style>
