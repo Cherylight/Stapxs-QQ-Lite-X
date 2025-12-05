@@ -858,7 +858,7 @@ interface NcForwardData {
 }
 export type NcObForwardSeg = ObSeg<'forward', {
     id: string
-    content: NcForwardData[]
+    content?: NcForwardData[]
 }>
 export type NcObGetForwardMsg = ObResponse<{
     messages: NcForwardData[]
