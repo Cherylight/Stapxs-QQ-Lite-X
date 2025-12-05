@@ -785,7 +785,7 @@ openCheckList.push((times: number) => {
                 master: true,
                 fun: () => {
                     openLink(
-                        'https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X',
+                        `https://github.com/${runtimeData.repoName}`,
                     )
                 },
             },

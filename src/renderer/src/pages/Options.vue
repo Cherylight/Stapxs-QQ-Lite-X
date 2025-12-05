@@ -35,8 +35,8 @@
                     </div>
                     <span>Copyright © 2022 - 2025 Mr.Lee</span>
                     <span style="color: var(--color-main);cursor: pointer;"
-                        @click="openLink('https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X')">
-                        Chzxxuanzheng/Stapxs-QQ-Lite-X
+                        @click="openLink(`https://github.com/${runtimeData.repoName}`)">
+                        {{ runtimeData.repoName }}
                     </span>
                 </div>
                 <svg style="width: 50px"

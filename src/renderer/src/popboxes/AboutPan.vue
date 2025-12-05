@@ -186,6 +186,7 @@ import app from '@renderer/main'
 import DepPan from './DepPan.vue'
 import Icon from '@renderer/components/Icon.vue'
 import { getVersion } from '@renderer/function/utils/systemUtil'
+import { runtimeData } from '@renderer/function/msg'
 
 const {
     showUI
@@ -212,7 +213,7 @@ function dependencies(type = undefined as string | undefined, title = '许可版
 }
 
 function goGithub() {
-    openLink('https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X')
+    openLink(`https://github.com/${runtimeData.repoName}`)
     sendStatEvent('click_statistics', { name: 'visit_github' })
 }
 

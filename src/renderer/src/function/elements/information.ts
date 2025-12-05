@@ -12,10 +12,6 @@ export interface RunTimeDataElem {
     loginInfo: LoginInfo,
     selfInfo?: User
     systemNoticesList?: { [key: string]: any }
-    pageView: {
-        chatView: any
-        msgView: any
-    }
     tags: {
         firstLoad: boolean
         canCors: boolean
@@ -36,6 +32,7 @@ export interface RunTimeDataElem {
     nowAdapter?: AdapterInterface // 当前适配器
     popBoxList: { id: string, data: PopBoxData }[],
     defaultColorMode: 'light' | 'dark',
+    repoName: string
 }
 
 export interface MenuEventData {

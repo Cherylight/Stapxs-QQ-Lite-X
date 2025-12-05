@@ -27,8 +27,6 @@ import {
 } from '@renderer/function/utils/systemUtil'
 import { backend } from '@renderer/runtime/backend'
 import {
-    defineAsyncComponent,
-    markRaw,
     // eslint-disable-next-line no-restricted-imports
     reactive,
     shallowReactive,
@@ -215,16 +213,6 @@ const baseRuntime = {
     watch: shallowReactive({
         backTimes: 0,
     }),
-    pageView: shallowReactive({
-        chatView: markRaw(
-            defineAsyncComponent(() => import('@renderer/pages/Chat.vue')),
-        ),
-        msgView: markRaw(
-            defineAsyncComponent(
-                () => import('@renderer/components/MsgBody.vue'),
-            ),
-        ),
-    }),
     defaultColorMode: 'light' as 'light' | 'dark',  // 系统颜色模式
     systemNoticesList: undefined,
     popBoxList: [],
@@ -232,6 +220,7 @@ const baseRuntime = {
     cm: getCm(),
     nowChat: undefined,
     nowBox: undefined,
+    repoName: import.meta.env.VITE_APP_REPO_NAME,
 }
 
 export const runtimeData: RunTimeDataElem = reactive(baseRuntime)
