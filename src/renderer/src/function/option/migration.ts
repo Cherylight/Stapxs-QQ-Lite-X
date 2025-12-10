@@ -131,7 +131,8 @@ const migrationFunc = {
  */
 export async function checkAndMigration(): Promise<void> {
     // 读取
-    const options = (await oldVersionCheck()) ?? await loadAllOptions()
+    const options = (await loadAllOptions(true)) ?? await oldVersionCheck()
+    if (!options) return
     const oldVersion = options['_version'] ?? 0
     const newOptions = await migration(options)
     // 保存
@@ -166,7 +167,7 @@ export async function migration(data: Record<string, any>): Promise<Record<strin
 export async function oldVersionCheck(): Promise<Record<string, any> | undefined> {
     const backend = await import('@renderer/runtime/backend').then(mod => mod.backend)
     if (backend.type === 'electron') {
-        const data = backend.callSync('opt:getAll')
+        const data = await backend.call(undefined, 'opt:getAll', true)
         // 登陆过的一定有address配置，通过该配置作为特征值
         if (data['address']) return oldOptLoader(data)
         return undefined

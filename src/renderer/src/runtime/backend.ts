@@ -1,10 +1,9 @@
 import VConsole from 'vconsole'
-import app from '../main'
 
 import { CapacitorGlobal } from '@capacitor/core'
 import { IpcRenderer } from '@electron-toolkit/preload'
 import { InvokeArgs, InvokeOptions } from '@tauri-apps/api/core'
-import { logger, popInfo } from '../function/base'
+import { logger } from '../function/base'
 import win from './win'
 
 export const backend = {
@@ -13,7 +12,6 @@ export const backend = {
     de: undefined as undefined | string,
     release: '',
     arch: '' as string | undefined,
-    proxy: undefined as number | undefined,
 
     function: undefined as IpcRenderer |
     {
@@ -39,7 +37,6 @@ export const backend = {
      * 初始化后端功能
      */
     async init(): Promise<void> {
-        const { $t } = app.config.globalProperties
         if (window.electron != undefined) {
             this.type = 'electron'
             this.function = window.electron.ipcRenderer
@@ -106,12 +103,7 @@ export const backend = {
             }
             this.release = `${os} ${version} (Web)`
         }
-        this.proxy  = await this.call(undefined, 'sys:runProxy', true)
         this.de = await this.call(undefined, 'win:getDe', true)
-        if(this.type == 'tauri' && !this.proxy) {
-            logger.error(null, 'Tauri 代理服务似乎没有正常启动，此服务异常将会影响应用内的大部分外部资源的加载。')
-            popInfo.error( $t('Tauri 代理服务似乎没有正常启动'))
-        }
     },
 
     /**
@@ -147,7 +139,7 @@ export const backend = {
             name = name.split(':')[1]
         }
         // 调用对应方法
-        try {
+        // try {
             if ('electron' == this.type && 'invoke' in this.function && 'send' in this.function) {
                 if (needBack) {
                     return await this.function.invoke(name, ...args)
@@ -177,10 +169,10 @@ export const backend = {
                     return back
                 }
             }
-        } catch (ex) {
-            logger.add('DEBUG', `调用后端方法 ${(type ?? '') + ' - '}${name} 失败`, ex)
-            return undefined
-        }
+        // } catch (ex) {
+        //     // logger.add('DEBUG', `调用后端方法 ${(type ?? '') + ' - '}${name} 失败`, ex)
+        //     return undefined
+        // }
     },
 
     /**

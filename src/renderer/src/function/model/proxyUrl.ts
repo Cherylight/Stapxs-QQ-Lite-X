@@ -1,6 +1,6 @@
-import { backend } from '@renderer/runtime/backend'
 import { computed, toRaw } from 'vue'
 import { runtimeData } from '../msg'
+import { backend } from '@renderer/runtime/backend'
 
 /**
  * 走代理的url
@@ -24,6 +24,7 @@ export class ProxyUrl{
      * @returns
      */
     static proxy(raw: string): string {
+        if (backend.type !== 'web') return raw
         if (!runtimeData.tags.canCors) return raw
         return ProxyUrl.proxyMain(raw)
     }
@@ -52,9 +53,7 @@ export class ProxyUrl{
         }
         // 获取跨域连接
         let proxyUrl: string | undefined
-        if (backend.proxy)
-            proxyUrl = `http://localhost:${backend.proxy}/proxy?url=${encodeURIComponent(raw)}`
-        else if (runtimeData.sysConfig.proxyUrl?.trim().length > 0)
+        if (runtimeData.sysConfig.proxyUrl?.trim().length > 0)
             proxyUrl = runtimeData.sysConfig.proxyUrl.trim()
 
         // url 校验

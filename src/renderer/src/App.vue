@@ -4,7 +4,6 @@
         class="top-bar"
         name="appbar"
         data-tauri-drag-region="true">
-        <div class="bar-button" @click="barMainClick()" />
         <div class="space" />
         <div class="controller">
             <div class="min" @click="win.minimize()">
@@ -113,14 +112,6 @@ import win from './runtime/win'
 import ContextMenus from './components/menu/ContextMenus.vue'
 
 //#region == 定义变量 ===================================================
-type PageType = 'Home' | 'Options' | 'Friends' | 'Messages' | 'Boxes'
-const pageInfo = shallowReactive<{
-    page: PageType
-    showChat: boolean
-}>({
-    page: 'Home',
-    showChat: false,
-})
 const fps = shallowReactive({
     last: Date.now(),
     ticks: 0,
@@ -281,46 +272,6 @@ async function init() {
     if (new Date().getMonth() == 3 && new Date().getDate() == 1)
         document.getElementById('connect_btn')?.classList.add('afd')
 }
-
-//#region == 页面相关 ==============================
-/**
- * 切换主标签卡判定
- * @param view 虚拟路径名称
- * @param show 是否显示聊天面板
- */
-function changeTab(view: PageType, show: boolean) {
-    // UM：发送页面路由分析
-    if (!runtimeData.sysConfig.close_ga && !import.meta.env.DEV) {
-        Umami.trackPageView('/' + view)
-    }
-    pageInfo.showChat = show
-    pageInfo.page = view
-    // 附加操作
-    const optTab = document.getElementsByClassName('opt-main-tab')[0] as HTMLDivElement
-    switch (view) {
-        case 'Options': {
-            if (optTab) {
-                optTab.style.opacity = '1'
-            }
-            break
-        }
-        case 'Home': {
-            if (optTab) {
-                optTab.style.opacity = '0'
-            }
-            break
-        }
-    }
-}
-
-function barMainClick() {
-    if (driver.isConnected()) {
-        changeTab('Messages', true)
-    } else {
-        changeTab('Home', false)
-    }
-}
-//#endregion
 
 /**
  * 刷新页面 fps 数据

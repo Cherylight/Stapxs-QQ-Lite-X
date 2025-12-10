@@ -7,7 +7,9 @@ function spaceCfgs(): {_version: number} {
 /**
  * 加载所有配置项
  */
-export async function loadAllOptions(): Promise<Record<string, any>> {
+export async function loadAllOptions(): Promise<Record<string, any>>
+export async function loadAllOptions(retUndefined: true): Promise<Record<string, any> | undefined>
+export async function loadAllOptions(retUndefined?: boolean): Promise<Record<string, any> | undefined> {
     const backend = await import('@renderer/runtime/backend').then(mod => mod.backend)
     let json: string | null
     if ('electron' === backend.type) {
@@ -15,7 +17,10 @@ export async function loadAllOptions(): Promise<Record<string, any>> {
     } else {
         json = localStorage.getItem('options')
     }
-    if (!json) return spaceCfgs()
+    if (!json) {
+        if (retUndefined) return undefined
+        return spaceCfgs()
+    }
     return JSON.parse(json)
 }
 
@@ -27,7 +32,7 @@ export async function saveAllOptions(data: Record<string, any>): Promise<void> {
     const backend = await import('@renderer/runtime/backend').then(mod => mod.backend)
     const json = JSON.stringify(data)
     if ('electron' === backend.type) {
-        backend.callSync('opt:store', {options: json})
+        await backend.call(undefined, 'opt:store', false, {key: 'options', value: json})
     } else {
         localStorage.setItem('options', json)
     }
