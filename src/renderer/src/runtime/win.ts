@@ -14,7 +14,7 @@ const win = markRaw({
     _needMargin: undefined as any as ComputedRef<boolean>,
 
     _forceTilingState: shallowRef<undefined|boolean>(),
-    _darkMode: shallowRef<boolean>(false),
+    _darkMode: shallowRef<boolean|undefined>(undefined),
     _vibrancyMode: shallowRef<boolean>(false),
 
     hasInit: false,
