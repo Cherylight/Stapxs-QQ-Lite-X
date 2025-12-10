@@ -199,7 +199,6 @@
                     'use_language': '切换语言',
                     'click_statistics': '触发按钮',
                     'use_chatview': '切换聊天面板样式',
-                    'cilent': '上报客户端',
                     'show_qed': '触发彩蛋',
 
                     'app_version': '应用版本',
