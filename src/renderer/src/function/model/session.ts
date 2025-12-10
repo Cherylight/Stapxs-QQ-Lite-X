@@ -322,7 +322,7 @@ export abstract class Session {
         // 保存消息
         this.messageList.push(msg)
         this.refreshPreMsg()
-        if(msg instanceof Msg && msg.sender.user_id !== runtimeData.loginInfo.uin)
+        if (msg instanceof Msg && msg.sender.user_id !== runtimeData.loginInfo.uin)
             this.newMsg ++
 
         // 刷新收纳盒
@@ -423,14 +423,15 @@ export abstract class Session {
 
     /**
      * 设为已读消息
+     * @param from 触发来源
      * @param msgId 消息id
      */
-    async setRead(targetMsg?: Msg): Promise<void> {
-        // 避免频繁调用...昨天吃警告了.tx竟然没给我踹下去
+    async setRead(from: 'viewer' | 'sender' | 'cmd', targetMsg?: Msg): Promise<void> {
         this.showNotice = false
         this.highlightInfo.length = 0
         // 关闭该会话所有通知
         new Notify().closeAll((this.id).toString())
+        // 避免频繁调用...昨天吃警告了.tx竟然没给我踹下去
         if (this.newMsg === 0) return
         this.newMsg = 0
 
@@ -453,6 +454,9 @@ export abstract class Session {
         }
 
         // 调用api
+        // 过滤设置
+        if (from === 'viewer' && runtimeData.sysConfig.auto_mark_read !== 'viewer') return
+        if (from === 'sender' && runtimeData.sysConfig.auto_mark_read === 'none') return
         await runtimeData.nowAdapter?.setMsgReaded?.(this, targetMsg)
         await this.runHook('afterSetReadHook')
     }

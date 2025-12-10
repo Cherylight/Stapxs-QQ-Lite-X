@@ -2282,3 +2282,18 @@ msgstr ""
 
 msgid "新提交: {hash}"
 msgstr ""
+
+msgid "上报标记已读消息"
+msgstr ""
+
+msgid "已阅"
+msgstr ""
+
+msgid "浏览+发消息时（默认）"
+msgstr ""
+
+msgid "发消息时"
+msgstr ""
+
+msgid "禁用"
+msgstr ""

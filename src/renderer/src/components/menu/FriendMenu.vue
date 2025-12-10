@@ -302,7 +302,7 @@ function clickReload() {
     emit('close')
 }
 function clickReaded() {
-    getTarget().setRead()
+    getTarget().setRead('cmd')
     emit('close')
 }
 function clickRead() {

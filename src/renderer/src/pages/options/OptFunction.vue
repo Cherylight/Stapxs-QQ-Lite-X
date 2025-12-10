@@ -59,6 +59,27 @@
                 </div>
                 <Switch v-model="runtimeData.sysConfig.preview_notice" />
             </div>
+            <div class="opt-item">
+                <div :class="{changed: !OptionManager.checkDefault('auto_mark_read')}" />
+                <font-awesome-icon :icon="['fas', 'check']" />
+                <div>
+                    <span>{{ $t('上报标记已读消息') }}</span>
+                    <span>{{ $t('已阅') }}</span>
+                </div>
+                <div class="select-wrapper">
+                    <select v-model="runtimeData.sysConfig.auto_mark_read" title="auto_mark_read">
+                        <option value="viewer">
+                            {{ $t('浏览+发消息时（默认）') }}
+                        </option>
+                        <option value="sender">
+                            {{ $t('发消息时') }}
+                        </option>
+                        <option value="none">
+                            {{ $t('禁用') }}
+                        </option>
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="ss-card">
             <header>{{ $t('聊天选项') }}</header>

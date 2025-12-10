@@ -72,6 +72,8 @@ export class Msg extends Message {
      * 是否为已删除消息
      */
     isDelete: boolean = false
+    toMe: boolean = this.atme
+    fromMe: boolean = false
     constructor(data: MsgData)
     constructor(segs: Seg[], sender: IUser, session?: Session, senderTime?: Time)
     constructor(arg1: Seg[] | MsgData, arg2?: IUser, arg3?: Session, arg4?: Time) {
@@ -116,6 +118,9 @@ export class Msg extends Message {
                 this.sender = getSender(data.sender, this.session)
             })
         }
+
+        if (this.sender.user_id === runtimeData.loginInfo.uin) this.fromMe = true
+
         // TODO: 文件图片支持
         let last: undefined | Img
         for (const seg of this.message) {

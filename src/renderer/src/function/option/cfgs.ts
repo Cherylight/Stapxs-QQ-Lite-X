@@ -217,6 +217,9 @@ export const OptionInfos = {
     close_notice: {
         default: true
     },
+    auto_mark_read: {
+        default: 'viewer' as 'viewer' | 'sender' | 'none'
+    },
     bubble_sort_user: {
         default: true,
         onChange: (value: boolean) => {

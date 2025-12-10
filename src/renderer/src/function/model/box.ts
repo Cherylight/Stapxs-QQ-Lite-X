@@ -200,9 +200,9 @@ export class SessionBox {
     /**
      * 设置为已读状态
      */
-    setRead(): void {
+    setRead(from: 'viewer' | 'sender' | 'cmd'): void {
         for (const s of this._content) {
-            s.setRead()
+            s.setRead(from)
         }
     }
     /**

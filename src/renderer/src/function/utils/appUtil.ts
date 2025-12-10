@@ -397,7 +397,7 @@ export function createIpc() {
             [new ReplySeg(String(info.msg)), new TxtSeg(info.content)]
         )
         // 去消息列表内寻找，去除新消息标记
-        session.setRead()
+        session.setRead('sender')
     })
     // 应用功能
     backend.addListener(undefined, 'app:about', () => {
@@ -518,7 +518,7 @@ export async function loadMobile() {
                         ]
                     )
                     // 去消息列表内寻找，去除新消息标记
-                    session.setRead()
+                    session.setRead('sender')
                 }
             })
         }

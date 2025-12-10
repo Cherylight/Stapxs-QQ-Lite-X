@@ -335,7 +335,7 @@ function chatScroll(event: Event) {
 
     // 底部
     if ((body.scrollTop + body.clientHeight + 10) >= body.scrollHeight) {
-        chat.setRead()
+        chat.setRead('viewer')
         tags.showBottomButton = false
     }
     // 显示回到底部

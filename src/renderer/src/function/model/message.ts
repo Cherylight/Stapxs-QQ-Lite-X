@@ -18,6 +18,8 @@ export abstract class Message {
     readonly abstract type: string
     readonly uuid: string = uuid()
     abstract session?: Session
+    abstract toMe: boolean
+    abstract fromMe: boolean
     time?: Time
     constructor(data: {time?: number}) {
 		if (data.time && !isNaN(data.time)) this.time = new Time(data.time)

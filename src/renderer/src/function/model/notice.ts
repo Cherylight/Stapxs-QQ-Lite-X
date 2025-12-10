@@ -31,7 +31,11 @@ import { autoReactive, formatTime } from './utils'
 export abstract class Notice extends Message {
     abstract readonly type: string
 
-    get tome(): boolean {
+    get fromMe(): boolean {
+        return false
+    }
+
+    get toMe(): boolean {
         return false
     }
 }
@@ -78,6 +82,15 @@ export class RecallNotice extends ReceivedNotice {
         if (this.selfRevoke) return this.user.name + $t('撤回了一条消息')
         return this.operator.name + $t('撤回了') + this.user.name + $t('的消息')
     }
+
+    override get fromMe(): boolean {
+        return this.operator.user_id === runtimeData.loginInfo.uin
+    }
+
+    override get toMe(): boolean {
+        if (this.fromMe) return false
+        return this.user.user_id === runtimeData.loginInfo.uin
+    }
 }
 
 @autoReactive
@@ -115,7 +128,12 @@ export class BanNotice extends ReceivedNotice {
         return back
     }
 
-    override get tome(): boolean {
+    override get fromMe(): boolean {
+        return this.operator.user_id === runtimeData.loginInfo.uin
+    }
+
+    override get toMe(): boolean {
+        if (this.fromMe) return false
         return this.user.user_id === runtimeData.loginInfo.uin
     }
 
@@ -125,7 +143,7 @@ export class BanNotice extends ReceivedNotice {
 
     override get preMsg(): string {
         const { $t } = app.config.globalProperties
-        if (this.tome) return this.operator.name + $t('禁言了') + $t('你') + this.fTime
+        if (this.toMe) return this.operator.name + $t('禁言了') + $t('你') + this.fTime
         return this.operator.name + $t('禁言了') + this.user.name + this.fTime
     }
 }
@@ -143,13 +161,18 @@ export class BanLiftNotice extends ReceivedNotice {
         this.users.push(this.user, this.operator)
     }
 
-    override get tome(): boolean {
+    override get fromMe(): boolean {
+        return this.operator.user_id === runtimeData.loginInfo.uin
+    }
+
+    override get toMe(): boolean {
+        if (this.fromMe) return false
         return this.user.user_id === runtimeData.loginInfo.uin
     }
 
     override get preMsg(): string {
         const { $t } = app.config.globalProperties
-        if (this.tome) return this.operator.name + $t('解除了你的禁言')
+        if (this.toMe) return this.operator.name + $t('解除了你的禁言')
         return this.operator.name + $t('解除了') + this.user.name + $t('的禁言')
     }
 }
@@ -172,13 +195,18 @@ export class PokeNotice extends ReceivedNotice {
         this.users.push(this.user, this.target)
     }
 
-    override get tome(): boolean {
+    override get fromMe(): boolean {
+        return this.user.user_id === runtimeData.loginInfo.uin
+    }
+
+    override get toMe(): boolean {
+        if (this.fromMe) return false
         return this.target.user_id === runtimeData.loginInfo.uin
     }
 
     override get preMsg(): string {
         const { $t } = app.config.globalProperties
-        if (this.tome) return this.user.name + $t('戳了你')
+        if (this.toMe) return this.user.name + $t('戳了你')
         return this.user.name + this.action + this.target.name + this.suffix
     }
 
@@ -214,6 +242,10 @@ export class JoinNotice extends ReceivedNotice {
         }
     }
 
+    override get fromMe(): boolean {
+        return this.operator_info?.id === runtimeData.loginInfo.uin
+    }
+
     /**
      * 刷新自身数据
      * 因为刚加群时没他的信息
@@ -247,7 +279,12 @@ export class LeaveNotice extends ReceivedNotice {
         this.users.push(this.user, this.operator)
     }
 
-    override get tome(): boolean {
+    override get fromMe(): boolean {
+        return this.operator.user_id === runtimeData.loginInfo.uin
+    }
+
+    override get toMe(): boolean {
+        if (this.fromMe) return false
         return this.user.user_id === runtimeData.loginInfo.uin
     }
 
@@ -278,7 +315,12 @@ export class ResponseNotice extends ReceivedNotice {
         this.emojiId = Number(data.emojiId)
     }
 
-    override get tome(): boolean {
+    override get fromMe(): boolean {
+        return this.operator.user_id === runtimeData.loginInfo.uin
+    }
+
+    override get toMe(): boolean {
+        if (this.fromMe) return false
         return this.user.user_id === runtimeData.loginInfo.uin
     }
 

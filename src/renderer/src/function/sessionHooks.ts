@@ -34,6 +34,7 @@ Session.afterNewMessageHook.push((session: Session, msg: Message) => {
     if (!(session instanceof GroupSession)) return
     if (msg instanceof SystemNotice) return
     if (!needSendNotice(session)) return
+    if (msg.fromMe) return
 
     if (!isImportant(msg) && !groupNeedShowNotice(session)) return
 
@@ -50,12 +51,19 @@ Session.afterNewMessageHook.push((session: Session, msg: Message) => {
     if (session instanceof GroupSession) return
     if (msg instanceof SystemNotice) return
     if (!needSendNotice(session)) return
+    if (msg.fromMe) return
 
     session.showNotice = true
     // 发送通知
     sendNotify(session, msg)
 })
-
+/**
+ * 设置已读处理
+ */
+Session.afterNewMessageHook.push((session: Session, msg: Message) => {
+    if (!msg.fromMe) return
+    session.setRead('sender')
+})
 //#endregion
 
 //#region == 高亮相关 ==============================================
@@ -145,7 +153,7 @@ function hasConnectionWithImport(msg: Message): boolean {
 function isImportant(msg: Message): boolean {
     if (hasConnectionWithImport(msg)) return true
     if (msg instanceof Notice) {
-        if (msg.tome) return true
+        if (msg.toMe) return true
         return false
     }else if (msg instanceof Msg) {
         if (msg.atme) return true
