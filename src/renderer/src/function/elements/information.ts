@@ -19,6 +19,7 @@ export interface RunTimeDataElem {
         darkMode: boolean
         vibrancy: boolean
         noLogin: boolean    // 一次都没有登陆
+        dev: boolean
     }
     cm: number
     watch: {

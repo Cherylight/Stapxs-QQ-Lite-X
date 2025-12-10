@@ -105,7 +105,7 @@ import GlobalSessionSearchBar from './components/GlobalSessionSearchBar.vue'
 import PopBox from './components/PopBox.vue'
 import Viewer from './components/Viewer.vue'
 import { vHide } from './function/utils/vcmd'
-import { useDailyDo, useFrame, useKeyboard } from './function/utils/vuse'
+import { useFrame, useKeyboard } from './function/utils/vuse'
 import Chat from './pages/Chat.vue'
 import SideBar from './pages/SideBar.vue'
 import { backend } from './runtime/backend'
@@ -114,7 +114,6 @@ import ContextMenus from './components/menu/ContextMenus.vue'
 
 //#region == 定义变量 ===================================================
 type PageType = 'Home' | 'Options' | 'Friends' | 'Messages' | 'Boxes'
-const dev = import.meta.env.DEV
 const pageInfo = shallowReactive<{
     page: PageType
     showChat: boolean
@@ -144,7 +143,7 @@ const titleList = [
     '你好世界！',
     '这只是个普通的彩蛋！'
 ]
-if (dev) {
+if (import.meta.env.DEV) {
     document.title = 'Stapxs QQ Lite X(Dev)'
 }else {
     const title = titleList[Math.floor(Math.random() * titleList.length)]
@@ -172,7 +171,7 @@ window.onbeforeunload = () => {
 window.runtimeData = runtimeData
 
 useKeyboard('f12', ()=>{
-    if (!import.meta.env.DEV) return
+    if (!runtimeData.tags.dev) return
     backend.call(undefined, 'win:openDevTools', false)
 })
 
@@ -187,7 +186,7 @@ useFrame(()=>{
  * 初始化
  */
 async function init() {
-    if(dev)
+    if(import.meta.env.DEV)
         // eslint-disable-next-line
         console.log('[ SSystem Bootloader Complete took ' + (new Date().getTime() - uptime) + 'ms, welcome to sar-dos on stapxs-qq-lite.su ]')
     else
@@ -201,13 +200,13 @@ async function init() {
     App.createMenu() // Electron：创建菜单
     App.createIpc() // Electron：创建 IPC 通信
     // 加载开发者相关功能
-    if (dev) {
+    if (import.meta.env.DEV) {
         document.title = 'Stapxs QQ Lite X (Dev)'
         // FPS 检查
         rafLoop()
     }
 
-    if(dev) {
+    if(import.meta.env.DEV) {
         logger.debug('stapxs-qq-lite.su:$/mnt/boot/dawnHunt/bin/core --pour /mnt/app/bin/main', true)
         logger.system('[ dawnHuntCore Version: 1.0 Beta, dawnHuntDB: 2025-04-24 ]')
     } else {
@@ -216,7 +215,7 @@ async function init() {
     logger.debug('系统配置' + runtimeData.sysConfig)
 
     // 基础初始化完成
-    logger.system('欢迎回来，开发者。Stapxs QQ Lite X 正处于 ' + (dev ? 'development' : 'production') + ' 模式。正在为您加载更多功能。')
+    logger.system('欢迎回来，开发者。Stapxs QQ Lite X 正处于 ' + (import.meta.env.DEV ? 'development' : 'production') + ' 模式。正在为您加载更多功能。')
     // 加载移动平台特性
     App.loadMobile()
     // 服务发现
@@ -249,24 +248,26 @@ async function init() {
     //#endregion
 
     //#region == 加载 Umami 统计功能 ============================
-    if (!runtimeData.sysConfig.close_ga && !dev) {
-        const config = {
-            baseUrl: import.meta.env.VITE_APP_MU_ADDRESS,
-            websiteId: import.meta.env.VITE_APP_MU_ID
-        } as any
-        // 给页面添加一个来源域名方便在 electron 中获取
-        if(!backend.isWeb()) {
-            config.hostName = backend.type + '.stapxs.cn'
+    if (!runtimeData.sysConfig.close_ga) {
+        if (import.meta.env.DEV) {
+            logger.system('开发者，由于 Stapxs QQ Lite X 运行在调试模式下，分析组件并未初始化 …… 系统将无法捕获开发者阁下的访问状态，请悉知。')
+        } else {
+            const config = {
+                baseUrl: import.meta.env.VITE_APP_MU_ADDRESS,
+                websiteId: import.meta.env.VITE_APP_MU_ID
+            } as any
+            // 给页面添加一个来源域名方便在 electron 中获取
+            if(!backend.isWeb()) {
+                config.hostName = backend.type + '.stapxs.cn'
+            }
+            Umami.initialize(config)
+            // 上报一些应用基础信息
+            App.sendIdentifyData({
+                'app_version': import.meta.env.VITE_APP_CLIENT_TAG + ',' + getVersion(),
+                'os_version': backend.release,
+                'os_arch': backend.arch,
+            })
         }
-        Umami.initialize(config)
-        // 上报一些应用基础信息
-        App.sendIdentifyData({
-            'app_version': import.meta.env.VITE_APP_CLIENT_TAG + ',' + getVersion(),
-            'os_version': backend.release,
-            'os_arch': backend.arch,
-        })
-    } else if (dev) {
-        logger.system('开发者，由于 Stapxs QQ Lite X 运行在调试模式下，分析组件并未初始化 …… 系统将无法捕获开发者阁下的访问状态，请悉知。')
     }
     //#endregion
 
@@ -289,7 +290,7 @@ async function init() {
  */
 function changeTab(view: PageType, show: boolean) {
     // UM：发送页面路由分析
-    if (!runtimeData.sysConfig.close_ga && !dev) {
+    if (!runtimeData.sysConfig.close_ga && !import.meta.env.DEV) {
         Umami.trackPageView('/' + view)
     }
     pageInfo.showChat = show

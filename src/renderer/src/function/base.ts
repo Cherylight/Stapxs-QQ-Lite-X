@@ -9,6 +9,7 @@
 import { shallowReactive } from 'vue'
 import { PopInfoElem } from './elements/system'
 import OptionManager from './option/option'
+import { runtimeData } from './msg'
 
 // =============== 日志 ===============
 
@@ -29,7 +30,7 @@ function normallyConditionCheck(type: LogType): boolean {
     if (logLevel === 'debug' && (type === 'DEBUG' || type === 'UI')) return true
     if (logLevel === 'info' && type === 'INFO') return true
     if (logLevel === 'err' && type === 'ERR') return true
-    if (import.meta.env.DEV && type === 'SYSTEM') return true
+    if (runtimeData.tags.dev && type === 'SYSTEM') return true
     return false
 }
 

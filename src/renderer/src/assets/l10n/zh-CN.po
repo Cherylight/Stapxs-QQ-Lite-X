@@ -2297,3 +2297,15 @@ msgstr ""
 
 msgid "禁用"
 msgstr ""
+
+msgid "调试模式"
+msgstr ""
+
+msgid "开发者阁下，你好👋"
+msgstr ""
+
+msgid "打开欢迎窗口"
+msgstr ""
+
+msgid "Welcome to use Stapxs QQ Lite X"
+msgstr ""

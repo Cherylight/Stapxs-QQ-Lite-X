@@ -129,7 +129,7 @@
                 <input v-model="appmsg_text" class="ss-input"
                     style="width: 150px" type="text" @keyup="sendTestAppmsg">
             </div>
-            <div v-if="dev" class="opt-item">
+            <div v-if="runtimeData.tags.dev" class="opt-item">
                 <font-awesome-icon :icon="['fas', 'window-restore']" />
                 <div>
                     <span>{{ $t('强制窗口状态') }}</span>
@@ -149,7 +149,7 @@
                     </select>
                 </div>
             </div>
-            <div v-if="dev" class="opt-item">
+            <div v-if="runtimeData.tags.dev" class="opt-item">
                 <font-awesome-icon :icon="['fas', 'trash']" />
                 <div>
                     <span>{{ $t('移除未使用的配置') }}</span>
@@ -161,7 +161,7 @@
                 </button>
             </div>
             <div class="opt-item">
-                <font-awesome-icon :icon="['fas', 'trash']" />
+                <font-awesome-icon :icon="['fas', 'face-grin-wink']" />
                 <div>
                     <span>{{ $t('打开欢迎窗口') }}</span>
                     <span>{{ $t('Welcome to use Stapxs QQ Lite X') }}</span>
@@ -206,6 +206,14 @@
                     </button>
                 </div>
             </template>
+            <div class="opt-item">
+                <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
+                <div>
+                    <span>{{ $t('调试模式') }}</span>
+                    <span>{{ $t('开发者阁下，你好👋') }}</span>
+                </div>
+                <Switch v-model="runtimeData.sysConfig.dev_mode" />
+            </div>
         </div>
         <div class="ss-card">
             <header>{{ $t('维护与备份') }}</header>
@@ -267,7 +275,6 @@ import win from '@renderer/runtime/win'
 import WelPan from '@renderer/popboxes/WelPan.vue'
 
 const $t = app.config.globalProperties.$t
-const dev = import.meta.env.DEV
 const appmsg_text = shallowRef('')
 const winState = shallowRef<'none' | 'tiling' | 'win'>('none')
 

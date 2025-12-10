@@ -295,5 +295,8 @@ export const OptionInfos = {
     debug_msg: {
         default: false
     },
+    dev_mode: {
+        default: false
+    }
     //#endregion
 } satisfies Record<string, OptionField<any>>

@@ -185,7 +185,7 @@ function init(): void {
     }
 
     // 开发者工具
-    menuDisplay.dev = import.meta.env.DEV
+    menuDisplay.dev = runtimeData.tags.dev
 
     // 要求会话的
     if (!session) {

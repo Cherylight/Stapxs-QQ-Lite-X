@@ -209,6 +209,7 @@ const baseRuntime = {
         canCors: false,
         vibrancy: false,
         noLogin: true,  // 一次都没有登陆
+        dev: false,
     }),
     watch: shallowReactive({
         backTimes: 0,
@@ -263,3 +264,13 @@ runtimeData.defaultColorMode = media.matches ? 'dark' : 'light'
 media.addEventListener('change', (e)=>{
     runtimeData.defaultColorMode = e.matches ? 'dark' : 'light'
 })
+
+// 开发模式
+function checkInitMode() {
+    if (runtimeData.sysConfig.dev_mode)
+        runtimeData.tags.dev = true
+    else
+        runtimeData.tags.dev = import.meta.env.DEV
+}
+watchEffect(checkInitMode)
+checkInitMode()
