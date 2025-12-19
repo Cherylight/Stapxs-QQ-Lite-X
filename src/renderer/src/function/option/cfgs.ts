@@ -272,6 +272,9 @@ export const OptionInfos = {
     dont_parse_delete: {
         default: false
     },
+    hide_empty_msg: {
+        default: false
+    },
     jump_forward: {
         default: true
     },
