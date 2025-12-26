@@ -2309,3 +2309,6 @@ msgstr ""
 
 msgid "Welcome to use Stapxs QQ Lite X"
 msgstr ""
+
+msgid "版本号{version}格式异常，某些功能可能无法使用"
+msgstr "版本号{version}格式异常，某些功能可能无法使用"

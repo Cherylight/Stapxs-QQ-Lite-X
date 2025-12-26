@@ -7,6 +7,12 @@
     <div v-if="status.info" class="bot-info">
         <div>
             <span>
+                <span>{{ $t('Milky版本') + ': ' }}</span>
+                <span>
+                    {{ status.info.milky_version }}
+                </span>
+            </span>
+            <span>
                 <span>{{ $t('协议端名称') + ': ' }}</span>
                 <span>
                     {{ status.info.impl_name }}

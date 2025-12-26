@@ -50,6 +50,7 @@ import { Resource } from '@renderer/function/model/resource'
 import { AtAllSeg, AtSeg, FaceSeg, ForwardSeg, ImgSeg, JsonSeg, MfaceSeg, ReplySeg, Seg, TxtSeg, UnknownSeg, VideoSeg, XmlSeg } from '@renderer/function/model/seg'
 import { queueWait } from '@renderer/function/utils/systemUtil'
 import * as MilkyType from '@saltify/milky-types'
+import * as Milky11Type from './milky11type'
 import {
     Event,
     IncomingForwardedMessage,
@@ -64,8 +65,9 @@ import * as ISeg from './incomeSeg'
 import MkInfo from './MkInfo.vue'
 import * as OSeg from './outgoingSeg'
 import { $t, createSender, fileToBase64, getGender, getRole } from './utils'
-import { logger } from '@renderer/function/base'
+import { logger, popInfo } from '@renderer/function/base'
 
+import semver from 'semver'
 
 // 提取输出类型的工具类型
 type ExtractMilkyTypes<T, suffix extends string> = {
@@ -77,7 +79,7 @@ type ExtractMilkyTypes<T, suffix extends string> = {
 }[keyof T]
 
 // 从MilkyType中提取所有输出类型
-type MilkyApiOutputTypes = ExtractMilkyTypes<typeof MilkyType, 'Output'>
+type MilkyApiOutputTypes = ExtractMilkyTypes<typeof MilkyType & typeof Milky11Type, 'Output'>
 
 // 动态创建API对象，支持包的变更
 const createApiSchemas = <T extends Record<string, any>>(schemas: T) => {
@@ -95,7 +97,7 @@ const createApiSchemas = <T extends Record<string, any>>(schemas: T) => {
 }
 
 // 动态生成的API schemas
-const Api = createApiSchemas(MilkyType)
+const Api = createApiSchemas({...MilkyType, ...Milky11Type})
 interface MkOkResponse<T extends MilkyApiOutputTypes> {
     status: 'ok'
     retcode: 0
@@ -191,7 +193,27 @@ export class MilkyAdapter implements AdapterInterface {
     ): Promise<boolean> {
         driver.reset(url, ssl, token, 'event')
         driver.onMessage(this.handleEvent.bind(this))
-        return await driver.open()
+        const re = await driver.open()
+        if (!re) return re
+
+        const implInfo = (await this.getImplInfoRaw())
+        if (!implInfo) return false
+
+        let version = implInfo.milky_version
+
+        if (!semver.valid(version)) {
+            popInfo.error($t('版本号{version}格式异常，某些功能可能无法使用', { version }))
+            version = '1.0.0'
+        }
+
+        // 根据协议段版本禁用不支持的API
+        if (semver.lt(version, '1.1.0')) {
+            this.getCustomFace = undefined as any
+            this.setNickname = undefined as any
+            this.setSign = undefined as any
+        }
+
+        return re
     }
     async close(): Promise<true | undefined> {
         await driver.close()
@@ -399,8 +421,15 @@ export class MilkyAdapter implements AdapterInterface {
      * 获取用户自定义表情
      * @param userId
      */
-    // @api
-    async getCustomFace?(): Promise<string[] | undefined>
+    @api
+    async getCustomFace(): Promise<string[] | undefined> {
+        const data = await this.callApi(
+            'get_custom_face_url_list',
+            Api.GetCustomFaceUrlListInput.parse({}),
+            Api.GetCustomFaceUrlListOutput,
+        )
+        return data?.urls ?? undefined
+    }
     /**
      * 获取资源url
      * @param id 资源id
@@ -892,14 +921,26 @@ export class MilkyAdapter implements AdapterInterface {
      * 设置昵称
      * @param nickname 新昵称
      */
-    // @api
-    setNickname?(nickname: string): Promise<true | undefined>
+    @api
+    async setNickname(nickname: string): Promise<true | undefined> {
+        await this.callApi(
+            'set_nickname',
+            Api.SetNicknameInput.parse({ new_nickname: nickname })
+        )
+        return true
+    }
     /**
      * 设置个性签名
      * @param sign 新签名
      */
-    // @api
-    setSign?(sign: string): Promise<true | undefined>
+    @api
+    async setSign(sign: string): Promise<true | undefined> {
+        await this.callApi(
+            'set_bio',
+            Api.SetBioInput.parse({ new_bio: sign })
+        )
+        return true
+    }
     //#endregion
     //#endregion
 
