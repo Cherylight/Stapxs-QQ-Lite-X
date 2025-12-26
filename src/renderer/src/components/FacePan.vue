@@ -67,13 +67,14 @@
                         </div>
                     </template>
                     <template v-else-if="runtimeData.stickerCache && runtimeData.stickerCache.length > 0">
-                        <img v-for="(url, index) in runtimeData.stickerCache"
-                            v-show="url != 'end'"
-                            :key="'stickers-' + index"
-                            loading="lazy"
-                            :src="url"
-                            :alt="'[' + $t('动画表情') + ']'"
-                            @click="addImgFace(url)">
+                        <span v-for="(url, index) in runtimeData.stickerCache" :key="'stickers-' + index">
+                            <img
+                                v-show="url != 'end'"
+                                loading="lazy"
+                                :src="url"
+                                :alt="'[' + $t('动画表情') + ']'"
+                                @click="addImgFace(url)">
+                        </span>
                     </template>
                     <template v-else>
                         <div v-show="runtimeData.stickerCache && runtimeData.stickerCache.length <= 0"

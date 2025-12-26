@@ -706,9 +706,14 @@ body {
     height: calc(300px - 110px);
 }
 
-.face-stickers > img {
+.face-stickers > span {
     height: 44px;
     width: 44px;
+}
+
+.face-stickers > span > img {
+    max-height: 44px;
+    max-width: 44px;
 }
 
 .respond {
