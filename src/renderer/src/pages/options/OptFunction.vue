@@ -206,6 +206,15 @@
                 <Switch v-model="runtimeData.sysConfig.dont_parse_delete" />
             </div>
             <div class="opt-item">
+                <div :class="{changed: !OptionManager.checkDefault('hide_empty_msg')}" />
+                <font-awesome-icon :icon="['fas', 'xmark']" />
+                <div>
+                    <span>{{ $t('过滤空消息') }}</span>
+                    <span>{{ $t('屏蔽，不支持消息可能产生的空消息') }}</span>
+                </div>
+                <Switch v-model="runtimeData.sysConfig.hide_empty_msg" />
+            </div>
+            <div class="opt-item">
                 <div :class="{changed: !OptionManager.checkDefault('jump_forward')}" />
                 <font-awesome-icon :icon="['fas', 'share']" />
                 <div>

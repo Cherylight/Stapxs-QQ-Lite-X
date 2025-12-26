@@ -278,6 +278,10 @@ export abstract class Session {
         await queueWait(this._addMessage(msg), `addMessage-${this.type}-${this.id}`, 10000)
     }
     private async _addMessage(msg: Message) {
+        // 过滤空消息
+        if (msg instanceof Msg && runtimeData.sysConfig.hide_empty_msg && msg.message.length === 0) {
+            return
+        }
         let beforeActive = false
         // 激活消息
         if (!this.isActive) {
