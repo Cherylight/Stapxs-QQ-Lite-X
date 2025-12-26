@@ -1,36 +1,36 @@
 <template>
-	<div>
-		<div class="ss-card msg-menu-body" @click.stop>
-			<div v-if="menuDisplay.at" @click="setAt">
-				<div><font-awesome-icon :icon="['fas', 'at']" /></div>
-				<a>{{ $t('提及') }}</a>
-			</div>
-			<div v-if="menuDisplay.poke" @click="sendPoke">
-				<div><font-awesome-icon :icon="['fas', 'fa-hand-point-up']" /></div>
-				<a>{{ $t('戳一戳') }}</a>
-			</div>
-			<div v-if="menuDisplay.remove" @click="removeUser">
-				<div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
-				<a>{{ $t('移出群聊') }}</a>
-			</div>
-			<!-- TODO <div v-if="menuDisplay.menuSelectedUser instanceof Member" v-if="menuDisplay.config"
+    <div>
+        <div class="ss-card msg-menu-body" @click.stop>
+            <div v-if="menuDisplay.at" @click="setAt">
+                <div><font-awesome-icon :icon="['fas', 'at']" /></div>
+                <a>{{ $t('提及') }}</a>
+            </div>
+            <div v-if="menuDisplay.poke" @click="sendPoke">
+                <div><font-awesome-icon :icon="['fas', 'fa-hand-point-up']" /></div>
+                <a>{{ $t('戳一戳') }}</a>
+            </div>
+            <div v-if="menuDisplay.remove" @click="removeUser">
+                <div><font-awesome-icon :icon="['fas', 'trash-can']" /></div>
+                <a>{{ $t('移出群聊') }}</a>
+            </div>
+            <!-- TODO <div v-if="menuDisplay.menuSelectedUser instanceof Member" v-if="menuDisplay.config"
 				@click="openChatInfoPan();
 						infoRef?.openMoreConfig(menuDisplay.menuSelectedUser);
 						closeUserMenu();">
 				<div><font-awesome-icon :icon="['fas', 'cog']" /></div>
 				<a>{{ $t('成员设置') }}</a>
 			</div> -->
-		</div>
-	</div>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { popInfo } from '@renderer/function/base';
-import { GroupSession, Session } from '@renderer/function/model/session';
-import { IUser, Member } from '@renderer/function/model/user';
-import { runtimeData } from '@renderer/function/msg';
-import { ensurePopBox } from '@renderer/function/utils/popBox';
-import app from '@renderer/main';
+import { popInfo } from '@renderer/function/base'
+import { GroupSession, Session } from '@renderer/function/model/session'
+import { IUser, Member } from '@renderer/function/model/user'
+import { runtimeData } from '@renderer/function/msg'
+import { ensurePopBox } from '@renderer/function/utils/popBox'
+import app from '@renderer/main'
 import { shallowReactive } from 'vue'
 
 //#region == 变量声明 ============================================

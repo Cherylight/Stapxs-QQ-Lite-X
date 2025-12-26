@@ -34,12 +34,12 @@
                 v-if="runtimeData.sysConfig.bubble_sort_user"
                 key="inMessage-bubble-box"
                 v-menu.prevent="event => openFriendMenu(
-					event.x,
-					event.y,
-					'message',
-					undefined,
-					BubbleBox.instance,
-				)"
+                    event.x,
+                    event.y,
+                    'message',
+                    undefined,
+                    BubbleBox.instance,
+                )"
                 :data="markRaw(BubbleBox.instance)"
                 from="message"
                 @user-click="session => changeSession(session, BubbleBox.instance)" />
@@ -49,11 +49,11 @@
                     v-if="item instanceof Session"
                     :key="'inMessage-' + item.id"
                     v-menu.prevent="event => openFriendMenu(
-						event.x,
-						event.y,
-						'message',
-						item,
-					)"
+                        event.x,
+                        event.y,
+                        'message',
+                        item,
+                    )"
                     :data="item"
                     from="message"
                     @click="changeSession(item)" />
@@ -62,12 +62,12 @@
                     :key="'inMessage-box-' + item.id"
                     ref="sessionBoxes"
                     v-menu.prevent="event => openFriendMenu(
-						event.x,
-						event.y,
-						'message',
-						undefined,
-						item,
-					)"
+                        event.x,
+                        event.y,
+                        'message',
+                        undefined,
+                        item,
+                    )"
                     :data="item"
                     from="message"
                     @user-click="(session)=>changeSession(session, item)" />

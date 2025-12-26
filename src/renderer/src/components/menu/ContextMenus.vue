@@ -9,23 +9,21 @@
             @before-leave="(el) => customAnimationName('before-leave')(el)"
             @leave="(el) => customAnimationName('leave')(el)"
             @after-leave="(el) => customAnimationName('after-leave')(el)"
-            @leave-cancelled="(el) => customAnimationName('cancel-leave')(el)"
-        >
-            <ContextMenu v-for="value in contextMenus" :key="value.id"
-                :id="value.id"
+            @leave-cancelled="(el) => customAnimationName('cancel-leave')(el)">
+            <ContextMenu v-for="value in contextMenus" :id="value.id"
+                :key="value.id"
                 :x="value.x"
                 :y="value.y"
                 :template="value.template"
                 :args="value.args"
                 :controller="value.controller"
-                :animationName="value.animationName"
-            />
+                :animation-name="value.animationName" />
         </TransitionGroup>
     </Teleport>
 </template>
 <script setup lang="ts">
 import { contextMenus } from '@renderer/function/utils/contextMenu'
-import ContextMenu from './ContextMenu.vue';
+import ContextMenu from './ContextMenu.vue'
 
 function customAnimationName(state:
     | 'before-enter'

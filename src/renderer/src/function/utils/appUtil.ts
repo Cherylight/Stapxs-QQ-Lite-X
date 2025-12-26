@@ -658,6 +658,7 @@ function stableVersionCheck() {
 * 展示更新弹窗
 * @param data 更新数据
 */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function showUpdateLog(data: any) {
     const appVersion = appInfo.version // 当前版本
     const cacheVersion = localStorage.getItem('version') // 缓存版本

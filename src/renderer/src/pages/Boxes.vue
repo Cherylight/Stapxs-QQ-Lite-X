@@ -34,12 +34,12 @@
                     v-for="box in SessionBox.sessionBoxes"
                     :key="box.id"
                     v-menu.prevent="event => openFriendMenu(
-						event.x,
-						event.y,
-						'friend',
-						undefined,
-						box
-					)"
+                        event.x,
+                        event.y,
+                        'friend',
+                        undefined,
+                        box
+                    )"
                     :data="box"
                     from="friend"
                     @user-click="session=>changeSession(session, box)" />

@@ -89,20 +89,19 @@
 <script setup lang="ts">
 import MsgBar from './MsgBar.vue'
 
-import { logger, popInfo } from '@renderer/function/base'
+import { popInfo } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import { Message } from '@renderer/function/model/message'
 import { Msg } from '@renderer/function/model/msg'
 import { ForwardSeg } from '@renderer/function/model/seg'
 import { runtimeData } from '@renderer/function/msg'
-import { downloadFile } from '@renderer/function/utils/appUtil'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
 import { mergeForward, singleForward } from '@renderer/function/utils/msgUtil'
 import { copyToClipboard, getViewTime } from '@renderer/function/utils/systemUtil'
 import { vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import { useViewportUnits } from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
-import { nextTick, shallowReactive, shallowRef, useTemplateRef, watch } from 'vue'
+import { nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import ChatMsgMenu from './menu/ChatMsgMenu.vue'
 
 const { vw } = useViewportUnits()
@@ -110,11 +109,6 @@ const stack = runtimeData.mergeMsgStack
 const nowData = shallowRef<undefined | ForwardSeg>()
 const addMode = shallowRef(true)
 const positionCache: number[] = []
-const menuDisplay = shallowReactive({
-    canForward: false,
-    downloadImgSrc: '',
-    selectMsg: null as null | Msg,
-})
 const isMultiselectMode = shallowRef(false)
 
 const msgBarEl = useTemplateRef('msgBar')

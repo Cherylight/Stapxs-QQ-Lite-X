@@ -45,12 +45,12 @@
                             <FriendBody v-for="item in class_.content"
                                 :key=" 'fb-' + item.id "
                                 v-menu.prevent="event => {
-									openFriendMenu(
-										event.x,
-										event.y,
-										'friend',
-										item
-									)
+                                    openFriendMenu(
+                                        event.x,
+                                        event.y,
+                                        'friend',
+                                        item
+                                    )
                                 }"
                                 :data="item"
                                 from="friend"
@@ -64,11 +64,11 @@
                     <FriendBody v-for="item in searchInfo.originList"
                         :key="'fb-' + item.id"
                         v-menu.prevent="event => openFriendMenu(
-							event.x,
-							event.y,
-							'friend',
-							item
-						)"
+                            event.x,
+                            event.y,
+                            'friend',
+                            item
+                        )"
                         :data="item as Session"
                         from="friend"
                         @click="userClick(item as Session)" />
@@ -80,11 +80,11 @@
                     <FriendBody v-for="item in searchInfo.query"
                         :key="'fb-' + item.id"
                         v-menu.prevent="event => openFriendMenu(
-							event.x,
-							event.y,
-							'friend',
-							item
-						)"
+                            event.x,
+                            event.y,
+                            'friend',
+                            item
+                        )"
                         :data="item as Session"
                         from="friend"
                         @click="userClick(item as Session)" />

@@ -76,12 +76,12 @@
                         <FriendBody v-for="item in data.sortContentByTime"
                             :key="item.id"
                             v-menu.prevent.stop="event => openFriendMenu(
-								event.x,
-								event.y,
-								'message',
-								toRaw(item),
-								toRaw(data)
-							)"
+                                event.x,
+                                event.y,
+                                'message',
+                                toRaw(item),
+                                toRaw(data)
+                            )"
                             :data="item"
                             :from="from"
                             :box="data"
@@ -93,12 +93,12 @@
                     <FriendBody v-for="item in data.sortContentByName"
                         :key="item.id"
                         v-menu.prevent.stop="event => openFriendMenu(
-							event.x,
-							event.y,
-							'friend',
-							toRaw(item),
-							toRaw(data)
-						)"
+                            event.x,
+                            event.y,
+                            'friend',
+                            toRaw(item),
+                            toRaw(data)
+                        )"
                         :data="item"
                         :from="from"
                         :box="data"

@@ -12,10 +12,9 @@
 -->
 <template>
     <div :id="`context-menu-${id}`"
-        :data-animation-name="animationName"
         ref="content"
-        class="content"
-    >
+        :data-animation-name="animationName"
+        class="content">
         <component :is="template" v-bind="args"
             @close="controller.close" />
     </div>

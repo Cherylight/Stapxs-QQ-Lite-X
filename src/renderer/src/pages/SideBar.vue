@@ -159,6 +159,8 @@ const foldState = computed<'open' | 'fold'>(() => {
             return 'fold'
         case 'hide':
             return 'open'
+        default:
+            throw new Error(`未知侧边栏状态${runtimeData.sysConfig.auto_hide_side_bar}`)
     }
 })
 

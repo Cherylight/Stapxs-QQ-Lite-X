@@ -5,8 +5,7 @@
             class="ss-card respond"
             :class="{
                 'open': unfoldResponse
-            }"
-        >
+            }">
             <div @wheel="
                 !unfoldResponse ?
                     ($event.currentTarget as HTMLElement).scrollLeft += $event.deltaY

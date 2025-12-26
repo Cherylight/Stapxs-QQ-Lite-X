@@ -126,7 +126,7 @@
         <UserInfoPanComponent :data="userInfoPanData" />
         <!-- msg 预览栏 -->
         <MsgPrevPanComponent :data="msgPrevPanData" />
-	</div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -387,7 +387,7 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
 function showUserMenu(data: MenuEventData, user: IUser) {
 	const setAtFunc = (member: Member) => {
 		chat.inputMsg.addSq(new AtSeg(member.user_id))
-		chatBottom.value?.toMainInput();
+		chatBottom.value?.toMainInput()
 	}
 
 	const menu = openContextMenu(
