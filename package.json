@@ -32,7 +32,6 @@
     "dependencies": {
         "@electron-toolkit/preload": "^3.0.0",
         "@electron-toolkit/utils": "^3.0.0",
-        "@saltify/milky-types": "1.1.0-rc.6",
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-opener": "^2",
         "@tauri-apps/plugin-shell": "~2",
@@ -69,6 +68,7 @@
         "@hugotomazi/capacitor-navigation-bar": "^4.0.1",
         "@modyfi/vite-plugin-yaml": "^1.1.0",
         "@rushstack/eslint-patch": "^1.10.3",
+        "@saltify/milky-types": "1.1.0-rc.6",
         "@stapxs/capacitor-sync-version": "^1.0.10",
         "@stapxs/umami-logger-typescript": "^1.0.15",
         "@tauri-apps/cli": "^2.3.1",
