@@ -32,7 +32,7 @@
     "dependencies": {
         "@electron-toolkit/preload": "^3.0.0",
         "@electron-toolkit/utils": "^3.0.0",
-        "@saltify/milky-types": "^1.0.0-draft.11",
+        "@saltify/milky-types": "1.1.0-rc.6",
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-opener": "^2",
         "@tauri-apps/plugin-shell": "~2",
@@ -76,6 +76,7 @@
         "@types/jsonpath": "^0.2.4",
         "@types/node": "^20.14.8",
         "@types/semver": "^7.5.8",
+        "@typescript/native-preview": "^7.0.0-dev.20251226.1",
         "@untiny/capacitor-safe-area": "^1.0.3",
         "@vitejs/plugin-vue": "^5.0.5",
         "@vue/eslint-config-typescript": "^13.0.0",

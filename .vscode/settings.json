@@ -1,0 +1,24 @@
+{
+	"cSpell.words": [
+		"Anns",
+		"atall",
+		"ciallo",
+		"Lltb",
+		"Mface",
+		"ntqq",
+		"Onebot",
+		"popboxes",
+		"retcode",
+		"Rkey",
+		"saltify",
+		"Segs",
+		"Stapxs",
+		"ungroup",
+		"uuidv",
+		"vcmd",
+		"vuse",
+		"xmark"
+	],
+    "typescript.experimental.useTsgo": true,
+    "typescript.native-preview.tsdk": "node_modules/@typescript/native-preview"
+}

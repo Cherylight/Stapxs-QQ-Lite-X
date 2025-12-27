@@ -13,7 +13,6 @@ dist_tauri
 dist_capacitor
 stats.html
 
-.vscode/settings.json
 notice_local.json
 
 tmp
