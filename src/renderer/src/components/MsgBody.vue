@@ -119,6 +119,7 @@
                             <img v-else-if="item instanceof MfaceSeg"
                                 :class=" imgStyle(data.message.length, index, true) + ' msg-mface'"
                                 :src="item.src"
+                                :title="item.summary"
                                 :alt="item.summary"
                                 @load="imageLoaded"
                                 @error="imgLoadFail"
