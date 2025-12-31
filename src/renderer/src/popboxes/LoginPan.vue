@@ -176,7 +176,7 @@ function saveAutoConnect(event: PointerEvent) {
 function howToConnect() {
     popBox({
         title: $t('如何连接？'),
-        template: HowToConnect,
+        comp: HowToConnect,
         svg: 'book',
         button: [
             {
@@ -192,7 +192,7 @@ function howToConnect() {
  */
 function openOptions() {
     popBox({
-        template: Options,
+        comp: Options,
     })
 }
 

@@ -567,7 +567,7 @@ function getDnsType(type: number): 'A' | 'AAAA' | 'CNAME' | 'SRV' | 'TXT' | 'OTH
  */
 export function openLoginPan() {
     popBox({
-        template: LoginPan,
+        comp: LoginPan,
         allowAutoClose: false,
     })
 }

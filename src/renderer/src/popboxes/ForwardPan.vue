@@ -122,7 +122,7 @@ async function runForward(){
 
     popBox({
         title: title,
-        template: () => h(
+        comp: () => h(
             'div',
             {style: {overflowY: 'auto'}},
             [h(

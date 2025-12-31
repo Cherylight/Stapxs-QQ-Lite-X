@@ -314,7 +314,7 @@ const ndv = shallowRef(false)
 
 function showUmamiInfo() {
     popBox({
-        template: UmamiInfoPan,
+        comp: UmamiInfoPan,
         full: true,
     })
 }

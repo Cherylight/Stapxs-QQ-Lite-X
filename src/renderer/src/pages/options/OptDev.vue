@@ -612,7 +612,7 @@ async function forceWinState() {
 
 function openWelcomeWindow() {
     popBox({
-        template: WelPan,
+        comp: WelPan,
         allowAutoClose: false,
     })
 }

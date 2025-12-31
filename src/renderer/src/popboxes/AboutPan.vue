@@ -204,10 +204,9 @@ function dependencies(type = undefined as string | undefined, title = '许可版
     popBox({
         title: $t(title),
         svg: 'key',
-        template: DepPan,
-        templateValue: {
+        comp: DepPan,
+        props: {
             type: type,
-            title: title
         }
     })
 }

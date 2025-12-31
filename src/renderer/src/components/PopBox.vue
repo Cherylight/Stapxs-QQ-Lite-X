@@ -29,9 +29,10 @@
                     :icon="['fas', 'xmark']" @click="autoClose" />
             </header>
             <component
-                :is="template"
-                v-bind="templateValue"
-                v-model="templateModel"
+                :is="slotComp"
+                v-bind="slotProps"
+                v-model="slotModel"
+                v-on="slotEmit"
                 @close-pop-box="closeSelf" />
             <div v-if="buttons.length > 0" class="button">
                 <button v-for="(button, index) in buttons"
@@ -59,15 +60,16 @@ import { useViewportUnits } from '@renderer/function/utils/vuse'
 import anime from 'animejs'
 import { nextTick, shallowRef, useTemplateRef } from 'vue'
 
-const { props } = defineProps<{props: {id: string, data: PopBoxData}}>()
+const { props } = defineProps<{props: {id: string, data: PopBoxData<any>}}>()
 
 const id = props.id
 const {
     svg,
     title,
-    template,
-    templateValue,
-    templateModel,
+    comp: slotComp,
+    props: slotProps = {},
+    model: slotModel,
+    emit: slotEmit = {},
     full = false,
     button: buttons = [],
     allowAutoClose = true,

@@ -321,8 +321,8 @@ function clickNoticeClose() {
 function clickPutInBox() {
     popBox({
         title: $t('放入收纳盒'),
-        template: SelectBox,
-        templateValue: { session: markRaw(getTarget()) },
+        comp: SelectBox,
+        props: { session: markRaw(getTarget() as Session) },
         button: [
             {
                 text: $t('确定'),
@@ -335,8 +335,8 @@ function clickPutInBox() {
 function clickConfigBox() {
     popBox({
         title: $t('收纳盒设置'),
-        template: ConfigBox,
-        templateModel: markRaw(getTarget()),
+        comp: ConfigBox,
+        model: markRaw(getTarget()) as SessionBox,
         button: [{
             text: $t('确定'),
             master: true,

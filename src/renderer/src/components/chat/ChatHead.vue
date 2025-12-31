@@ -111,10 +111,10 @@ function openChatInfoPan() {
     // 加载一些需要显示的消息，有部分判断是用来防止反复加载已存在内容的
 
     popBox({
-        template: Info,
+        comp: Info,
         title: session.type === 'group' ? $t('群信息') : $t('好友信息'),
         svg: session.type === 'group' ? 'users' : 'user',
-        templateValue: { chat: session },
+        props: { chat: session },
     })
 
     // // 加载基础信息

@@ -8,8 +8,8 @@
 
 import app from '@renderer/main'
 import { v4 as uuidv4 } from 'uuid'
-import { h, markRaw } from 'vue'
-import { PopBoxData } from '../elements/information'
+import { Component, h, markRaw, VNode } from 'vue'
+import { NoCompPopBoxData, PopBoxData } from '../elements/information'
 import { runtimeData } from '../msg'
 import InputPopBox from '@renderer/popboxes/InputPopBox.vue'
 
@@ -38,9 +38,9 @@ export function hasPopBox(): boolean {
  * @param config 弹窗配置
  * @return 弹窗的唯一标识符
  */
-export function popBox(config: PopBoxData): string {
+export function popBox<T extends Component>(config: PopBoxData<T>): string {
     const id = uuidv4()
-    config.template = markRaw(config.template)
+    config.comp = markRaw(config.comp)
     runtimeData.popBoxList.push({
         id,
         data: config
@@ -55,9 +55,9 @@ export function popBox(config: PopBoxData): string {
  * @return 弹窗的唯一标识符
  * @deprecated 纯文本请使用 `textPopBox`, 或者 tsx + `popBox` 替代
  */
-export function htmlPopBox(html: string, config: Omit<PopBoxData, 'template'> = {}): string {
-    const data: PopBoxData = {
-        template: () => h('div', { innerHTML: html }),
+export function htmlPopBox(html: string, config: NoCompPopBoxData = {}): string {
+    const data: PopBoxData<() => VNode> = {
+        comp: () => h('div', { innerHTML: html }),
         ...config
     }
     return popBox(data)
@@ -69,9 +69,9 @@ export function htmlPopBox(html: string, config: Omit<PopBoxData, 'template'> = 
  * @param config 弹窗配置
  * @returns 弹窗唯一标识符
  */
-export function textPopBox(text: string, config: Omit<PopBoxData, 'template'> = {}): string {
-    const data: PopBoxData = {
-        template: () => h('div', [
+export function textPopBox(text: string, config: NoCompPopBoxData = {}): string {
+    const data: PopBoxData<() => VNode> = {
+        comp: () => h('div', [
             h('span', text)
         ]),
         ...config
@@ -149,17 +149,17 @@ export async function inputPopBox(config: {
 }): Promise<string|undefined> {
     const { $t } = app.config.globalProperties
     config.title = config.title ?? $t('输入')
-    config.value = config.value ?? ''
+    const model = { value: config.value ?? '' }
     return new Promise(resolve => {
         popBox({
             title: config.title,
             svg: config.svg,
-            template: InputPopBox,
-            templateValue: {
-                placeholder: config.placeholder,
+            comp: InputPopBox,
+            props: {
+                placeholder: config.placeholder ?? '',
                 complete: resolve
             },
-            templateModel: markRaw(config),
+            model: markRaw(model),
             button: [{
                 text: $t('确定'),
                 master: true,

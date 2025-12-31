@@ -164,8 +164,8 @@ async function preCheck(
         popBox({
             title: $t('谨慎地拒绝公网无token登陆'),
             svg: 'triangle-exclamation',
-            template: WhyNeedToken,
-            templateValue: { host: publicCheck },
+            comp: WhyNeedToken,
+            props: { host: publicCheck },
             allowAutoClose: false,
             button: [
                 {

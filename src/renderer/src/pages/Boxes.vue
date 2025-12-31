@@ -90,9 +90,9 @@ function newBox() {
     const newBox = new SessionBox($t('新收纳盒'), '', 0)
     popBox({
         title: $t('新建收纳盒'),
-        template: ConfigBox,
-        templateValue: { init: true },
-        templateModel: markRaw(newBox),
+        comp: ConfigBox,
+        props: { init: true },
+        model: markRaw(newBox),
         button: [
             {
                 text: $t('取消'),

@@ -404,7 +404,8 @@ export function createIpc() {
             popBox({
                 title: app.config.globalProperties.$t('关于') + ' ' +
                         app.config.globalProperties.$t('Stapxs QQ Lite X'),
-                template: AboutPan,
+                comp: AboutPan,
+                props: { showUI: false },
                 allowAutoClose: false,
             })
         })
@@ -734,8 +735,8 @@ function showReleaseLog(data: any, isUpdated: boolean) {
         },
     ]
     popBox({
-        template: UpdatePan,
-        templateValue: toRaw(info),
+        comp: UpdatePan,
+        props: toRaw(info),
         button: isUpdated? [
             {
                 text: $t('查看…'),
@@ -789,7 +790,7 @@ function showTestLog(data: GhCommits) {
         },
     ]
     popBox({
-        template: pages,
+        comp: pages,
         svg: 'bullhorn',
         title: $t('发现测试版本更新'),
         button: buttonGoUpdate,
@@ -818,7 +819,7 @@ openCheckList.push((_: number) => {
 
     // 首次打开，显示首次打开引导信息
     popBox({
-        template: WelPan,
+        comp: WelPan,
         allowAutoClose: false,
     })
     localStorage.setItem('guide', guideVersion.toString())
@@ -844,7 +845,7 @@ openCheckList.push((times: number) => {
     popBox({
         title: $t('好耶'),
         svg: 'star',
-        template: pages,
+        comp: pages,
         button: [
             {
                 text: $t('不要'),
@@ -904,7 +905,6 @@ export function checkNotice() {
                         for (let i = 0; i < noticeBody.pops.length; i++) {
                             // 添加弹窗
                             const info = noticeBody.pops[i]
-                            let popInfo = null as any
                             const button: PopBoxButton[] = [
                                 {
                                     text:
@@ -939,26 +939,22 @@ export function checkNotice() {
                                 })
                             }
                             if (info.html) {
-                                popInfo = {
+                                htmlPopBox(info.html, {
                                     title: info.title,
-                                    html: info.html,
                                     button: button
-                                }
+                                })
                             } else if(info.template) {
-                                popInfo = {
+                                popBox({
                                     title: info.title,
-                                    template: defineAsyncComponent(
+                                    comp: defineAsyncComponent(
                                         () => import(`@renderer/components/notice-component/${info.template}.vue`),
                                     ),
-                                    templateValue: markRaw(info.template_data ? info.template_data : {}),
+                                    props: markRaw(info.template_data ?? {}),
                                     button: button
-                                }
+                                })
                             } else {
                                 logger.error(null, '未知的公告类型')
                             }
-
-							if (popInfo)
-								popBox(popInfo)
                         }
                     }
                 }

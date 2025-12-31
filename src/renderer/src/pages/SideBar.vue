@@ -209,7 +209,7 @@ function setSideBar(bar: SideBarInfo) {
  */
 function openOptions() {
     popBox({
-        template: Options,
+        comp: Options,
     })
 }
 

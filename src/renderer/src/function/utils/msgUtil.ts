@@ -157,8 +157,8 @@ export async function singleForward(msgList: Msg[]) {
     popBox({
         title: $t('转发消息'),
         svg: 'fa-arrows-turn-right',
-        template: ForwardPan,
-        templateValue: {
+        comp: ForwardPan,
+        props: {
             msgs: msgList,
             type: 'single',
         }
@@ -175,8 +175,8 @@ export async function mergeForward(msgList: Msg[]) {
     popBox({
         title: $t('合并转发消息'),
         svg: 'fa-share-from-square',
-        template: ForwardPan,
-        templateValue: {
+        comp: ForwardPan,
+        props: {
             msgs: msgList,
             type: 'merge',
         }
