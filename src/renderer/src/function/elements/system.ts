@@ -5,12 +5,6 @@ export interface PopInfoElem {
     autoClose?: boolean
 }
 
-export interface MsgIdInfoElem {
-    gid?: number
-    uid?: number
-    seqid?: number
-}
-
 export interface NotificationElem {
     body: string
     tag: string
