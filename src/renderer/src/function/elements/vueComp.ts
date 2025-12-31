@@ -56,9 +56,6 @@ type CreateOptionalKey<K extends string, Content> = Content extends Record<strin
         ? { [P in K]?: Content }
         : { [P in K]: Content }
 
-/**
- * 为了兼容已有的代码结构，自定义类型名称
- */
 export type VueCompData<T extends Component> = {
     comp: T
     emit?: GetEmitArgs<T>
