@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { PopBoxData } from '@renderer/function/elements/information'
+import { PopBoxButton, PopBoxData } from '@renderer/function/elements/information'
 import { runtimeData } from '@renderer/function/msg'
 import { closePopBox } from '@renderer/function/utils/popBox'
 import { vEsc, vFocus, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
@@ -158,7 +158,7 @@ function closeSelf() {
  */
 function clickButton(
     event: Event,
-    button: NonNullable<PopBoxData['button']>[number],
+    button: NonNullable<PopBoxButton[]>[number],
 ) {
     event.stopPropagation()
     event.preventDefault()

@@ -85,8 +85,8 @@ const emit = defineEmits<{
     update_member_card: [mem: Member, value: string]
 }>()
 
-const meCard: Ref<string> = shallowRef(chat.getMe().card?.toString() ?? '')
-const nowChatName: Ref<string> = shallowRef(chat.showName ?? '')
+const meCard = shallowRef(chat.getMe().card?.toString() ?? '')
+const nowChatName = shallowRef(chat.showName ?? '')
 //#endregion
 
 //#region == 变量更新 ================================================================

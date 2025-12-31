@@ -704,6 +704,7 @@ function onScrollbarDrag(axis: 'x' | 'y', event: MouseEvent) {
                 modify.y = Math.max(-maxOffset, Math.min(modify.y, maxOffset))
             }
         }
+        return
     }, _ => scrollBarDrag.value = undefined)
 }
 //#endregion

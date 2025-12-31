@@ -416,7 +416,7 @@
             <div class="emoji-space" />
             <div class="emoji-like-body">
                 <TransitionGroup name="emoji-like">
-                    <template v-for="info, id in (data.emojis as { [key: string]: number[] })"
+                    <template v-for="info, id in (data.emojis as Record<string, number[]>)"
                         :key="'respond-' + data.uuid + '-' + id">
                         <div :class="{
                                  'me-send': info.includes(runtimeData.loginInfo.uin),

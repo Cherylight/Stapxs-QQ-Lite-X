@@ -20,6 +20,6 @@
 		"vuse",
 		"xmark"
 	],
-    "typescript.experimental.useTsgo": true,
+    "typescript.experimental.useTsgo": false,
     "typescript.native-preview.tsdk": "node_modules/@typescript/native-preview"
 }

@@ -109,7 +109,7 @@ const { sideBarState } = defineProps<{
 
 const showSessionList = shallowRef<(Session | SessionBox)[]>([])
 // 旧群收纳盒的东西
-const sessionBoxes = useTemplateRef('sessionBoxes')
+const sessionBoxes = useTemplateRef<InstanceType<typeof BoxBody>[]>('sessionBoxes')
 
 onMounted(()=>{
     library.add(faCheckToSlot, faThumbTack, faTrashCan, faGripLines)
