@@ -18,7 +18,12 @@ export function configFactory(outPath: string): UserConfigFnObject {
             vue(),
             vueDevTools(),
             ViteYaml(),
-            VitePWA({ registerType: 'autoUpdate' }),
+            VitePWA({ registerType: 'autoUpdate',
+                workbox: {
+                    // 调高预缓存文件大小限制（例如设置为 10MB）
+                    maximumFileSizeToCacheInBytes: 1024 * 1024 * 10,
+                }
+            }),
             visualizer() as PluginOption,
         ]
 
