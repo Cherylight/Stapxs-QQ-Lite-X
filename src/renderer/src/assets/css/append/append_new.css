@@ -123,20 +123,20 @@ body {
     height: calc(var(--content-num) * (34px + 20px + 5px) + 5px);
 }
 
-.member-info > div:first-child > div > div > a {
+.member-info> div > div > a {
     font-size: 0.8rem;
 }
 
-.member-info > div:first-child img {
+.member-infoimg {
     height: 35px;
     width: 35px;
 }
 
-.member-info > div:first-child > div > span {
+.member-info> div > span {
     font-size: 0.75rem;
 }
 
-.member-info > div:first-child > div > div > div > span {
+.member-info> div > div > div > span {
     font-size: 0.8rem;
 }
 

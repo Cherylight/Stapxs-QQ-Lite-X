@@ -73,8 +73,8 @@ body.vibrancy {
 }
 
 .vibrancy hr,
-.vibrancy .member-info > div,
-.vibrancy .msg-preview > div,
+.vibrancy .member-info,
+.vibrancy .msg-preview,
 .vibrancy .side-bar,
 .vibrancy .chat-pan,
 .vibrancy .main-box > .main-box-bg > .choice-chat,
@@ -116,8 +116,8 @@ body.vibrancy {
     background-color: rgba(var(--color-card-rgb), 0.4);
 }
 
-.vibrancy .member-info > div,
-.vibrancy .msg-preview > div {
+.vibrancy .member-info,
+.vibrancy .msg-preview {
     background: rgba(var(--color-bg-rgb), 0.1) !important;
 }
 

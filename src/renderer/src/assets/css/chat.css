@@ -636,27 +636,9 @@ body.with-bar .msg-menu {
 
 .msg-preview,
 .member-info {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    height: calc(100% - var(--safe-area-bottom));
-    width: 100%;
-    z-index: 10;
+    width: fit-content;
     pointer-events: none;
-}
 
-.member-info span,
-.member-info a {
-    color: var(--color-font);
-}
-
-.msg-preview > div,
-.member-info > div {
-    pointer-events: none;
-}
-
-.msg-preview > div,
-.member-info > div:first-child {
     transform: translate(-20px, calc(-100% - 0.8rem));
     box-shadow: 0 0 5px var(--color-shader);
     background: rgba(var(--color-card-2-rgb), 0.75);
@@ -665,49 +647,54 @@ body.with-bar .msg-menu {
     padding: 10px 20px 10px 10px;
     overflow: hidden;
     max-width: 55%;
-    width: fit-content;
+    max-height: calc(100% - var(--safe-area-bottom));
 }
 
-.msg-preview > div {
+.member-info span,
+.member-info a {
+    color: var(--color-font);
+}
+
+.msg-preview {
     max-height: 40vh;
 }
 
-.member-info > div:first-child > div:nth-child(1) {
+.member-info div:nth-child(1) {
     display: flex;
 }
 
-.member-info > div:first-child > div:nth-child(1) > img {
+.member-info> div:nth-child(1) > img {
     outline: 2px solid var(--color-main);
     border-radius: 7px;
     height: 60px;
     width: 60px;
 }
 
-.member-info > div:first-child > div:nth-child(1) > div {
+.member-info> div:nth-child(1) > div {
     margin-left: 20px;
     overflow: hidden;
     flex: 1;
 }
 
-.member-info > div:first-child > div:nth-child(1) > div > span {
+.member-info> div:nth-child(1) > div > span {
     color: var(--color-font-1);
     font-size: 0.9rem;
     white-space: nowrap;
 }
 
-.member-info > div:first-child > div:nth-child(1) > div > span[name='id'] {
+.member-info> div:nth-child(1) > div > span[name='id'] {
     font-size: 0.8rem;
     display: block;
     opacity: 0.7
 }
 
-.member-info > div:first-child > div:nth-child(1) > div > div {
+.member-info> div:nth-child(1) > div > div {
     margin-bottom: 5px;
     flex-wrap: wrap;
     display: flex;
 }
 
-.member-info > div:first-child > div:nth-child(1) > div > div > a {
+.member-info> div:nth-child(1) > div > div > a {
     text-overflow: ellipsis;
     width: 100%;
     overflow: hidden;
@@ -718,24 +705,24 @@ body.with-bar .msg-menu {
     display: block;
 }
 
-.member-info > div:first-child > div:nth-child(1) > div > div > div {
+.member-info> div:nth-child(1) > div > div > div {
     margin-top: 4px;
 }
 
 /* 群成员下边区域 */
-.member-info > div:first-child > div:nth-child(2).member {
+.member-info> div:nth-child(2).member {
     display: flex;
     margin-top: 10px;
     align-items: center;
 }
 
-.member-info > div:first-child > div:nth-child(2).member > :nth-child(1) {
+.member-info> div:nth-child(2).member > :nth-child(1) {
     width: 60px;
     display: block;
     font-size: 13px;
 }
 
-.member-info > div:first-child > div:nth-child(2).member > :nth-child(2) {
+.member-info> div:nth-child(2).member > :nth-child(2) {
     margin-left: 20px;
 }
 
@@ -2312,7 +2299,7 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
     }
 
     /* AT 信息悬浮面板 */
-    .member-info > div:first-child {
+    .member-info{
         max-width: 55%;
     }
 

@@ -48,8 +48,6 @@
                 :msgs="chat.messageList"
                 :show-msg-menu="showMsgMenu"
                 :show-user-menu="showUserMenu"
-                :user-info-pan="userInfoPanFunc"
-                :msg-prev-pan="msgPrevPanFunc"
                 :show-self-avatar="runtimeData.sysConfig.hide_self_avatar === false"
                 :self-direction="runtimeData.sysConfig.self_msg_direction"
                 @image-loaded="imgLoadedScroll"
@@ -122,10 +120,6 @@
 
         <!-- 合并转发消息预览器 -->
         <MergePan ref="mergePan" />
-        <!-- At 信息悬浮窗 -->
-        <UserInfoPanComponent :data="userInfoPanData" />
-        <!-- msg 预览栏 -->
-        <MsgPrevPanComponent :data="msgPrevPanData" />
     </div>
 </template>
 
@@ -137,8 +131,6 @@ import ChatMsgMenu from '@renderer/components/menu/ChatMsgMenu.vue'
 import ChatUserMenu from '@renderer/components/menu/ChatUserMenu.vue'
 import MergePan from '@renderer/components/MergePan.vue'
 import MsgBar from '@renderer/components/MsgBar.vue'
-import MsgPrevPanComponent, { MsgPrevPan } from '@renderer/components/MsgPrevPan.vue'
-import UserInfoPanComponent, { UserInfoPan } from '@renderer/components/UserInfoPan.vue'
 
 import { logger, popInfo } from '@renderer/function/base'
 import {
@@ -176,6 +168,8 @@ import {
 //#region == 常量声明 ====================================================================
 const { chat } = defineProps<{chat: Session}>()
 const inputMsg = defineModel<InputMsg>({required: true})
+const headHeight = shallowRef(0)
+const bottomHeight = shallowRef(0)
 
 const $t = app.config.globalProperties.$t
 const { vh } = useViewportUnits()
@@ -186,51 +180,6 @@ const mergePan = useTemplateRef('mergePan')
 const msgPan = useTemplateRef('msgPan')
 const chatPan = useTemplateRef('chat-pan')
 const chatBottom = useTemplateRef('bottom')
-//#endregion
-
-//#region == 用户信息栏相关 ================================
-const userInfoPanData = shallowReactive<{
-    user: undefined | IUser | number,
-    x: number,
-    y: number,
-}>({
-    user: undefined,
-    x: 0,
-    y: 0,
-})
-const headHeight = shallowRef(0)
-const bottomHeight = shallowRef(0)
-const userInfoPanFunc: UserInfoPan = {
-    open: (user: IUser | number, x: number, y: number) => {
-        userInfoPanData.user = user
-        userInfoPanData.x = x
-        userInfoPanData.y = y
-    },
-    close: () => {
-        userInfoPanData.user = undefined
-    },
-}
-//#endregion
-//#region == 消息预览栏相关 ================================
-const msgPrevPanData = shallowReactive<{
-    msgs: undefined | Msg[] | string,
-    x: number,
-    y: number,
-}>({
-    msgs: undefined,
-    x: 0,
-    y: 0,
-})
-const msgPrevPanFunc: MsgPrevPan = {
-    open: (msgs: Msg[] | string, x: number, y: number) => {
-        msgPrevPanData.msgs = msgs
-        msgPrevPanData.x = x
-        msgPrevPanData.y = y
-    },
-    close: () => {
-        msgPrevPanData.msgs = undefined
-    },
-}
 //#endregion
 
 const tagsDefault = {

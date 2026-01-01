@@ -22,8 +22,6 @@ module.exports = {
         'prefer-arrow-callback': 'warn',
         // 引号
         'quotes': ['warn', 'single'],
-        // 三元表达式
-        'multiline-ternary': ['warn', 'never'],
         // 分号
         'semi': ['warn', 'never'],
         // 未使用的变量

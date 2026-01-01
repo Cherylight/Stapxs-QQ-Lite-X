@@ -21,20 +21,13 @@
         }"
         :data-raw="data.plaintext()"
         :data-sender="data.sender.user_id"
-        :data-time="data.time"
-        @mouseleave="hiddenUserInfo">
+        :data-time="data.time">
         <img v-if="direction === 'left'" v-hide="!showAvatar"
+            v-user-tooltip="data.sender"
             v-menu.prevent="event => $emit('showUserMenu', event, data.sender)"
-            v-long-hover
             class="avatar"
             :src="data.sender.face"
             :alt="data.sender.name"
-            @v-long-hover="userInfoPan?.open(
-                data.sender,
-                ($event.detail as MenuEventData).x,
-                ($event.detail as MenuEventData).y,
-            )"
-            @v-long-hover-end="userInfoPan?.close()"
             @dblclick="$emit('senderDoubleClick', data.sender)">
         <div v-if="direction === 'right'"
             class="message-space" />
@@ -136,19 +129,12 @@
                                 <EmojiFace :emoji="item.face" class="msg-face" />
                             </template>
                             <template v-else-if="item instanceof AtSeg">
-                                <a v-long-hover
-                                    :data-id="item.user_id"
-                                    :data-group="data.session?.id"
-                                    :class="{
+                                <a :data-id="item.user_id" :data-group="data.session?.id" :class="{
                                         'msg-at': true,
                                         'atme': item.user_id === runtimeData.loginInfo.uin && showToMe,
                                     }"
-                                    @v-long-hover="userInfoPan?.open(
-                                        getAtMember(item.user_id),
-                                        ($event.detail as MenuEventData).x,
-                                        ($event.detail as MenuEventData).y,
-                                    )"
-                                    @v-long-hover-end="userInfoPan?.close()">
+                                    v-user-tooltip="getAtMember(item.user_id)"
+                                    >
                                     {{ item.plaintext(data) }}
                                 </a>
                             </template>
@@ -216,16 +202,8 @@
                                 </video>
                             </div>
                             <template v-else-if="item instanceof ForwardSeg">
-                                <div v-long-hover
+                                <div v-tooltip="msgPrevTooltip(item.content ?? $t('加载消息中...'))"
                                     class="msg-raw-forward"
-                                    @v-long-hover="msgPrevPan?.open(
-                                        item.content !== undefined ?
-                                            item.content
-                                            : $t('加载消息中...'),
-                                        ($event.detail as MenuEventData).x,
-                                        ($event.detail as MenuEventData).y,
-                                    )"
-                                    @v-long-hover-end="msgPrevPan?.close()"
                                     @click="openMerge(item)">
                                     <span>{{ $t('合并转发消息') }}</span>
                                     <div class="forward-msg">
@@ -264,17 +242,14 @@
                                 </div>
                             </template>
                             <div v-else-if="item instanceof ReplySeg"
-                                v-long-hover
+                                v-tooltip="msgPrevTooltip(
+                                    data.session?.getMsgById(item.id)
+                                        ? [data.session!.getMsgById(item.id)!]
+                                        : $t('加载消息失败')
+                                )"
                                 class="msg-reply"
                                 @click="scrollToMsg(item.id)"
-                                @v-long-hover="msgPrevPan?.open(
-                                    data.session?.getMsgById(item.id) ?
-                                        [data.session!.getMsgById(item.id)!]
-                                        : $t('加载消息失败'),
-                                    ($event.detail as MenuEventData).x,
-                                    ($event.detail as MenuEventData).y,
-                                )"
-                                @v-long-hover-end="msgPrevPan?.close()">
+                            >
                                 <font-awesome-icon :icon="['fas', 'reply']" />
                                 <a :class="getRepMsg(item.id) ? '' : 'msg-unknown'"
                                     style="cursor: pointer">
@@ -400,16 +375,10 @@
         </div>
         <img v-if="direction === 'right'" v-hide="!showAvatar"
             v-menu.prevent="event => $emit('showUserMenu', event, data.sender)"
-            v-long-hover
+            v-user-tooltip="data.sender"
             class="avatar"
             :src="data.sender.face"
             :alt="data.sender.name"
-            @v-long-hover="userInfoPan?.open(
-                data.sender,
-                ($event.detail as MenuEventData).x,
-                ($event.detail as MenuEventData).y,
-            )"
-            @v-long-hover-end="userInfoPan?.close()"
             @dblclick="$emit('senderDoubleClick', data.sender)">
         <div v-if="data.emojis"
             class="emoji-like">
@@ -419,8 +388,8 @@
                     <template v-for="info, id in (data.emojis as Record<string, number[]>)"
                         :key="'respond-' + data.uuid + '-' + id">
                         <div :class="{
-                                 'me-send': info.includes(runtimeData.loginInfo.uin),
-                             }"
+                                'me-send': info.includes(runtimeData.loginInfo.uin),
+                            }"
                             @click="$emit('emojiClick', id as string, data)">
                             <EmojiFace :emoji="Emoji.get(Number(id))" />
                             <span>{{ info.length }}</span>
@@ -438,7 +407,6 @@ import markdownit from 'markdown-it'
 
 import EmojiFace from './EmojiFace.vue'
 import CardMessage from './msg-component/CardMessage.vue'
-import { UserInfoPan } from './UserInfoPan.vue'
 
 import { Role } from '@renderer/function/adapter/enmu'
 import { logger } from '@renderer/function/base'
@@ -484,22 +452,23 @@ import {
     vMenu,
     vMove,
     VMoveOptions,
-    vUserRole
+    vUserRole,
+    vTooltip,
 } from '@renderer/function/utils/vcmd'
 import { backend } from '@renderer/runtime/backend'
 import {
     defineComponent,
     useTemplateRef
 } from 'vue'
-import { MsgPrevPan } from './MsgPrevPan.vue'
 import LazyLottie from './LazyLottie.vue'
+import { vUserTooltip } from '@renderer/function/tooltip'
+import { VueCompData } from '@renderer/function/elements/vueComp'
+import MsgPrevTooltip from './tooltip/MsgPrevTooltip.vue'
 
 //#region == 声明变量 ================================================================
 const {
     data,
     selected,
-    userInfoPan,
-    msgPrevPan,
     showIcon = true,
     dimNonExistentMsg = true,
     special = false,
@@ -547,8 +516,6 @@ const {
      * 显示时间
      */
     showTime?: boolean
-    userInfoPan?: UserInfoPan
-    msgPrevPan?: MsgPrevPan
 }>()
 
 const emit = defineEmits<{
@@ -597,6 +564,14 @@ function getAtMember(id: number): IUser | number {
     if (user) return user
     else return id
 }
+function msgPrevTooltip(msgs: Msg[] | string): VueCompData<typeof MsgPrevTooltip> {
+    return {
+        comp: MsgPrevTooltip,
+        props: {
+            msgs,
+        },
+    }
+}
 //#endregion
 //#region == 暴露给下面的script =======================================================
 defineExpose({
@@ -604,7 +579,6 @@ defineExpose({
     setupProps: {
         data,
         selected,
-        userInfoPan
     },
 })
 //#endregion
@@ -880,29 +854,6 @@ defineExpose({
             linkViewPicErr() {
                 if(this.pageViewInfo)
                     this.pageViewInfo.img = undefined
-            },
-
-            /**
-             * 当鼠标悬停在 at 消息上时显示被 at 人的消息悬浮窗
-             * @param event 消息事件
-             */
-            showUserInfo(user: IUser|number, event: Event) {
-                if (typeof user === 'number' && this.data.session instanceof GroupSession) {
-                    user = this.data.session?.getUserById(user) ?? user
-                }
-                // 获取鼠标位置
-                const pointEvent =
-                    (event as MouseEvent) || (event as MouseEvent)
-                const pointX = pointEvent.screenX
-                const pointY = pointEvent.screenY
-                this.userInfoPan?.open(user, pointX, pointY)
-            },
-
-            /**
-             * 隐藏 At 信息面板
-             */
-            hiddenUserInfo() {
-                this.userInfoPan?.close()
             },
 
             /**

@@ -7,8 +7,10 @@
  */
 
 import {
+    Component,
     Directive,
     DirectiveBinding,
+    ObjectDirective,
     shallowReactive,
     shallowRef,
     watch,
@@ -20,6 +22,8 @@ import { MenuEventData } from '../elements/information'
 import { shouldAutoFocus } from './appUtil'
 import { wheelMask } from './input'
 import { useStayEvent } from './vuse'
+import { VueCompData } from '../elements/vueComp'
+import { addTooltip, TooltipController } from '../tooltip'
 
 /**
  * 根据用户角色设置元素的 class 属性
@@ -622,7 +626,7 @@ function createVMove<T extends HTMLElement>(): Directive<T, VMoveOptions<T>>{
  */
 export const vMove = createVMove<any>()
 
-function createVLongHover(): Directive<HTMLElement, undefined> {
+function createVLongHover(): ObjectDirective<HTMLElement, undefined> {
     const {
         handle: userHoverHandle,
         handleEnd: userHoverEnd,
@@ -673,3 +677,68 @@ function createVLongHover(): Directive<HTMLElement, undefined> {
  * />
  */
 export const vLongHover = createVLongHover()
+
+type VTooltipBinding<T extends Component> =
+    | T
+    | VueCompData<T>
+    | (() => T | VueCompData<T> )
+    | ((eventData: {x: number, y: number}) => T | VueCompData<T> )
+
+function resolveBinding<T extends Component>(binding: VTooltipBinding<T>, eventData: {x: number, y: number}): VueCompData<T> {
+    if (typeof binding === 'function') {
+        const result = binding.length === 0
+            ? (binding as () => T | VueCompData<T>)()
+            : (binding as (eventData: {x: number, y: number}) => T | VueCompData<T>)(eventData)
+        if ('comp' in result) return result
+        return { component: result } as unknown as VueCompData<T>
+    } else if ('comp' in binding) {
+        return binding
+    } else {
+        return { component: binding, props: {} } as unknown as VueCompData<T>
+    }
+}
+
+/**
+ * 监听元素长时间悬停事件以显示提示工具
+ * 当元素被鼠标悬停超过一定时间后，显示提示工具
+ * 当鼠标移出元素时，关闭提示工具
+ * @modifiers debug - 调试模式，启用后悬停结束时不会关闭提示工具
+ * @example <dom v-tooltip="{
+ *     comp: 提示组件,
+ *     props: 传递给提示组件的属性,
+ *     model: 传递给提示组件的 v-model 数据,
+ *     emit: 传递给提示组件的事件,
+ * }" />
+ */
+export const vTooltip = {
+    mounted<T extends Component>(el: HTMLElement, binding: DirectiveBinding<VTooltipBinding<T>> & { modifiers: { debug?: boolean } }) {
+        const controller = new AbortController()
+        const options = { signal: controller.signal }
+        ;(vLongHover as any).mounted(el)
+        ;(el as any)._vTooltipController = controller
+
+        let tooltip: TooltipController | undefined
+
+        el.addEventListener('v-long-hover', (ev: Event) => {
+            const event = ev as CustomEvent<{ x: number, y: number }>
+            const detail = event.detail
+            const compData = resolveBinding(binding.value, detail)
+            tooltip = addTooltip(compData, { x: detail.x, y: detail.y })
+        }, options)
+
+        el.addEventListener('v-long-hover-end', () => {
+            if(binding.modifiers?.debug) return
+            tooltip?.close()
+            tooltip = undefined
+        }, options)
+    },
+
+    unmounted(el: HTMLElement) {
+        (vLongHover as any).unmounted(el)
+        const controller = (el as any)._vTooltipController
+        if (!controller) return
+
+        controller.abort()
+        delete (el as any)._vTooltipController
+    }
+}

@@ -76,6 +76,8 @@
 
         <!-- 菜单 -->
         <ContextMenus />
+        <!-- 提示工具 -->
+        <Tooltips />
         <div id="mobile-css" />
     </div>
     <div class="bg-blur" :style="{ backdropFilter: `blur(${runtimeData.sysConfig.background_img_blur}px)` }" />
@@ -109,6 +111,7 @@ import SideBar from './pages/SideBar.vue'
 import { backend } from './runtime/backend'
 import win from './runtime/win'
 import ContextMenus from './components/menu/ContextMenus.vue'
+import Tooltips from './components/tooltip/Tooltips.vue'
 
 //#region == 定义变量 ===================================================
 const fps = shallowReactive({

@@ -30,7 +30,6 @@
                 :key="'msg-' + message.uuid"
                 :selected="isSelected(message)"
                 :data="message"
-
                 :direction="getDirection(message)"
                 :special="getSpecial(message)"
                 :show-avatar="getShowAvatar(message)"
@@ -38,9 +37,6 @@
                 :dim-non-existent-msg="dimNonExistentMsg"
                 :without-avatar="getWithoutAvatar(message)"
                 :show-time="showTime"
-
-                :user-info-pan="userInfoPan"
-                :msg-prev-pan="msgPrevPan"
                 @click="msgClick($event, message)"
                 @image-loaded="arg=>$emit('imageLoaded', arg)"
                 @show-msg-menu="(eventData, msg) => openMsgMenu(eventData, msg)"
@@ -53,9 +49,7 @@
             <NoticeBody v-else-if="message instanceof Notice"
                 :id="message.uuid"
                 :key="'notice-' + index"
-                :user-info-pan="userInfoPan"
-                :data="message"
-                :msg-prev-pan="msgPrevPan" />
+                :data="message" />
         </template>
     </TransitionGroup>
 </template>
@@ -75,8 +69,6 @@ import { IUser } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
 import { isShowTime } from '@renderer/function/utils/msgUtil'
 import app from '@renderer/main'
-import { MsgPrevPan } from './MsgPrevPan.vue'
-import { UserInfoPan } from './UserInfoPan.vue'
 
 //#region ====定义与导出============================================
 const {
@@ -94,9 +86,6 @@ const {
     dimNonExistentMsg = true,
     withoutAvatar = false,
     showTime = true,
-
-    userInfoPan,
-    msgPrevPan,
 } = defineProps<{
     msgs: Message[],
     showMsgMenu?: (eventData: MenuEventData, msg: Msg) => (Promise<void> | void),
@@ -152,9 +141,6 @@ const {
      * 是否显示时间
      */
     showTime?: boolean
-
-    userInfoPan?: UserInfoPan,
-    msgPrevPan?: MsgPrevPan,
 }>()
 
 const emit = defineEmits<{

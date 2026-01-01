@@ -1,11 +1,11 @@
 
-export enum Gender {
+export const enum Gender {
     Male = 'male',
     Female = 'female',
     Unknown = 'unknown'
 }
 
-export enum Role {
+export const enum Role {
     Owner = 'owner',
     Admin = 'admin',
     User = 'user',
