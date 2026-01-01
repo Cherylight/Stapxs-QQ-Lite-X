@@ -1,4 +1,5 @@
-import 'https://cdn.jsdelivr.net/npm/pinyin@4.0.0/lib/umd/pinyin.min.js'
+
+declare const pinyin: any
 
 export type PinYinData = {
     main: string[]

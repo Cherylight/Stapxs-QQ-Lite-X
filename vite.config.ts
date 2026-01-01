@@ -12,7 +12,7 @@ import qfaceInfo from './src/renderer/src/assets/img/qq-face/public/assets/qq_em
 export function configFactory(outPath: string): UserConfigFnObject {
     return ({ mode }) => {
         const env = loadEnv(mode, process.cwd())
-        const useLocalFace = env.VITE_LOCAL_FACE == 'true'
+        const useLocalLib = env.VITE_LOCAL_LIB == 'true'
 
         const plugins: PluginOption[] = [
             vue(),
@@ -22,7 +22,7 @@ export function configFactory(outPath: string): UserConfigFnObject {
             visualizer() as PluginOption,
         ]
 
-        if (useLocalFace) {
+        if (useLocalLib) {
             const apngList: string[] = []
             const lottieList: string[] = []
             for (const info of qfaceInfo) {
