@@ -2315,3 +2315,6 @@ msgstr "版本号{version}格式异常，某些功能可能无法使用"
 
 msgid "打开"
 msgstr ""
+
+msgid "预览图片加载失败"
+msgstr ""

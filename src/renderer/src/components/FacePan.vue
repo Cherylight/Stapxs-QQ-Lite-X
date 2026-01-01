@@ -67,7 +67,8 @@
                         </div>
                     </template>
                     <template v-else-if="runtimeData.stickerCache && runtimeData.stickerCache.length > 0">
-                        <span v-for="(url, index) in runtimeData.stickerCache" :key="'stickers-' + index">
+                        <span v-for="(url, index) in runtimeData.stickerCache" :key="'stickers-' + index"
+                            v-tooltip="customFaceTooltip(url)">
                             <img
                                 v-show="url != 'end'"
                                 loading="lazy"
@@ -97,6 +98,10 @@ import Emoji from '@renderer/function/model/emoji'
 import { FaceSeg, ImgSeg, Seg, TxtSeg } from '@renderer/function/model/seg'
 import BcTab from 'vue3-bcui/packages/bc-tab'
 import EmojiFace from './EmojiFace.vue'
+import { VueCompData } from '@renderer/function/elements/vueComp'
+import CustomFaceTooltip from './tooltip/CustomFaceTooltip.vue'
+
+import { vTooltip } from '@renderer/function/utils/vcmd'
 
 const emit = defineEmits<{
     sendMsg: []
@@ -155,8 +160,15 @@ function addBaseFace(id: number) {
 function addImgFace(url: string) {
     addSpecialSeg(new ImgSeg(url, true))
     // 直接发送表情
-    if(runtimeData.sysConfig.send_face == true) {
+    if(runtimeData.sysConfig.send_face) {
         emit('sendMsg')
+    }
+}
+
+function customFaceTooltip(url: string): VueCompData<typeof CustomFaceTooltip> {
+    return {
+        comp: CustomFaceTooltip,
+        props: { url }
     }
 }
 </script>
