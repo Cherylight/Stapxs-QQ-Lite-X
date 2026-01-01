@@ -9,6 +9,7 @@ module.exports = {
         '@electron-toolkit',
         '@electron-toolkit/eslint-config-ts/eslint-recommended',
         '@vue/eslint-config-typescript/recommended',
+        'prettier',
     ],
     rules: {
         // === 基础规则 ===
