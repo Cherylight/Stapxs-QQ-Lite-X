@@ -13,35 +13,25 @@
 <template>
     <div :id="`context-menu-${id}`"
         ref="content"
-        :data-animation-name="animationName"
         class="content">
-        <component :is="template" v-bind="args"
+        <component :is="compData.comp" v-bind="compData.props"
+            v-model="compData.model"
+            v-on="compData.emit || {}"
             @close="controller.close" />
     </div>
 </template>
 <script setup lang="ts">
-import { ContextMenuController} from '@renderer/function/utils/contextMenu'
+import { ContextMenuData} from '@renderer/function/utils/contextMenu'
 import { useEventListener } from '@renderer/function/utils/vuse'
-import { onMounted, useTemplateRef, type Component } from 'vue'
+import { onMounted, useTemplateRef } from 'vue'
 
 //#region == 声明变量 ===============================================
 const {
-    x: targetX,
-    y: targetY,
+    pos,
     id,
-    template,
-    args,
+    compData,
     controller,
-    animationName,
-} = defineProps<{
-    x: number
-    y: number
-    id: string
-    template: Component
-    args: Record<string, any>
-    controller: ContextMenuController
-    animationName: string
-}>()
+} = defineProps<ContextMenuData>()
 
 const content = useTemplateRef<HTMLElement>('content')
 //#endregion
@@ -151,8 +141,8 @@ function keepCalc(force: boolean = false): void {
     ) {
         cacheData = data
         calcMenu(
-            targetX,
-            targetY,
+            pos.x,
+            pos.y,
             data.xa,
             data.ya,
             data.width,

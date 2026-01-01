@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div data-animation-name="chat-menu">
         <div class="ss-card msg-menu-body" @click.stop>
             <div v-if="menuDisplay.at" @click="setAt">
                 <div><font-awesome-icon :icon="['fas', 'at']" /></div>
@@ -40,7 +40,7 @@ const menuDisplay = shallowReactive({
 	remove: false,
 })
 const $t = app.config.globalProperties.$t
-const { 
+const {
 	user,
 	session,
 	sendPokeFunc,

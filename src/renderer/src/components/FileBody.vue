@@ -100,9 +100,13 @@ const folderItems = computed(() => {
 async function openMenu(event: MenuEventData): Promise<void> {
     isOpenMenu.value = true
     const menu = openContextMenu(
-        event.x, event.y,
-        FileMenu,
-        { file: markRaw(item) }
+        { x: event.x, y: event.y },
+        {
+            comp: markRaw(FileMenu),
+            props: {
+                file: item
+            }
+        }
     )
     await menu.finish
     isOpenMenu.value = false

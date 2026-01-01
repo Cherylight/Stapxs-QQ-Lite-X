@@ -11,14 +11,12 @@ import { Component, markRaw, shallowReactive, shallowRef } from 'vue'
 import { Session } from '../model/session'
 import { SessionBox } from '../model/box'
 import FriendMenu from '@renderer/components/menu/FriendMenu.vue'
+import { VueCompData } from '../elements/vueComp'
 
 export interface ContextMenuData {
     id: string
-    x: number
-    y: number
-    template: Component
-    args: Record<string, any>
-    animationName: string
+    pos: { x: number; y: number }
+    compData: VueCompData<Component>
     controller: ContextMenuController
 }
 
@@ -37,12 +35,9 @@ export const contextMenus = shallowRef<ContextMenuData[]>([])
  * @param template 右键菜单模板组件
  * @param args 传递给右键菜单的参数
  */
-export function openContextMenu(
-    x: number,
-    y: number,
-    template: Component,
-    args: Record<string, any> = {},
-    animationName?: string
+export function openContextMenu<T extends Component>(
+    pos: { x: number; y: number },
+    compData: VueCompData<T>,
 ): ContextMenuController {
     const id = uuid()
     const controller = contextControllerMaker(id)
@@ -50,12 +45,9 @@ export function openContextMenu(
         ...contextMenus.value,
         {
             id,
-            x,
-            y,
-            template: markRaw(template),
-            args,
+            pos,
+            compData,
             controller,
-            animationName: animationName ?? 'default-menu'
         }
     ]
     return controller
@@ -111,15 +103,15 @@ export function openFriendMenu(
 	friendMenuInfo.session = session
 	friendMenuInfo.box = box
 	const controller = openContextMenu(
-		x,
-		y,
-		FriendMenu,
-		{
-			from,
-			session,
-			box
-		},
-		'chat-menu'
+		{ x, y },
+        {
+            comp: markRaw(FriendMenu),
+            props: {
+                from,
+                session,
+                box
+            }
+        },
 	)
 	controller.finish.then(() => {
 		friendMenuInfo.session = undefined

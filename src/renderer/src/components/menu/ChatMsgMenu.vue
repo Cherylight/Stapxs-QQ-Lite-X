@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div data-animation-name="chat-menu">
         <div v-if="session instanceof GroupSession"
             v-show="!runtimeData.sysConfig.close_respond"
             class="ss-card respond"

@@ -163,7 +163,8 @@ import {
     shallowReactive,
     useTemplateRef,
     watch,
-    shallowRef
+    shallowRef,
+    markRaw
 } from 'vue'
 //#region == 常量声明 ====================================================================
 const { chat } = defineProps<{chat: Session}>()
@@ -311,18 +312,18 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
 		msgBar.value?.forceAddToMultiselectList(msg)
     }
     const menu = openContextMenu(
-        data.x,
-        data.y,
-        ChatMsgMenu,
+        { x: data.x, y: data.y },
         {
-            session: chat,
-            msg: msg,
-            eventData: data,
-            changeRespondFunc: changeRespond,
-            replyMsgFunc: replyMsg,
-            intoMultiselectFunc: intoMultiselect,
-        },
-		'chat-menu'
+            comp: markRaw(ChatMsgMenu),
+            props: {
+                session: chat,
+                msg: msg,
+                eventData: data,
+                changeRespondFunc: changeRespond,
+                replyMsgFunc: replyMsg,
+                intoMultiselectFunc: intoMultiselect,
+            }
+        }
     )
     return menu.finish
 }
@@ -340,16 +341,16 @@ function showUserMenu(data: MenuEventData, user: IUser) {
 	}
 
 	const menu = openContextMenu(
-		data.x,
-		data.y,
-		ChatUserMenu,
-		{
-			session: chat,
-			user: user,
-			sendPokeFunc: sendPoke,
-			setAtFunc: setAtFunc,
-		},
-		'chat-menu'
+        { x: data.x, y: data.y },
+        {
+            comp: markRaw(ChatUserMenu),
+            props: {
+                session: chat,
+                user: user,
+                sendPokeFunc: sendPoke,
+                setAtFunc: setAtFunc as (user: IUser) => void,
+            }
+        }
 	)
 	return menu.finish
 }

@@ -101,7 +101,7 @@ import { copyToClipboard, getViewTime } from '@renderer/function/utils/systemUti
 import { vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import { useViewportUnits } from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
-import { nextTick, shallowRef, useTemplateRef, watch } from 'vue'
+import { markRaw, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import ChatMsgMenu from './menu/ChatMsgMenu.vue'
 
 const { vw } = useViewportUnits()
@@ -205,15 +205,15 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
 		msgBarEl.value?.forceAddToMultiselectList(msg)
     }
     const menu = openContextMenu(
-        data.x,
-        data.y,
-        ChatMsgMenu,
+        { x: data.x, y: data.y },
         {
-            msg: msg,
-            eventData: data,
-            intoMultiselectFunc: intoMultiselect,
-        },
-		'chat-menu'
+            comp: markRaw(ChatMsgMenu),
+            props: {
+                msg: msg,
+                eventData: data,
+                intoMultiselectFunc: intoMultiselect,
+            }
+        }
     )
     return menu.finish
 }

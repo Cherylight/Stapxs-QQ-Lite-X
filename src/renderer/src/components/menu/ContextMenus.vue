@@ -10,20 +10,23 @@
             @leave="(el) => customAnimationName('leave')(el)"
             @after-leave="(el) => customAnimationName('after-leave')(el)"
             @leave-cancelled="(el) => customAnimationName('cancel-leave')(el)">
-            <ContextMenu v-for="value in contextMenus" :id="value.id"
+            <ContextMenu v-for="value in contextMenus"
                 :key="value.id"
-                :x="value.x"
-                :y="value.y"
-                :template="value.template"
-                :args="value.args"
-                :controller="value.controller"
-                :animation-name="value.animationName" />
+                v-bind="value" />
         </TransitionGroup>
     </Teleport>
 </template>
 <script setup lang="ts">
 import { contextMenus } from '@renderer/function/utils/contextMenu'
 import ContextMenu from './ContextMenu.vue'
+
+function getAnimationName(el: Element): string {
+    const menuEl = el.children[0]
+    if (!menuEl) return 'default-menu'
+    const animationName = (menuEl as any).dataset.animationName
+    if (!animationName) return 'default-menu'
+    return animationName
+}
 
 function customAnimationName(state:
     | 'before-enter'
@@ -36,7 +39,8 @@ function customAnimationName(state:
     | 'cancel-leave'
 ): (el: Element) => void {
     return (el: Element) => {
-        const animationName = (el as any).dataset.animationName
+        const animationName = getAnimationName(el)
+        console.log('animationName', animationName)
         const getName = (name: string) => {
             return `${animationName}-${name}`
         }
