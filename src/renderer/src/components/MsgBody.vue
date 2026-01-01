@@ -37,9 +37,6 @@
             'hide-face': !showAvatar,
         }">
             <div class="message-info">
-                <a v-if="showTime && direction === 'right'" :class="{ 'force-show': selected, 'time': true }">
-                    {{ data.time?.format('year') }}
-                </a>
                 <!-- 一帮头衔之类的 -->
                 <template v-if="data.sender instanceof Member && showAvatar">
                     <span v-user-role="data.sender.role">
@@ -56,9 +53,6 @@
                 </template>
                 <a v-if="showAvatar" class="sender-name">
                     {{ data.sender.name }}
-                </a>
-                <a v-if="showTime && direction === 'left'" :class="{ 'force-show': selected, 'time': true }">
-                    {{ data.time?.format('year') }}
                 </a>
             </div>
             <div class="message-content">
@@ -398,7 +392,17 @@
                 </TransitionGroup>
             </div>
         </div>
-        <code style="display: none">{{ data.plaintext() }}</code>
+        <div class="message-ex-info">
+            <div v-if="direction === 'right'" class="space" />
+            <template v-for="info in exInfo" :key="data.uuid + '-exinfo-' + info">
+                <a v-if="info === 'msgId'">
+                    msgId: {{ data.message_id }}
+                </a>
+                <a v-if="info === 'time'">
+                    time: {{ data.time?.format('year') }}
+                </a>
+            </template>
+        </div>
     </div>
 </template>
 
@@ -473,7 +477,7 @@ const {
     showToMe = true,
     direction = 'left',
     showAvatar = true,
-    showTime = true,
+    exInfo = ['time', 'msgId'],
     withoutAvatar = false,
 } = defineProps<{
     data: Msg | SelfMsg
@@ -513,7 +517,7 @@ const {
     /**
      * 显示时间
      */
-    showTime?: boolean
+    exInfo?: ('time'|'msgId')[]
 }>()
 
 const emit = defineEmits<{

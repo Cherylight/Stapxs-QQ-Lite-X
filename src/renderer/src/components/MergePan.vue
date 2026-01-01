@@ -36,7 +36,7 @@
                                     :show-msg-menu="showMsgMenu"
                                     :special-self="false"
                                     :direction="vw * 100 > 450 ? 'right' : 'left'"
-                                    :show-time="false"
+                                    :ex-info="[]"
                                     class="merge-node" />
                             </KeepAlive>
                         </Transition>

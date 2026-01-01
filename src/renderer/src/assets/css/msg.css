@@ -5,9 +5,11 @@
 
 .message {
     user-select: text;
-    transition: background 0.3s, opacity 0.3s;
+    transition:
+        background 0.3s,
+        opacity 0.3s;
     display: flex;
-    padding: 5px 10px 10px 10px;
+    padding: 5px 10px 0 10px;
     width: calc(100% - 30px);
     border-radius: 7px;
     margin: 5px 0;
@@ -105,6 +107,11 @@
 
 .message-info {
     display: flex;
+    height: calc(0.9rem + 2px);
+}
+
+.without-avatar .message-info {
+    display: none;
 }
 
 .right .message-info {
@@ -119,18 +126,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     word-break: keep-all;
-}
-
-.message-info > a.time {
-    transition: opacity 0.3s;
-    color: var(--color-font-2);
-    font-size: 0.75rem;
-    opacity: 0.0;
-}
-
-.message-info > a.time:hover,
-.message-info > a.time.force-show {
-    opacity: 0.7;
 }
 
 .message-info > a.sender-name {
@@ -156,6 +151,33 @@
 
 .message-content > div.not-exist {
     opacity: 0.4;
+}
+
+.message-ex-info {
+    display: flex;
+    width: 100%;
+    font-size: 12px;
+    height: 12px;
+    opacity: 0;
+    color: var(--color-font-2);
+    transition: opacity 0.3s;
+}
+
+.message-ex-info:hover {
+    opacity: 1;
+}
+
+.message-ex-info > div.space {
+    margin: auto;
+}
+
+.message-ex-info > a {
+    margin: 0 2px;
+}
+
+.message-ex-info > a.time:hover,
+.message-ex-info > a.time.force-show {
+    opacity: 0.7;
 }
 
 .message-space {
@@ -617,7 +639,7 @@
     font-size: 1rem;
     margin: 0;
 }
-.emoji-like-body div.me-send{
+.emoji-like-body div.me-send {
     border: solid 1px var(--color-main);
 }
 
@@ -697,7 +719,7 @@ span.user-title.robot {
 }
 
 .loading {
-    opacity: 0.0;
+    opacity: 0;
 }
 
 .loading > svg {
@@ -705,7 +727,7 @@ span.user-title.robot {
 }
 
 .loading > .show {
-    opacity: 1.0;
+    opacity: 1;
 }
 
 .msg-raw-forward {

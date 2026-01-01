@@ -36,7 +36,7 @@
                 :show-icon="showIcon"
                 :dim-non-existent-msg="dimNonExistentMsg"
                 :without-avatar="getWithoutAvatar(message)"
-                :show-time="showTime"
+                :ex-info="exInfo"
                 @click="msgClick($event, message)"
                 @image-loaded="arg=>$emit('imageLoaded', arg)"
                 @show-msg-menu="(eventData, msg) => openMsgMenu(eventData, msg)"
@@ -85,7 +85,7 @@ const {
     showIcon = true,
     dimNonExistentMsg = true,
     withoutAvatar = false,
-    showTime = true,
+    exInfo = ['time', 'msgId'],
 } = defineProps<{
     msgs: Message[],
     showMsgMenu?: (eventData: MenuEventData, msg: Msg) => (Promise<void> | void),
@@ -140,7 +140,7 @@ const {
     /**
      * 是否显示时间
      */
-    showTime?: boolean
+    exInfo?: ('time'|'msgId')[]
 }>()
 
 const emit = defineEmits<{

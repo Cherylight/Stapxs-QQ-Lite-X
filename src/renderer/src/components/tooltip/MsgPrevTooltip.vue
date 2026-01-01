@@ -15,7 +15,7 @@
             show-avatar
             :msgs="msgs"
             :can-interaction="false"
-            :show-time="false" />
+            :ex-info="[]" />
     </div>
 </template>
 
