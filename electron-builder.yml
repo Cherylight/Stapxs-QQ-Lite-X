@@ -1,22 +1,22 @@
 # 基础配置
 appId: cn.stapxs.qqwebx
 productName: Stapxs QQ Lite X
-copyright: Copyright © 2022-2025 Mr.Lee, and other contributors.
+copyright: Copyright © 2025-2026 Mr.Lee, and other contributors.
 directories:
     buildResources: build,
     output: dist_electron
 files:
-    - '!**/.vscode/*'
-    - '!src/*'
-    - '!electron.vite.config.{js,ts,mjs,cjs}'
-    - '!vite.config.{js,ts,mjs,cjs}'
-    - '!capacitor.config.{js,ts,mjs,cjs}'
-    - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,README/*}'
-    - '!{.env,.env.*,.envrc,.gitmodules,.tool-versions,stats.html}'
-    - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-    - '!{dist*/*,build/*,scripts/*}'
-    - '!{scripts/*,dockerfile}'
-    - '!{ssqq.capacitor-onebot-connector,ssqq.npx-web-quick-start}/**/*'
+    - "!**/.vscode/*"
+    - "!src/*"
+    - "!electron.vite.config.{js,ts,mjs,cjs}"
+    - "!vite.config.{js,ts,mjs,cjs}"
+    - "!capacitor.config.{js,ts,mjs,cjs}"
+    - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,README/*}"
+    - "!{.env,.env.*,.envrc,.gitmodules,.tool-versions,stats.html}"
+    - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
+    - "!{dist*/*,build/*,scripts/*}"
+    - "!{scripts/*,dockerfile}"
+    - "!{ssqq.capacitor-onebot-connector,ssqq.npx-web-quick-start}/**/*"
 
 asarUnpack:
     - resources/**
@@ -27,7 +27,7 @@ win:
         - { target: portable, arch: x64 }
     executableName: Stapxs QQ Lite X
     icon: build/icon-client-others.png
-    legalTrademarks: Copyright © 2022-2025 Mr.Lee, and other contributors.
+    legalTrademarks: Copyright © 2025-2026 Mr.Lee, and other contributors.
     publisherName: Mr.Lee
 
 # macOS 配置
@@ -59,7 +59,7 @@ linux:
     vendor: Mr.Lee
     synopsis: 一个跨协议的 Stapxs QQ Lite 发行版。
     category: Network
-    mimeTypes: [ application/x-stapxs-qq-lite-x ]
+    mimeTypes: [application/x-stapxs-qq-lite-x]
     desktop:
         Type: Application
         Name: Stapxs QQ Lite X

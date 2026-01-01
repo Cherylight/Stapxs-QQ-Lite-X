@@ -33,7 +33,7 @@
                         <span>Stapxs QQ Lite X </span>
                         <a>{{ getVersion() }}</a>
                     </div>
-                    <span>Copyright © 2022 - 2025 Mr.Lee</span>
+                    <span>Copyright © 2025 - 2026 Mr.Lee</span>
                     <span style="color: var(--color-main);cursor: pointer;"
                         @click="openLink(`https://github.com/${runtimeData.repoName}`)">
                         {{ runtimeData.repoName }}
