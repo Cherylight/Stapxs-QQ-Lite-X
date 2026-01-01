@@ -10,8 +10,7 @@
     <div v-if="user" class="member-info ss-card"
         :class="{
             leave: typeof user === 'number' || user instanceof Member && user.leave,
-        }"
-    >
+        }">
         <!-- 群成员 -->
         <template v-if="user instanceof Member">
             <div>

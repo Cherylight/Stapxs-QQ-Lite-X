@@ -11,14 +11,12 @@
     "scripts": {
         "capacitor:copy:before": "capacitor-sync-version",
         "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts,.vue --fix; vue-tsc --noEmit -p tsconfig.web.json",
-        "lint:tauri": "cargo check --manifest-path src/tauri/Cargo.toml",
         "update:icon": "npx @capacitor/assets generate --assetPath 'src/mobile/_assets' --iosProject 'src/mobile/ios/App' --androidProject 'src/mobile/android' --android --ios",
         "update:version": "npx @stapxs/capacitor-sync-version android ios",
         "dev": "vite dev",
         "preview": "vite preview",
         "dev:electron": "electron-vite dev",
         "proxy": "node proxy.js",
-        "dev:tauri": "tauri dev -c src/tauri/tauri.conf.json",
         "dev:ios": "vite build && capacitor sync ios && capacitor run ios",
         "dev:android": "vite build && capacitor sync android && capacitor run android",
         "open:ios": "vite build && capacitor sync ios && capacitor open ios",
@@ -26,8 +24,7 @@
         "build": "vite build",
         "build:electron": "electron-vite build && electron-builder",
         "build:ios": "vite build && capacitor sync ios && sh ./scripts/build-export-ipa.sh",
-        "build:android": "vite build && capacitor sync android && capacitor build android",
-        "build:tauri": "tauri build -c src/tauri/tauri.conf.json"
+        "build:android": "vite build && capacitor sync android && capacitor build android"
     },
     "dependencies": {
         "@electron-toolkit/preload": "^3.0.0",

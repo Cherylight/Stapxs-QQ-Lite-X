@@ -1,5 +1,5 @@
 <template>
-    <img :src="url" :alt="$t('预览图片加载失败')" class="custom-face-tooltip"/>
+    <img :src="url" :alt="$t('预览图片加载失败')" class="custom-face-tooltip">
 </template>
 
 <script setup lang="ts">

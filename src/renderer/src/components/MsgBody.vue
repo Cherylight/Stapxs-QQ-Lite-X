@@ -129,12 +129,13 @@
                                 <EmojiFace :emoji="item.face" class="msg-face" />
                             </template>
                             <template v-else-if="item instanceof AtSeg">
-                                <a :data-id="item.user_id" :data-group="data.session?.id" :class="{
+                                <a v-user-tooltip="getAtMember(item.user_id)"
+                                    :data-id="item.user_id"
+                                    :data-group="data.session?.id"
+                                    :class="{
                                         'msg-at': true,
                                         'atme': item.user_id === runtimeData.loginInfo.uin && showToMe,
-                                    }"
-                                    v-user-tooltip="getAtMember(item.user_id)"
-                                    >
+                                    }">
                                     {{ item.plaintext(data) }}
                                 </a>
                             </template>
@@ -248,8 +249,7 @@
                                         : $t('加载消息失败')
                                 )"
                                 class="msg-reply"
-                                @click="scrollToMsg(item.id)"
-                            >
+                                @click="scrollToMsg(item.id)">
                                 <font-awesome-icon :icon="['fas', 'reply']" />
                                 <a :class="getRepMsg(item.id) ? '' : 'msg-unknown'"
                                     style="cursor: pointer">
@@ -388,8 +388,8 @@
                     <template v-for="info, id in (data.emojis as Record<string, number[]>)"
                         :key="'respond-' + data.uuid + '-' + id">
                         <div :class="{
-                                'me-send': info.includes(runtimeData.loginInfo.uin),
-                            }"
+                                 'me-send': info.includes(runtimeData.loginInfo.uin),
+                             }"
                             @click="$emit('emojiClick', id as string, data)">
                             <EmojiFace :emoji="Emoji.get(Number(id))" />
                             <span>{{ info.length }}</span>
@@ -409,7 +409,7 @@ import EmojiFace from './EmojiFace.vue'
 import CardMessage from './msg-component/CardMessage.vue'
 
 import { Role } from '@renderer/function/adapter/enmu'
-import { logger } from '@renderer/function/base'
+import { logger, popInfo } from '@renderer/function/base'
 import { MenuEventData } from '@renderer/function/elements/information'
 import Emoji from '@renderer/function/model/emoji'
 import { Img } from '@renderer/function/model/img'
@@ -432,7 +432,6 @@ import {
     VideoSeg,
     XmlSeg
 } from '@renderer/function/model/seg'
-import { GroupSession } from '@renderer/function/model/session'
 import { IUser, Member } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
 import {
@@ -448,7 +447,6 @@ import {
 } from '@renderer/function/utils/systemUtil'
 import {
     vHide,
-    vLongHover,
     vMenu,
     vMove,
     VMoveOptions,
@@ -607,7 +605,6 @@ defineExpose({
                 getVideo: false,
                 senderInfo: null as any,
                 trueLang: getTrueLang(),
-                Role,
                 // 互动相关
                 msgMove: {
                     move: 0,

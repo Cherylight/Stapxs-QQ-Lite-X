@@ -7,7 +7,7 @@ import packageInfo from '../../../../../package.json'
 import { logger, popInfo } from '../base'
 import { DnsElem } from '../elements/information'
 import { popBox } from './popBox'
-import LoginPan from '@renderer/popboxes/LoginPan.vue'
+import LoginPan from '@renderer/components/popBox/LoginPan.vue'
 
 /**
  * 异步延迟

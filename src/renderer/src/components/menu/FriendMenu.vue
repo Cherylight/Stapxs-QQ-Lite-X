@@ -69,8 +69,8 @@ import { GroupSession, Session } from '@renderer/function/model/session'
 import { runtimeData } from '@renderer/function/msg'
 import { ensurePopBox, popBox } from '@renderer/function/utils/popBox'
 import { i18n } from '@renderer/main'
-import ConfigBox from '@renderer/popboxes/ConfigBox.vue'
-import SelectBox from '@renderer/popboxes/SelectBox.vue'
+import ConfigBox from '@renderer/components/popBox/ConfigBox.vue'
+import SelectBox from '@renderer/components/popBox/SelectBox.vue'
 import {
     markRaw,
     shallowReactive,
@@ -307,7 +307,8 @@ function clickReaded() {
 }
 function clickRead() {
     if (!session) return
-    session.showNotice = true
+    const target = session
+    target.showNotice = true
     emit('close')
 }
 function clickNoticeOpen() {

@@ -59,21 +59,13 @@
             </div>
         </TransitionGroup>
 
-        <!-- 弹窗列表 -->
-        <!-- 弹窗列表 -->
-        <TransitionGroup name="pop-box">
-            <template v-for="(pop, index) in runtimeData.popBoxList" :key="'pop-box-' + pop.id">
-                <div v-hide="index !== runtimeData.popBoxList.length - 1"
-                    class="pop-box-background" />
-                <PopBox :props="pop" />
-            </template>
-        </TransitionGroup>
-
 
         <!-- 全局搜索栏 -->
         <GlobalSessionSearchBar />
         <Viewer ref="viewer" />
 
+        <!-- 弹窗列表 -->
+        <PopBoxes />
         <!-- 菜单 -->
         <ContextMenus />
         <!-- 提示工具 -->
@@ -96,22 +88,22 @@ import {
     shallowReactive,
     useTemplateRef
 } from 'vue'
-import driver from './function/driver'
-import { Notify } from './function/notify'
-import { ensurePopBox } from './function/utils/popBox'
-import { getDeviceType, getVersion, openLoginPan } from './function/utils/systemUtil'
+import driver from '@renderer/function/driver'
+import { Notify } from '@renderer/function/notify'
+import { ensurePopBox } from '@renderer/function/utils/popBox'
+import { getDeviceType, getVersion, openLoginPan } from '@renderer/function/utils/systemUtil'
 
-import GlobalSessionSearchBar from './components/GlobalSessionSearchBar.vue'
-import PopBox from './components/PopBox.vue'
-import Viewer from './components/Viewer.vue'
-import { vHide } from './function/utils/vcmd'
-import { useFrame, useKeyboard } from './function/utils/vuse'
-import Chat from './pages/Chat.vue'
-import SideBar from './pages/SideBar.vue'
-import { backend } from './runtime/backend'
-import win from './runtime/win'
-import ContextMenus from './components/menu/ContextMenus.vue'
-import Tooltips from './components/tooltip/Tooltips.vue'
+import GlobalSessionSearchBar from '@renderer/components/GlobalSessionSearchBar.vue'
+import Viewer from '@renderer/components/Viewer.vue'
+import { vHide } from '@renderer/function/utils/vcmd'
+import { useFrame, useKeyboard } from '@renderer/function/utils/vuse'
+import Chat from '@renderer/pages/Chat.vue'
+import SideBar from '@renderer/pages/SideBar.vue'
+import { backend } from '@renderer/runtime/backend'
+import win from '@renderer/runtime/win'
+import ContextMenus from '@renderer/components/menu/ContextMenus.vue'
+import Tooltips from '@renderer/components/tooltip/Tooltips.vue'
+import PopBoxes from '@renderer/components/popBox/PopBoxes.vue'
 
 //#region == 定义变量 ===================================================
 const fps = shallowReactive({

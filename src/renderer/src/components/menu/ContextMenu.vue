@@ -15,7 +15,7 @@
         ref="content"
         class="content">
         <component :is="compData.comp" v-bind="compData.props"
-            v-model="compData.model"
+            v-model="model"
             v-on="compData.emit || {}"
             @close="controller.close" />
     </div>
@@ -34,6 +34,8 @@ const {
 } = defineProps<ContextMenuData>()
 
 const content = useTemplateRef<HTMLElement>('content')
+
+const model = defineModel<any>()
 //#endregion
 
 useEventListener(window, 'pointerdown', (event)=>{

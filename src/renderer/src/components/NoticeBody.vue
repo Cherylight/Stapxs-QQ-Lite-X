@@ -88,8 +88,7 @@
                 <span>{{ $t('的') }}</span>
                 <a v-tooltip="{comp: MsgPrevTooltip, props: {msgs: [data.msg]}}"
                     class="cursor-pointer"
-                    @click="scrollToMsg(data.msg)"
-                >
+                    @click="scrollToMsg(data.msg)">
                     {{ $t('消息') }}
                 </a>
                 <span>:</span>

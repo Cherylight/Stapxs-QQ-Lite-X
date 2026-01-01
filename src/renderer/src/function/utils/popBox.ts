@@ -8,10 +8,31 @@
 
 import app from '@renderer/main'
 import { v4 as uuidv4 } from 'uuid'
-import { Component, h, markRaw, VNode } from 'vue'
-import { NoCompPopBoxData, PopBoxData } from '../elements/information'
-import { runtimeData } from '../msg'
-import InputPopBox from '@renderer/popboxes/InputPopBox.vue'
+import { Component, h, markRaw, shallowReactive, VNode } from 'vue'
+import InputPopBox from '@renderer/components/popBox/InputPopBox.vue'
+import { VueCompData } from '../elements/vueComp'
+
+
+export interface PopBoxButton {
+	master?: boolean // 是否高亮（主按钮）
+	fun?: (() => void | Promise<void>)
+		| ((event: Event) => void | Promise<void>) // 按钮回调
+	text: string // 按钮文本
+	noClose?: boolean // 是否不退出弹窗
+}
+
+export type AbsCompPopBoxData = {
+    svg?: string // 弹窗图标
+    title?: string // 弹窗标题（缺省将没有标题栏和关闭按钮）
+    full?: boolean // 是否填充整个页面
+    button?: PopBoxButton[]
+    allowAutoClose?: boolean // 是否允许自带的关闭操作
+    onClose?: () => void // 关闭回调
+}
+
+export type PopBoxData<T extends Component> = AbsCompPopBoxData & VueCompData<T>
+
+export const popBoxList: {id: string, data: PopBoxData<Component>}[] = shallowReactive([])
 
 /**
  * 关闭一个弹窗
@@ -19,10 +40,10 @@ import InputPopBox from '@renderer/popboxes/InputPopBox.vue'
  * @returns
  */
 export function closePopBox(id: string) {
-    const index = runtimeData.popBoxList.findIndex(item => item.id === id)
+    const index = popBoxList.findIndex(item => item.id === id)
     if (index === -1) return
-    runtimeData.popBoxList[index].data.onClose?.()
-    runtimeData.popBoxList.splice(index, 1)
+    popBoxList[index].data.onClose?.()
+    popBoxList.splice(index, 1)
 }
 
 /**
@@ -30,7 +51,7 @@ export function closePopBox(id: string) {
  * @returns
  */
 export function hasPopBox(): boolean {
-    return runtimeData.popBoxList.length > 0
+    return popBoxList.length > 0
 }
 
 /**
@@ -41,7 +62,7 @@ export function hasPopBox(): boolean {
 export function popBox<T extends Component>(config: PopBoxData<T>): string {
     const id = uuidv4()
     config.comp = markRaw(config.comp)
-    runtimeData.popBoxList.push({
+    popBoxList.push({
         id,
         data: config
     })
@@ -55,7 +76,7 @@ export function popBox<T extends Component>(config: PopBoxData<T>): string {
  * @return 弹窗的唯一标识符
  * @deprecated 纯文本请使用 `textPopBox`, 或者 tsx + `popBox` 替代
  */
-export function htmlPopBox(html: string, config: NoCompPopBoxData = {}): string {
+export function htmlPopBox(html: string, config: AbsCompPopBoxData = {}): string {
     const data: PopBoxData<() => VNode> = {
         comp: () => h('div', { innerHTML: html }),
         ...config
@@ -69,7 +90,7 @@ export function htmlPopBox(html: string, config: NoCompPopBoxData = {}): string 
  * @param config 弹窗配置
  * @returns 弹窗唯一标识符
  */
-export function textPopBox(text: string, config: NoCompPopBoxData = {}): string {
+export function textPopBox(text: string, config: AbsCompPopBoxData = {}): string {
     const data: PopBoxData<() => VNode> = {
         comp: () => h('div', [
             h('span', text)

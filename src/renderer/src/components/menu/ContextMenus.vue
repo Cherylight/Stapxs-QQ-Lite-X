@@ -12,7 +12,8 @@
             @leave-cancelled="(el) => customAnimationName('cancel-leave')(el)">
             <ContextMenu v-for="value in contextMenus"
                 :key="value.id"
-                v-bind="value" />
+                v-bind="value"
+                v-model="value.compData.model" />
         </TransitionGroup>
     </Teleport>
 </template>
@@ -40,7 +41,6 @@ function customAnimationName(state:
 ): (el: Element) => void {
     return (el: Element) => {
         const animationName = getAnimationName(el)
-        console.log('animationName', animationName)
         const getName = (name: string) => {
             return `${animationName}-${name}`
         }

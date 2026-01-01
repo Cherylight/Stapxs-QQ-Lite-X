@@ -89,7 +89,7 @@ import OptView from './options/OptView.vue'
 import { runtimeData } from '@renderer/function/msg'
 import { openLink } from '@renderer/function/utils/appUtil'
 import { getVersion } from '@renderer/function/utils/systemUtil'
-import AboutPan from '@renderer/popboxes/AboutPan.vue'
+import AboutPan from '@renderer/components/popBox/AboutPan.vue'
 
 const config = runtimeData.sysConfig
 

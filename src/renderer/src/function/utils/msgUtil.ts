@@ -153,7 +153,7 @@ export function isImportant(user: IUser | number): boolean {
  */
 export async function singleForward(msgList: Msg[]) {
     const $t = app.config.globalProperties.$t
-    const ForwardPan = (await import('@renderer/popboxes/ForwardPan.vue')).default
+    const ForwardPan = (await import('@renderer/components/popBox/ForwardPan.vue')).default
     popBox({
         title: $t('转发消息'),
         svg: 'fa-arrows-turn-right',
@@ -171,7 +171,7 @@ export async function singleForward(msgList: Msg[]) {
  */
 export async function mergeForward(msgList: Msg[]) {
     const $t = app.config.globalProperties.$t
-    const ForwardPan = (await import('@renderer/popboxes/ForwardPan.vue')).default
+    const ForwardPan = (await import('@renderer/components/popBox/ForwardPan.vue')).default
     popBox({
         title: $t('合并转发消息'),
         svg: 'fa-share-from-square',

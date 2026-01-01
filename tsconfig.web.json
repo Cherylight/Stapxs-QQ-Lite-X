@@ -9,6 +9,7 @@
     "exclude": [
         "src/renderer/src/assets/img/qq-face/**/*",
         "src/renderer/src/pages/chat-view/Chat弹幕.vue",
+        "src/renderer/src/pages/chat-view/SystemNotice.vue",
     ],
     "compilerOptions": {
         "composite": true,

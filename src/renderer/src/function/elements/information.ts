@@ -1,11 +1,9 @@
-import { Component } from 'vue'
 import { AdapterInterface, LoginInfo } from '../adapter/interface'
 import { SessionBox } from '../model/box'
 import { ForwardSeg } from '../model/seg'
 import { Session } from '../model/session'
 import { User } from '../model/user'
 import { AppConfig } from '../option/option'
-import { VueCompData } from './vueComp'
 
 export interface RunTimeDataElem {
     sysConfig: AppConfig
@@ -32,7 +30,6 @@ export interface RunTimeDataElem {
     nowChat?: Session
     nowBox?: SessionBox  // 当前的会话盒子
     nowAdapter?: AdapterInterface // 当前适配器
-    popBoxList: { id: string, data: PopBoxData<any> }[],
     defaultColorMode: 'light' | 'dark',
     repoName: string
 }
@@ -42,25 +39,6 @@ export interface MenuEventData {
     y: number
     target: HTMLElement
 }
-
-export interface PopBoxButton {
-	master?: boolean // 是否高亮（主按钮）
-	fun?: (() => void | Promise<void>)
-		| ((event: Event) => void | Promise<void>) // 按钮回调
-	text: string // 按钮文本
-	noClose?: boolean // 是否不退出弹窗
-}
-
-export type NoCompPopBoxData = {
-    svg?: string // 弹窗图标
-    title?: string // 弹窗标题（缺省将没有标题栏和关闭按钮）
-    full?: boolean // 是否填充整个页面
-    button?: PopBoxButton[]
-    allowAutoClose?: boolean // 是否允许自带的关闭操作
-    onClose?: () => void // 关闭回调
-}
-
-export type PopBoxData<T extends Component> = NoCompPopBoxData & VueCompData<T>
 
 export interface MenuEventData {
     x: number

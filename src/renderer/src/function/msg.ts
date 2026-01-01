@@ -216,7 +216,6 @@ const baseRuntime = {
     }),
     defaultColorMode: 'light' as 'light' | 'dark',  // 系统颜色模式
     systemNoticesList: undefined,
-    popBoxList: [],
     mergeMsgStack: [],
     cm: getCm(),
     nowChat: undefined,

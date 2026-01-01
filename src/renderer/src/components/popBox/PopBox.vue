@@ -29,10 +29,10 @@
                     :icon="['fas', 'xmark']" @click="autoClose" />
             </header>
             <component
-                :is="slotComp"
-                v-bind="slotProps"
-                v-model="slotModel"
-                v-on="slotEmit"
+                :is="props.data.comp"
+                v-bind="props.data.props"
+                v-model="model"
+                v-on="props.data.emit || {}"
                 @close-pop-box="closeSelf" />
             <div v-if="buttons.length > 0" class="button">
                 <button v-for="(button, index) in buttons"
@@ -51,25 +51,22 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { PopBoxButton, PopBoxData } from '@renderer/function/elements/information'
+<script setup lang="ts" generic="T extends Component">
 import { runtimeData } from '@renderer/function/msg'
-import { closePopBox } from '@renderer/function/utils/popBox'
+import { closePopBox, PopBoxButton, PopBoxData } from '@renderer/function/utils/popBox'
 import { vEsc, vFocus, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import { useViewportUnits } from '@renderer/function/utils/vuse'
 import anime from 'animejs'
-import { nextTick, shallowRef, useTemplateRef } from 'vue'
+import { type Component, nextTick, shallowRef, useTemplateRef } from 'vue'
 
-const { props } = defineProps<{props: {id: string, data: PopBoxData<any>}}>()
+const { props } = defineProps<{props: {id: string, data: PopBoxData<T>}}>()
+
+const model = defineModel<any>()
 
 const id = props.id
 const {
     svg,
     title,
-    comp: slotComp,
-    props: slotProps = {},
-    model: slotModel,
-    emit: slotEmit = {},
     full = false,
     button: buttons = [],
     allowAutoClose = true,

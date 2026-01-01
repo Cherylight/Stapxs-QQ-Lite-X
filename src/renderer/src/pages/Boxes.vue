@@ -65,7 +65,7 @@ import { changeSession } from '@renderer/function/utils/msgUtil'
 import { popBox } from '@renderer/function/utils/popBox'
 import { vAutoFocus, vMenu, vSearch } from '@renderer/function/utils/vcmd'
 import { i18n } from '@renderer/main'
-import ConfigBox from '@renderer/popboxes/ConfigBox.vue'
+import ConfigBox from '@renderer/components/popBox/ConfigBox.vue'
 import {
     markRaw,
     shallowReactive,

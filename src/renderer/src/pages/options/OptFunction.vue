@@ -305,7 +305,7 @@ import Switch from '@renderer/components/Switch.vue'
 import OptionManager from '@renderer/function/option/option'
 import { runtimeData } from '@renderer/function/msg'
 import { popBox } from '@renderer/function/utils/popBox'
-import UmamiInfoPan from '@renderer/popboxes/UmamiInfoPan.vue'
+import UmamiInfoPan from '@renderer/components/popBox/UmamiInfoPan.vue'
 import { backend } from '@renderer/runtime/backend'
 import { shallowRef } from 'vue'
 

@@ -272,7 +272,7 @@ import driver from '@renderer/function/driver'
 import { ensurePopBox, htmlPopBox, popBox } from '@renderer/function/utils/popBox'
 import { copyToClipboard, getVersion } from '@renderer/function/utils/systemUtil'
 import win from '@renderer/runtime/win'
-import WelPan from '@renderer/popboxes/WelPan.vue'
+import WelPan from '@renderer/components/popBox/WelPan.vue'
 
 const $t = app.config.globalProperties.$t
 const appmsg_text = shallowRef('')
