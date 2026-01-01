@@ -20,6 +20,17 @@
 		"vuse",
 		"xmark"
 	],
+	"eslint.validate": [
+		"javascript",
+		"javascriptreact",
+		"typescript",
+		"typescriptreact",
+		"vue"
+	],
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+	},
     "typescript.experimental.useTsgo": false,
     "typescript.native-preview.tsdk": "node_modules/@typescript/native-preview"
 }
