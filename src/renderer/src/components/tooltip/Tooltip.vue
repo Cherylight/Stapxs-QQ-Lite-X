@@ -30,6 +30,8 @@ onMounted(async ()=>{
     // 高度
     const el = (body.value as any).$el as HTMLElement
     const panHeight = el.clientHeight
+    console.log('panHeight', panHeight)
+    console.log('pos.y', pos.y)
     if (pos.y < panHeight + 20) {
         posInfo.y = panHeight + 20
     }

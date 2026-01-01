@@ -105,20 +105,26 @@
                             </button>
                         </header>
                         <div v-if="(userSearchInfo!.isSearch ? userSearchInfo!.query : chat.memberList).length > 0">
-                            <div v-for="member in userSearchInfo!.isSearch ? userSearchInfo!.query : chat.memberList"
-                                :key="'chatinfomlist-' + member.user_id" class="edit">
-                                <img alt="nk" loading="lazy"
-                                    :src="member.face">
-                                <div>
-                                    <a @click="startChat(member)">{{ member.name }}</a>
-                                    <font-awesome-icon v-if="member.role === 'owner'" :icon="['fas', 'crown']" />
-                                    <font-awesome-icon v-if="member.role === 'admin'" :icon="['fas', 'star']" />
+                            <RecycleScroller
+                                v-slot="{ item: member }"
+                                :items="userSearchInfo!.isSearch ? userSearchInfo!.query : chat.memberList"
+                                class="member-scroller"
+                                :item-size="60"
+                                key-field="user_id">
+                                <div class="member-item">
+                                    <img alt="nk" loading="lazy"
+                                        :src="member.face">
+                                    <div>
+                                        <a @click="startChat(member)">{{ member.name }}</a>
+                                        <font-awesome-icon v-if="member.role === 'owner'" :icon="['fas', 'crown']" />
+                                        <font-awesome-icon v-if="member.role === 'admin'" :icon="['fas', 'star']" />
+                                    </div>
+                                    <!-- 在手机端戳 id 就能触发 -->
+                                    <span @click="clickMember(member)">{{ member.user_id }}</span>
+                                    <font-awesome-icon v-if="canEditMember(member.role)" :icon="['fas', 'wrench']" @click="clickMember(member)" />
+                                    <font-awesome-icon v-else :icon="['fas', 'copy']" @click="clickMember(member)" />
                                 </div>
-                                <!-- 在手机端戳 id 就能触发 -->
-                                <span @click="clickMember(member)">{{ member.user_id }}</span>
-                                <font-awesome-icon v-if="canEditMember(member.role)" :icon="['fas', 'wrench']" @click="clickMember(member)" />
-                                <font-awesome-icon v-else :icon="['fas', 'copy']" @click="clickMember(member)" />
-                            </div>
+                            </RecycleScroller>
                         </div>
                         <div v-else class="null">
                             <font-awesome-icon :icon="['fas', 'inbox']" />
@@ -244,10 +250,11 @@
 
 <script setup lang="ts">
 import BulletinBody from '@renderer/components/BulletinBody.vue'
-import app from '@renderer/main'
 import BcTab from 'vue3-bcui/packages/bc-tab'
 import OptInfo from '@renderer/pages/options/OptInfo.vue'
+import { RecycleScroller } from 'vue-virtual-scroller'
 
+import app from '@renderer/main'
 import { Role } from '@renderer/function/adapter/enmu'
 import { popInfo } from '@renderer/function/base'
 import { Ann } from '@renderer/function/model/ann'

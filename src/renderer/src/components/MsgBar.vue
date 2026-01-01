@@ -5,61 +5,62 @@
  * @Version: 1.0
 -->
 <template>
-    <TransitionGroup
-        :name="runtimeData.sysConfig.opt_fast_animation ? '' : 'msglist'"
-        :class="{
-            'disable-interaction': !allowInteraction || multiselectMode,
-        }"
-        tag="div">
-        <template v-for="(message, index) in msgs">
-            <!-- 时间戳 -->
-            <NoticeBody
-                v-if="message.time && isShowTime(msgs.at(index - 1)?.time?.time, message.time.time)"
-                :key="'notice-time-' + (message.time.time / ( 4 * 60 )).toFixed(0)"
-                :data="SystemNotice.time(message.time.time)" />
-            <!-- [已删除]消息 -->
-            <NoticeBody
-                v-if="
-                    !runtimeData.sysConfig.dont_parse_delete &&
+    <DynamicScroller
+        :items="displayMsgs"
+        :min-item-size="45"
+        class="msg-scroller"
+        key-field="uuid">
+        <template #default="{ item: message, index, active }">
+            <DynamicScrollerItem
+                :item="message"
+                :active="active"
+                :data-index="index"
+                :watch-data="false">
+                <!-- [已删除]消息 -->
+                <NoticeBody
+                    v-if="!runtimeData.sysConfig.dont_parse_delete &&
                         message instanceof Msg &&
                         message.isDelete"
-                :key="'delete-' + message.uuid"
-                :data="SystemNotice.delete()" />
-            <!-- 消息体 -->
-            <MsgBody v-else-if="message instanceof Msg"
-                :key="'msg-' + message.uuid"
-                :selected="isSelected(message)"
-                :data="message"
-                :direction="getDirection(message)"
-                :special="getSpecial(message)"
-                :show-avatar="getShowAvatar(message)"
-                :show-icon="showIcon"
-                :dim-non-existent-msg="dimNonExistentMsg"
-                :without-avatar="getWithoutAvatar(message)"
-                :ex-info="exInfo"
-                @click="msgClick($event, message)"
-                @image-loaded="arg=>$emit('imageLoaded', arg)"
-                @show-msg-menu="(eventData, msg) => openMsgMenu(eventData, msg)"
-                @show-user-menu="(eventData, user) => openUserMenu(eventData, user)"
-                @left-move="arg => $emit('leftMove', arg)"
-                @right-move="arg => $emit('rightMove', arg)"
-                @sender-double-click="arg => $emit('senderDoubleClick', arg)"
-                @emoji-click="(id, msg) => $emit('emojiClick', id, msg)" />
-            <!-- 其他通知消息 -->
-            <NoticeBody v-else-if="message instanceof Notice"
-                :id="message.uuid"
-                :key="'notice-' + index"
-                :data="message" />
+                    :key="'delete-' + message.uuid"
+                    :data="SystemNotice.delete()" />
+                <!-- 消息体 -->
+                <MsgBody v-else-if="message instanceof Msg"
+                    :key="'msg-' + message.uuid"
+                    :selected="isSelected(message)"
+                    :data="message"
+                    :direction="getDirection(message)"
+                    :special="getSpecial(message)"
+                    :show-avatar="getShowAvatar(message)"
+                    :show-icon="showIcon"
+                    :dim-non-existent-msg="dimNonExistentMsg"
+                    :without-avatar="getWithoutAvatar(message)"
+                    :ex-info="exInfo"
+                    @click="msgClick($event, message)"
+                    @image-loaded="arg=>$emit('imageLoaded', arg)"
+                    @show-msg-menu="(eventData, msg) => openMsgMenu(eventData, msg)"
+                    @show-user-menu="(eventData, user) => openUserMenu(eventData, user)"
+                    @left-move="arg => $emit('leftMove', arg)"
+                    @right-move="arg => $emit('rightMove', arg)"
+                    @sender-double-click="arg => $emit('senderDoubleClick', arg)"
+                    @emoji-click="(id, msg) => $emit('emojiClick', id, msg)" />
+                <!-- 其他通知消息 -->
+                <NoticeBody v-else-if="message instanceof Notice"
+                    :id="message.uuid"
+                    :key="'notice-' + index"
+                    :data="message" />
+            </DynamicScrollerItem>
         </template>
-    </TransitionGroup>
+    </DynamicScroller>
 </template>
 <script setup lang="ts">
 import {
+    computed,
     shallowReactive,
     shallowRef,
 } from 'vue'
 import MsgBody from './MsgBody.vue'
 import NoticeBody from './NoticeBody.vue'
+import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller'
 
 import { MenuEventData } from '@renderer/function/elements/information'
 import { Message } from '@renderer/function/model/message'
@@ -158,6 +159,20 @@ const multipleSelectList = shallowReactive<Set<Msg>>(new Set)
 const multipleSelectListCardNum = shallowRef<number>(0)
 const selectMsg = shallowRef<undefined|Msg>()
 
+const displayMsgs = computed<Message[]>(()=>{
+    const re = [] as Message[]
+    for (let i = 0; i < msgs.length; i++) {
+        const msg = msgs[i]
+        if (msg instanceof Msg && msg.time) {
+            if (isShowTime(msgs.at(i - 1)?.time?.time, msg.time.time)) {
+                re.push(SystemNotice.time(msg.time.time))
+            }
+        }
+        re.push(msg)
+    }
+    return re
+})
+
 defineExpose({
     setAllowInteraction,
     getAllowInteraction,
@@ -214,7 +229,6 @@ function openUserMenu(eventData: MenuEventData, user: IUser) {
     showUserMenu(eventData, user)
 }
 //#endregion
-
 
 //#region ====多选模式相关==========================================
 /**
@@ -296,7 +310,6 @@ function toggleMsgInMultiselectList(msg: Msg) {
 }
 //#endregion
 
-
 //#region ====配置相关==============================================
 function getDirection(msg: Msg): 'left' | 'right' {
     if (runtimeData.loginInfo.uin !== msg.sender.user_id) return direction
@@ -324,7 +337,6 @@ function getWithoutAvatar(msg: Msg): boolean {
     return true
 }
 //#endregion
-
 
 //#region ====工具函数==============================================
 function isSelected(msg: Msg): boolean{
