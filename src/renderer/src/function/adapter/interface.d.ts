@@ -567,6 +567,8 @@ export interface ImgSegData extends SegData {
     url: Resource               // 图片链接
     isFace: boolean             // 是否是表情图片
     summary?: string            // 预览信息
+    width?: number              // 图片宽度
+    height?: number             // 图片高度
 }
 export interface MfaceSegData extends SegData {
     type: 'mface'               // 消息段类型

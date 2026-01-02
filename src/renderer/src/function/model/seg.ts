@@ -110,6 +110,8 @@ export class ImgSeg extends Seg {
     summary: string
     isFace: boolean = false
     imgData: Img
+    width?: number
+    height?: number
     constructor(url: string, isFace?: boolean)
     constructor(data: ImgSegData)
     constructor(arg1: string | ImgSegData, arg2: boolean = false) {
@@ -128,6 +130,8 @@ export class ImgSeg extends Seg {
             this._url = data.url
             this.summary = data.summary ?? $t('[图片]')
             this.isFace = data.isFace
+            this.width = data.width
+            this.height = data.height
         }
         this.imgData = new Img(this._url)
     }
@@ -135,6 +139,12 @@ export class ImgSeg extends Seg {
     plaintext(_?: Msg): string {
         const { $t } = app.config.globalProperties
         return this.summary ?? '[' + $t('图片') + ']'
+    }
+
+    setSize(width: number, height: number): void {
+        if (this.width) throw new Error('图片宽度已设置，不能重复设置')
+        this.width = width
+        this.height = height
     }
 
     get url(): string {
@@ -156,6 +166,8 @@ export class ImgSeg extends Seg {
             url: this._url,
             summary: this.summary,
             isFace: this.isFace,
+            width: this.width,
+            height: this.height,
         }
     }
 }

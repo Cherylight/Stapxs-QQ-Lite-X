@@ -244,9 +244,22 @@
     margin: 5px 0;
     border-radius: 7px;
     max-height: 35vh;
-    cursor: pointer;
-    display: block;
     max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.msg-img.loaded {
+    cursor: pointer;
+}
+
+.msg-img > img {
+    display: block;
+    width: 100%;
+    max-height: 35vh;
+    object-fit: cover;
 }
 
 .msg-img.top {
@@ -254,7 +267,7 @@
 }
 
 .msg-img.bottom {
-    margin: 5px 0 0 5px;
+    margin: 5px 0 0 0;
 }
 
 .msg-img.alone {
@@ -263,8 +276,65 @@
     margin: -10px;
 }
 
-.msg-img.face {
-    max-width: calc(var(--width) / 2 + 20px);
+.msg-img.mface,
+.msg-img.face,
+.msg-img.mface > img,
+.msg-img.face > img {
+    max-height: calc(var(--height) / 2);
+}
+
+.msg-img.mface {
+    outline: 1px dashed var(--color-main);
+    width: 17.5vh;
+    height: 17.5vh;
+}
+
+.msg-img.long-image {
+    height: 30vh;
+    width: 10vh;
+    position: relative;
+    background-color: var(--color-card-1);
+}
+
+.msg-img.long-image::after {
+    content: '长图';
+    position: absolute;
+    bottom: 5px;
+    font-size: 0.8rem;
+    color: var(--color-main);
+}
+
+.msg-img.long-image > img {
+    object-fit: cover;
+    object-position: top;
+    height: 100%;
+    width: 100%;
+    --mask: linear-gradient(to bottom, black 80%, transparent 95%);
+    -webkit-mask-image: var(--mask);
+    mask-image: var(--mask);
+}
+
+.msg-super-face {
+    width: calc(17.5vh);
+    height: 17.5vh;
+    border: 1px solid var(--color-main);
+    max-width: calc(100% + 20px);
+    margin: -10px;
+    border-radius: 7px;
+}
+
+.msg-img > .fail-load {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.msg-img > .fail-load > svg {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 10px;
 }
 
 .msg-face {
@@ -301,10 +371,6 @@
 .msg-face-long > span:nth-child(3n) {
     opacity: 0;
     width: 8px;
-}
-
-.msg-mface {
-    outline: 1px dashed var(--color-main);
 }
 
 .msg-at {

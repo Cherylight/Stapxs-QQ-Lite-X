@@ -998,6 +998,8 @@ export class MilkyAdapter implements AdapterInterface {
             type: 'image',
             url: Resource.fromUrl(data.data.temp_url, data.data.resource_id),
             isFace: data.data.sub_type === 'sticker',
+            width: data.data.width,
+            height: data.data.height,
         }
     }
     async marketFaceParser(data: ISeg.MarketFaceSeg, _?: IncomingMessage): Promise<MfaceSegData> {
