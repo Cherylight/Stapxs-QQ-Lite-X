@@ -579,12 +579,12 @@ async function setImg(file: File) {
                     compressedFile.size / 1024 / 1024 +
                     ' MB',
             )
-            setImg(compressedFile)
+            file = compressedFile
         } catch (error) {
             logger.error(error as Error, '图片压缩失败')
             popInfo.error($t('压缩图片失败'))
+            return
         }
-        return
     }
 
     inputMsg.value.addImg(await fileToDataURL(file))
