@@ -34,7 +34,7 @@ export function closeTooltip(id: string) {
     }
 }
 
-type VUserTooltipBinding = IUser | number
+type VUserTooltipBinding = IUser | number | (() => IUser | number)
 
 export const vUserTooltip: ObjectDirective<HTMLElement, VUserTooltipBinding> = {
     mounted(el: HTMLElement, binding: DirectiveBinding<VUserTooltipBinding>) {

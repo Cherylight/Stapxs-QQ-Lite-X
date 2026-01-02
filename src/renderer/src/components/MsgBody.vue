@@ -23,7 +23,7 @@
         :data-sender="data.sender.user_id"
         :data-time="data.time">
         <img v-if="direction === 'left'" v-hide="!showAvatar"
-            v-user-tooltip="data.sender"
+            v-user-tooltip="() => data.sender"
             v-menu.prevent="event => $emit('showUserMenu', event, data.sender)"
             class="avatar"
             :src="data.sender.face"
@@ -110,7 +110,7 @@
                                 <EmojiFace :emoji="item.face" class="msg-face" />
                             </template>
                             <template v-else-if="item instanceof AtSeg">
-                                <a v-user-tooltip="getAtMember(item.user_id)"
+                                <a v-user-tooltip="() => getAtMember(item.user_id)"
                                     :data-id="item.user_id"
                                     :data-group="data.session?.id"
                                     :class="{
@@ -356,7 +356,7 @@
         </div>
         <img v-if="direction === 'right'" v-hide="!showAvatar"
             v-menu.prevent="event => $emit('showUserMenu', event, data.sender)"
-            v-user-tooltip="data.sender"
+            v-user-tooltip="() => data.sender"
             class="avatar"
             :src="data.sender.face"
             :alt="data.sender.name"

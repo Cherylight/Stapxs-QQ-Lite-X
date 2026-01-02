@@ -7,27 +7,27 @@
  *           2.0 重构为提示工具组件
 -->
 <template>
-    <div v-if="user" class="member-info ss-card"
+    <div v-if="userInfo" class="member-info ss-card"
         :class="{
-            leave: typeof user === 'number' || user instanceof Member && user.leave,
+            leave: typeof userInfo === 'number' || userInfo instanceof Member && userInfo.leave,
         }">
         <!-- 群成员 -->
-        <template v-if="user instanceof Member">
+        <template v-if="userInfo instanceof Member">
             <div>
-                <img :src="user.face" :alt="user.name">
+                <img :src="userInfo.face" :alt="userInfo.name">
                 <div>
-                    <span name="id">{{ user.user_id }}</span>
+                    <span name="id">{{ userInfo.user_id }}</span>
                     <div>
-                        <a>{{ user.name }}</a>
-                        <span v-user-role="user.role">
-                            <template v-if="user.role === Role.Bot">
+                        <a>{{ userInfo.name }}</a>
+                        <span v-user-role="userInfo.role">
+                            <template v-if="userInfo.role === Role.Bot">
                                 <font-awesome-icon :icon="['fas', 'robot']" />
                             </template>
-                            <template v-if="user.level">
-                                {{ 'Lv.' + user.level }}
+                            <template v-if="userInfo.level">
+                                {{ 'Lv.' + userInfo.level }}
                             </template>
-                            <template v-if="user.title">
-                                {{ user.title.replace(/[\u202A-\u202E\u2066-\u2069]/g, '') }}
+                            <template v-if="userInfo.title">
+                                {{ userInfo.title.replace(/[\u202A-\u202E\u2066-\u2069]/g, '') }}
                             </template>
                         </span>
                     </div>
@@ -35,15 +35,15 @@
             </div>
             <div class="member">
                 <div>
-                    <template v-if="user.banTime">
+                    <template v-if="userInfo.banTime">
                         <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-volume-mute']" />
                         {{ $t('禁言中') }}
                     </template>
                 </div>
-                <span v-if="user.join_time">
+                <span v-if="userInfo.join_time">
                     {{
                         $t('{time} 加入群聊', {
-                            time: user.join_time.format(
+                            time: userInfo.join_time.format(
                                 'year',
                                 'day',
                             ),
@@ -53,54 +53,54 @@
             </div>
         </template>
         <!-- 已退群 -->
-        <template v-else-if="typeof user === 'number'">
+        <template v-else-if="typeof userInfo === 'number'">
             <div>
-                <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + user" :alt="String(user)">
+                <img :src="'https://q1.qlogo.cn/g?b=qq&s=0&nk=' + userInfo" :alt="String(userInfo)">
                 <div>
-                    <span name="id">{{ user }}</span>
+                    <span name="id">{{ userInfo }}</span>
                     <div>
-                        <a>{{ $t('已退群( {userId} )', { userId: user }) }}</a>
+                        <a>{{ $t('已退群( {userId} )', { userId: userInfo }) }}</a>
                     </div>
                 </div>
             </div>
         </template>
         <!-- 好友 -->
-        <template v-else-if="user instanceof User">
+        <template v-else-if="userInfo instanceof User">
             <div>
-                <img :src="user.face" :alt="user.name">
+                <img :src="userInfo.face" :alt="userInfo.name">
                 <div>
-                    <span name="id">{{ user.user_id }}</span>
+                    <span name="id">{{ userInfo.user_id }}</span>
                     <div>
-                        <a>{{ user.name }}</a>
+                        <a>{{ userInfo.name }}</a>
                         <div>
-                            等级: <span>Lv {{ user.level }}</span>
+                            等级: <span>Lv {{ userInfo.level }}</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div v-if="user.longNick" class="user">
-                {{ user.longNick }}
+            <div v-if="userInfo.longNick" class="user">
+                {{ userInfo.longNick }}
             </div>
         </template>
         <!-- 保底的 -->
         <template v-else>
             <div>
-                <img :src="user.face" :alt="user.name">
+                <img :src="userInfo.face" :alt="userInfo.name">
                 <div>
-                    <span name="id">{{ user.user_id }}</span>
+                    <span name="id">{{ userInfo.user_id }}</span>
                     <div>
-                        <a>{{ user.name }}</a>
+                        <a>{{ userInfo.name }}</a>
                         <div>
-                            <span v-if="user.role === Role.Owner">
+                            <span v-if="userInfo.role === Role.Owner">
                                 {{ $t('群主') }}
                             </span>
-                            <span v-else-if="user.role === Role.Admin">
+                            <span v-else-if="userInfo.role === Role.Admin">
                                 {{ $t('管理员') }}
                             </span>
-                            <span v-else-if="user.role === Role.Bot">
+                            <span v-else-if="userInfo.role === Role.Bot">
                                 {{ $t('机器人') }}
                             </span>
-                            <span v-if="user.level">Lv {{ user.level }}</span>
+                            <span v-if="userInfo.level">Lv {{ userInfo.level }}</span>
                         </div>
                     </div>
                 </div>
@@ -114,9 +114,16 @@ import { Role } from '@renderer/function/adapter/enmu'
 import { IUser, Member, User } from '@renderer/function/model/user'
 import { vUserRole } from '@renderer/function/utils/vcmd'
 
-const { user } = defineProps<{
-    user: IUser | number
+const { user: userProp } = defineProps<{
+    user: IUser | number | (() => IUser | number)
 }>()
+
+let userInfo: IUser | number
+if (typeof userProp === 'function') {
+    userInfo = userProp()
+} else {
+    userInfo = userProp
+}
 </script>
 
 <style lang="css" scoped>
