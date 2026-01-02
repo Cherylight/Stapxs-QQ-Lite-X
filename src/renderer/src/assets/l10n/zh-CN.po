@@ -2318,3 +2318,6 @@ msgstr ""
 
 msgid "预览图片加载失败"
 msgstr ""
+
+msgid "Milky版本"
+msgstr ""
