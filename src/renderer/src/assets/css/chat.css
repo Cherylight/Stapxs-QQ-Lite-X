@@ -131,7 +131,7 @@ body.with-bar .chat-pan {
 }
 
 .chat-pan > div.chat > .custom-hr {
-	margin: 10px 30px 0 30px;
+    margin: 10px 30px 0 30px;
 }
 
 .chat-pan > div.chat::-webkit-scrollbar {
@@ -205,7 +205,7 @@ body.with-bar .chat-pan {
 
 .chat-bottom > .input-pan > .input > .ban > svg {
     margin-left: 1rem;
-    color: var(--color-red)
+    color: var(--color-red);
 }
 
 .chat-bottom > .input-pan > .input > textarea {
@@ -664,38 +664,38 @@ body.with-bar .msg-menu {
     display: flex;
 }
 
-.member-info> div:nth-child(1) > img {
+.member-info > div:nth-child(1) > img {
     outline: 2px solid var(--color-main);
     border-radius: 7px;
     height: 60px;
     width: 60px;
 }
 
-.member-info> div:nth-child(1) > div {
+.member-info > div:nth-child(1) > div {
     margin-left: 20px;
     overflow: hidden;
     flex: 1;
 }
 
-.member-info> div:nth-child(1) > div > span {
+.member-info > div:nth-child(1) > div > span {
     color: var(--color-font-1);
     font-size: 0.9rem;
     white-space: nowrap;
 }
 
-.member-info> div:nth-child(1) > div > span[name='id'] {
+.member-info > div:nth-child(1) > div > span[name='id'] {
     font-size: 0.8rem;
     display: block;
-    opacity: 0.7
+    opacity: 0.7;
 }
 
-.member-info> div:nth-child(1) > div > div {
+.member-info > div:nth-child(1) > div > div {
     margin-bottom: 5px;
     flex-wrap: wrap;
     display: flex;
 }
 
-.member-info> div:nth-child(1) > div > div > a {
+.member-info > div:nth-child(1) > div > div > a {
     text-overflow: ellipsis;
     width: 100%;
     overflow: hidden;
@@ -706,33 +706,38 @@ body.with-bar .msg-menu {
     display: block;
 }
 
-.member-info> div:nth-child(1) > div > div > div {
+.member-info > div:nth-child(1) > div > div > div {
     margin-top: 4px;
 }
 
 /* 群成员下边区域 */
-.member-info> div:nth-child(2).member {
+.member-info > div:nth-child(2).member {
     display: flex;
     margin-top: 10px;
     align-items: center;
 }
 
-.member-info> div:nth-child(2).member > :nth-child(1) {
+.member-info > div:nth-child(2).member > :nth-child(1) {
     width: 60px;
     display: block;
     font-size: 13px;
 }
 
-.member-info> div:nth-child(2).member > :nth-child(2) {
+.member-info > div:nth-child(2).member > :nth-child(2) {
     margin-left: 20px;
 }
 
 .custom-face-tooltip {
     padding: 0;
     border: 2px solid var(--color-main);
-    border-radius: 2px;
-    max-width: max(min(90vw, 300px), 30vw);
-    transform: translate(-50%, calc(-100% - 0.8rem));
+    max-width: 90vw;
+    max-height: 35vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transform: translate(-50%, calc(-100% - 0.8rem)) scale(0.5);
+    transform-origin: bottom;
+    border-radius: 7px;
 }
 
 .chat-info-pan {
@@ -957,7 +962,7 @@ body.with-bar .msg-menu {
 
 .chat-info-tab-member > div > div > span {
     color: var(--color-font-2);
-    transition: all .2s;
+    transition: all 0.2s;
     opacity: 1;
 }
 
@@ -968,7 +973,7 @@ body.with-bar .msg-menu {
 
 .chat-info-tab-member > div > div > svg {
     color: var(--color-font-2);
-    transition: all .2s;
+    transition: all 0.2s;
     margin-right: -25px;
     margin-left: 10px;
     width: 15px;
@@ -1258,7 +1263,7 @@ body.with-bar .msg-menu {
 }
 
 .chat-info-pan header > button:hover {
-    background-color: var(--color-card-2)
+    background-color: var(--color-card-2);
 }
 
 .chat-info-pan header > button > svg {
@@ -1631,14 +1636,15 @@ body.with-bar .msg-menu {
     flex-direction: row;
     overflow-y: scroll;
     flex-wrap: wrap;
-    display: flex;
+    display: grid;
     padding: 0 10px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .face-stickers > span {
     cursor: pointer;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1647,8 +1653,8 @@ body.with-bar .msg-menu {
 
 .face-stickers > span > img {
     background: var(--color-card-2);
-    max-height: 50px;
-    max-width: 50px;
+    max-height: 100%;
+    max-width: 100%;
     margin: 5px;
     border-radius: 7px;
 }
@@ -1807,7 +1813,7 @@ body.with-bar .msg-menu {
 }
 
 .select-tag {
-	position: absolute;
+    position: absolute;
     background: var(--color-card-1);
     justify-content: space-evenly;
     transition: transform 0.3s;
@@ -1819,15 +1825,15 @@ body.with-bar .msg-menu {
     margin: 20px;
     padding: 15px 10px;
     height: auto;
-	width: calc(100% - 60px);
-	bottom: 10px;
+    width: calc(100% - 60px);
+    bottom: 10px;
     pointer-events: all;
-	transform-origin: bottom;
+    transform-origin: bottom;
 }
 
 .select-tag-enter-from,
 .select-tag-leave-to {
-	transform: scaleY(0);
+    transform: scaleY(0);
 }
 
 .select-tag > div {
@@ -1861,7 +1867,6 @@ body.with-bar .msg-menu {
     font-size: 0.75rem;
     margin-top: 5px;
 }
-
 
 .img-pan-enter-active {
     animation: img-pan-appear 0.3s;
@@ -2309,7 +2314,7 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
     }
 
     /* AT 信息悬浮面板 */
-    .member-info{
+    .member-info {
         max-width: 55%;
     }
 
@@ -2330,7 +2335,6 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
 }
 
 @media (max-width: 500px) {
-
     /* 群信息面板 */
     .chat-info {
         height: calc(100% - 115px);

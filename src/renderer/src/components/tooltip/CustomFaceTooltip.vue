@@ -9,14 +9,14 @@ const { url } = defineProps<{ url: string }>()
 <style scoped lang="css">
 .tooltip-enter-active, .tooltip-leave-active {
     transition: opacity 0.2s, transform 0.2s;
-    transform-origin: top;
+    transform-origin: bottom;
 }
 .tooltip-enter-from, .tooltip-leave-to {
     opacity: 0;
-    transform: scaleY(0) translate(-50%, calc(-100% - 0.8rem));
+    transform: translate(-50%, calc(-100% - 0.8rem)) scale(0.5) scaleY(0);
 }
 .tooltip-enter-to, .tooltip-leave-from {
     opacity: 1;
-    transform: scaleY(1) translate(-50%, calc(-100% - 0.8rem));
+    transform: translate(-50%, calc(-100% - 0.8rem)) scale(0.5) scaleY(1);
 }
 </style>
