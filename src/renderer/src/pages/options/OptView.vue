@@ -358,11 +358,13 @@ import { BrowserInfo, detect } from 'detect-browser'
 import { runtimeData } from '../../function/msg'
 
 import { sendIdentifyData } from '@renderer/function/utils/appUtil'
-import { closePopBox, ensurePopBox, textPopBox } from '@renderer/function/utils/popBox'
+import { closePopBox, ensurePopBox, textPopBox, waitPopBox } from '@renderer/function/utils/popBox'
 import { backend } from '@renderer/runtime/backend'
+import imageCompression from 'browser-image-compression'
 import languages from '../../assets/l10n/_l10nconfig.json'
 import app from '@renderer/main'
 import win from '@renderer/runtime/win'
+import { logger, popInfo } from '@renderer/function/base'
 
 const COLOR_NAMES = [
     '林槐蓝',
@@ -400,18 +402,40 @@ async function changeVibrancy(){
 /**
  * 设置背景图片
  */
-function setBackground(event: Event) {
+async function setBackground(event: Event) {
     const sender = event.target as HTMLInputElement
-    const img = sender.files?.[0]
+    let img = sender.files?.[0]
     if (!img) return
-    img.arrayBuffer().then((buffer) => {
-        const base64String = btoa(
-            new Uint8Array(buffer)
-                .reduce((data, byte) => data + String.fromCodePoint(byte), ''),
-        )
-        const imgSrc = `data:${img.type};base64,${base64String}`
-        runtimeData.sysConfig.background_img = imgSrc
-    })
+    // 图片太大
+    if (img.size > 3145728) {
+        const options = { maxSizeMB: 3, useWebWorker: true }
+        const done = waitPopBox($t('正在压缩图片 ……'))
+        try {
+            const compressedFile = await imageCompression(
+                img,
+                options,
+            )
+            logger.info(
+                '图片压缩成功，原大小：' +
+                    img.size / 1024 / 1024 +
+                    ' MB，压缩后大小：' +
+                    compressedFile.size / 1024 / 1024 +
+                    ' MB',
+            )
+            img = compressedFile
+        } catch (error) {
+            logger.error(error as Error, '图片压缩失败')
+            popInfo.error($t('压缩图片失败'))
+        }
+        done()
+    }
+    const buffer = await img.arrayBuffer()
+    const base64String = btoa(
+        new Uint8Array(buffer)
+            .reduce((data, byte) => data + String.fromCodePoint(byte), ''),
+    )
+    const imgSrc = `data:${img.type};base64,${base64String}`
+    runtimeData.sysConfig.background_img = imgSrc
 }
 /**
  * 移除背景图片
