@@ -153,7 +153,7 @@
                     v-model="inputMsg.content"
                     type="text"
                     @paste="addImg"
-                    @keydown="mainKey"
+                    @keydown="mainKeyDown"
                     @keyup="mainKeyUp"
                     @click="selectSQIn()"
                     @compositionstart="handleCompositionStart"
@@ -300,7 +300,7 @@ function handleCompositionEnd() {
  * 发送框按键事件
  * @param event 事件
  */
-function mainKey(event: KeyboardEvent) {
+function mainKeyDown(event: KeyboardEvent) {
     // 处理 At 查找
     if (keyCheck(event)) {
         event.preventDefault()
@@ -342,7 +342,9 @@ function mainKey(event: KeyboardEvent) {
     // meta + enter
     // alt + enter
     // 上述组合不自带enter,需要手动补充
-    if(canSend && !inputMsg.value.isVoid) {
+    if(canSend) {
+        event.preventDefault()
+        event.stopPropagation()
         sendMsg()
     } else if(event.key === 'Enter' &&
         (event.ctrlKey || event.metaKey || event.altKey)) {
@@ -360,6 +362,7 @@ function mainKeyUp(event: KeyboardEvent) {
  * 发送消息
  */
 function sendMsg() {
+    if (inputMsg.value.isVoid) return toMainInput()
     // 关闭所有其他的已打开的更多功能弹窗
     switchDetail(undefined)
     // 无消息不发送
