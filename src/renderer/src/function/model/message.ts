@@ -9,7 +9,6 @@
 import { v4 as uuid } from 'uuid'
 import { Session } from './session'
 import { Time } from './data'
-import { shallowRef, ShallowRef } from 'vue'
 
 export abstract class Message {
     /**
@@ -22,14 +21,9 @@ export abstract class Message {
     abstract toMe: boolean
     abstract fromMe: boolean
     time?: Time
-    refreshFlag: ShallowRef<number> = shallowRef(0)
     constructor(data: {time?: number}) {
 		if (data.time && !isNaN(data.time)) this.time = new Time(data.time)
     }
 
     abstract get preMsg(): string
-
-    refreshSize() {
-        this.refreshFlag.value += 1
-    }
 }

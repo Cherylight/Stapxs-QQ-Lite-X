@@ -9,8 +9,10 @@
         background 0.3s,
         opacity 0.3s;
     display: flex;
+    padding: 5px 10px 0 10px;
     width: calc(100% - 30px);
     border-radius: 7px;
+    margin: 5px 0;
     font-size: 1rem;
     flex-wrap: wrap;
 }
@@ -67,6 +69,10 @@
 
 .message-body.special {
     color: var(--color-font-r);
+}
+
+.message-body.hide-face {
+    margin-top: -1rem;
 }
 
 .message.merge > div.message-body {
@@ -150,26 +156,28 @@
 .message-ex-info {
     display: flex;
     width: 100%;
-    font-size: 15px;
-    height: 15px;
+    font-size: 12px;
+    height: 12px;
+    opacity: 0;
     color: var(--color-font-2);
+    transition: opacity 0.3s;
+}
+
+.message-ex-info:hover {
+    opacity: 1;
 }
 
 .message-ex-info > div.space {
     margin: auto;
 }
 
-.message-ex-info > .content {
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.message-ex-info > .content:hover {
-    opacity: 1;
-}
-
-.message-ex-info > .content > a {
+.message-ex-info > a {
     margin: 0 2px;
+}
+
+.message-ex-info > a.time:hover,
+.message-ex-info > a.time.force-show {
+    opacity: 0.7;
 }
 
 .message-space {
@@ -829,6 +837,7 @@ span.user-title.robot {
 
 .note {
     justify-content: center;
+    margin: 10px 0;
     display: flex;
 }
 

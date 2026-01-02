@@ -131,7 +131,7 @@ body.with-bar .chat-pan {
 }
 
 .chat-pan > div.chat > .custom-hr {
-    margin: 10px 30px 0 30px;
+	margin: 10px 30px 0 30px;
 }
 
 .chat-pan > div.chat::-webkit-scrollbar {
@@ -205,7 +205,7 @@ body.with-bar .chat-pan {
 
 .chat-bottom > .input-pan > .input > .ban > svg {
     margin-left: 1rem;
-    color: var(--color-red);
+    color: var(--color-red)
 }
 
 .chat-bottom > .input-pan > .input > textarea {
@@ -392,12 +392,10 @@ body.with-bar .chat-pan {
     background-color: var(--color-card-2);
     opacity: 1;
 }
-
 .more-detail > div.select {
     background-color: var(--color-main);
     color: var(--color-font-r);
 }
-
 .more-detail > div.select > svg {
     color: var(--color-font-r);
 }
@@ -409,12 +407,10 @@ body.with-bar .chat-pan {
     background-color: var(--color-main);
     color: var(--color-font-r);
 }
-
 .more-detail > div.send > svg {
     color: var(--color-font-r);
     transition: color 0.3s;
 }
-
 .more-detail > div.send:hover {
     background-color: var(--color-font);
 }
@@ -424,7 +420,6 @@ body.with-bar .chat-pan {
     opacity: 0.5;
     color: var(--color-font);
 }
-
 .more-detail > div.send.disable > svg {
     color: var(--color-font);
 }
@@ -663,45 +658,44 @@ body.with-bar .msg-menu {
 
 .msg-preview {
     max-height: 40vh;
-    width: max(300px, min(400px, 30vw));
 }
 
 .member-info div:nth-child(1) {
     display: flex;
 }
 
-.member-info > div:nth-child(1) > img {
+.member-info> div:nth-child(1) > img {
     outline: 2px solid var(--color-main);
     border-radius: 7px;
     height: 60px;
     width: 60px;
 }
 
-.member-info > div:nth-child(1) > div {
+.member-info> div:nth-child(1) > div {
     margin-left: 20px;
     overflow: hidden;
     flex: 1;
 }
 
-.member-info > div:nth-child(1) > div > span {
+.member-info> div:nth-child(1) > div > span {
     color: var(--color-font-1);
     font-size: 0.9rem;
     white-space: nowrap;
 }
 
-.member-info > div:nth-child(1) > div > span[name='id'] {
+.member-info> div:nth-child(1) > div > span[name='id'] {
     font-size: 0.8rem;
     display: block;
-    opacity: 0.7;
+    opacity: 0.7
 }
 
-.member-info > div:nth-child(1) > div > div {
+.member-info> div:nth-child(1) > div > div {
     margin-bottom: 5px;
     flex-wrap: wrap;
     display: flex;
 }
 
-.member-info > div:nth-child(1) > div > div > a {
+.member-info> div:nth-child(1) > div > div > a {
     text-overflow: ellipsis;
     width: 100%;
     overflow: hidden;
@@ -712,24 +706,24 @@ body.with-bar .msg-menu {
     display: block;
 }
 
-.member-info > div:nth-child(1) > div > div > div {
+.member-info> div:nth-child(1) > div > div > div {
     margin-top: 4px;
 }
 
 /* 群成员下边区域 */
-.member-info > div:nth-child(2).member {
+.member-info> div:nth-child(2).member {
     display: flex;
     margin-top: 10px;
     align-items: center;
 }
 
-.member-info > div:nth-child(2).member > :nth-child(1) {
+.member-info> div:nth-child(2).member > :nth-child(1) {
     width: 60px;
     display: block;
     font-size: 13px;
 }
 
-.member-info > div:nth-child(2).member > :nth-child(2) {
+.member-info> div:nth-child(2).member > :nth-child(2) {
     margin-left: 20px;
 }
 
@@ -916,17 +910,11 @@ body.with-bar .msg-menu {
 }
 
 .chat-info-tab-member > div {
-    flex: 1;
-    overflow-y: hidden;
-    display: flex;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
-.member-scroller {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.member-item {
+.chat-info-tab-member > div > div {
     transition: background 0.3s;
     align-items: center;
     border-radius: 7px;
@@ -935,25 +923,25 @@ body.with-bar .msg-menu {
     padding: 10px;
 }
 
-.member-item:hover {
+.chat-info-tab-member > div > div:hover {
     background: var(--color-card-1);
 }
 
-.member-item > img {
+.chat-info-tab-member > div > div > img {
     border-radius: 100%;
     margin-right: 10px;
     height: 30px;
     width: 30px;
 }
 
-.member-item > div {
+.chat-info-tab-member > div > div > div {
     overflow: hidden;
     align-items: center;
     display: flex;
     flex: 1;
 }
 
-.member-item > div > a {
+.chat-info-tab-member > div > div > div > a {
     color: var(--color-font);
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -961,40 +949,40 @@ body.with-bar .msg-menu {
     overflow: hidden;
 }
 
-.member-item > div > svg {
+.chat-info-tab-member > div > div > div > svg {
     color: var(--color-main);
     margin-left: 5px;
     height: 0.8rem;
 }
 
-.member-item > span {
+.chat-info-tab-member > div > div > span {
     color: var(--color-font-2);
-    transition: all 0.2s;
+    transition: all .2s;
     opacity: 1;
 }
 
-.member-item:hover > span {
+.chat-info-tab-member > div > div.edit:hover > span {
     transform: translateX(-10px);
     opacity: 0;
 }
 
-.member-item > svg {
+.chat-info-tab-member > div > div > svg {
     color: var(--color-font-2);
-    transition: all 0.2s;
+    transition: all .2s;
     margin-right: -25px;
     margin-left: 10px;
     width: 15px;
     opacity: 0;
 }
 
-.member-item:hover > svg {
+.chat-info-tab-member > div > div > svg:hover {
+    color: var(--color-main);
+}
+
+.chat-info-tab-member > div > div.edit:hover > svg {
     margin-right: 5px;
     display: block;
     opacity: 1;
-}
-
-.member-item > svg:hover {
-    color: var(--color-main);
 }
 
 .chat-info-tab {
@@ -1270,7 +1258,7 @@ body.with-bar .msg-menu {
 }
 
 .chat-info-pan header > button:hover {
-    background-color: var(--color-card-2);
+    background-color: var(--color-card-2)
 }
 
 .chat-info-pan header > button > svg {
@@ -1819,7 +1807,7 @@ body.with-bar .msg-menu {
 }
 
 .select-tag {
-    position: absolute;
+	position: absolute;
     background: var(--color-card-1);
     justify-content: space-evenly;
     transition: transform 0.3s;
@@ -1831,15 +1819,15 @@ body.with-bar .msg-menu {
     margin: 20px;
     padding: 15px 10px;
     height: auto;
-    width: calc(100% - 60px);
-    bottom: 10px;
+	width: calc(100% - 60px);
+	bottom: 10px;
     pointer-events: all;
-    transform-origin: bottom;
+	transform-origin: bottom;
 }
 
 .select-tag-enter-from,
 .select-tag-leave-to {
-    transform: scaleY(0);
+	transform: scaleY(0);
 }
 
 .select-tag > div {
@@ -1873,6 +1861,7 @@ body.with-bar .msg-menu {
     font-size: 0.75rem;
     margin-top: 5px;
 }
+
 
 .img-pan-enter-active {
     animation: img-pan-appear 0.3s;
@@ -1923,7 +1912,6 @@ body.with-bar .msg-menu {
 .img-pan > .imgs > div:first-child {
     margin-left: 10px;
 }
-
 .img-pan > .imgs > div:last-child {
     margin-right: 10px;
 }
@@ -2321,7 +2309,7 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
     }
 
     /* AT 信息悬浮面板 */
-    .member-info {
+    .member-info{
         max-width: 55%;
     }
 
@@ -2342,6 +2330,7 @@ div.tiny-session-body > div:nth-child(3) > div > svg {
 }
 
 @media (max-width: 500px) {
+
     /* 群信息面板 */
     .chat-info {
         height: calc(100% - 115px);

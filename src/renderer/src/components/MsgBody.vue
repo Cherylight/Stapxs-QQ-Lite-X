@@ -361,7 +361,7 @@
             :src="data.sender.face"
             :alt="data.sender.name"
             @dblclick="$emit('senderDoubleClick', data.sender)">
-        <div v-if="Object.keys(data.emojis).length > 0"
+        <div v-if="data.emojis"
             class="emoji-like">
             <div class="emoji-space" />
             <div class="emoji-like-body">
@@ -381,16 +381,14 @@
         </div>
         <div class="message-ex-info">
             <div v-if="direction === 'right'" class="space" />
-            <div class="content">
-                <template v-for="info in exInfo" :key="data.uuid + '-exinfo-' + info">
-                    <a v-if="info === 'msgId'">
-                        msgId: {{ data.message_id }}
-                    </a>
-                    <a v-if="info === 'time'">
-                        time: {{ data.time?.format('year') }}
-                    </a>
-                </template>
-            </div>
+            <template v-for="info in exInfo" :key="data.uuid + '-exinfo-' + info">
+                <a v-if="info === 'msgId'">
+                    msgId: {{ data.message_id }}
+                </a>
+                <a v-if="info === 'time'">
+                    time: {{ data.time?.format('year') }}
+                </a>
+            </template>
         </div>
     </div>
 </template>

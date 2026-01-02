@@ -9,7 +9,6 @@ import { createI18n } from 'vue-i18n'
 
 import { faSquare } from '@fortawesome/free-regular-svg-icons'
 
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import './assets/css/chat.css'
 import './assets/css/doc.css'
 import './assets/css/msg.css'
