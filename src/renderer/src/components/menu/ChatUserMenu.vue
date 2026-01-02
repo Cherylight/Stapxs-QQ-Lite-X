@@ -73,6 +73,10 @@ function init() {
 
     // 原来私聊不能@
     if (session instanceof GroupSession) menuDisplay.at = true
+
+    // 戳一戳
+    menuDisplay.poke = true
+
     // 群成员设置
     if(canAdmin) {
         // menuDisplay.config = true
@@ -86,7 +90,7 @@ function setAt() {
 
 function sendPoke() {
 	sendPokeFunc(user as Member)
-	emit('close')
+	menuDisplay.poke = false
 }
 
 
