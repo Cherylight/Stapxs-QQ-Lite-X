@@ -3,7 +3,7 @@ import { GroupSession, UserSession } from '../model/session'
 import { Msg } from '../model/msg'
 import { runtimeData } from '../msg'
 import { popInfo } from '../base'
-import { closePopBox, noticePopBox, textPopBox } from './popBox'
+import { noticePopBox, waitPopBox } from './popBox'
 import { TimeoutSet } from '../model/data'
 import { GroupFileFolder } from '../model/file'
 import { FileSegData } from '../adapter/interface'
@@ -130,14 +130,11 @@ export class FileSender {
         const $t = i18n.global.t
 
         // 提示
-        const popId = textPopBox($t('正在发送文件中……'), {
-            title: $t('提醒'),
-            allowAutoClose: false,
-        })
+        const done = waitPopBox($t('正在发送文件中……'))
 
         if (folder) await this.sendFileAndAddMsg(file, target as GroupSession, folder)
         else await this.sendFileAndAddMsg(file, target)
 
-        closePopBox(popId)
+        done()
     }
 }

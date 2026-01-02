@@ -162,6 +162,11 @@ export async function noticePopBox(text: string, buttonName?: string): Promise<v
     return promise
 }
 
+/**
+ * 输入弹窗
+ * @param config
+ * @returns
+ */
 export async function inputPopBox(config: {
     title?: string,
     svg?: string,
@@ -195,4 +200,26 @@ export async function inputPopBox(config: {
             }]
         })
     })
+}
+
+/**
+ * 创建一个等待弹窗
+ * @param content 提示内容
+ * @param config
+ * @returns
+ */
+export function waitPopBox(content: string, config: {
+    title?: string,
+    svg?: string,
+} = {}): ()=>void {
+    const { $t } = app.config.globalProperties
+    const popBoxId = textPopBox(content, {
+        title: config.title ?? $t('操作'),
+        svg: config.svg,
+        allowAutoClose: false
+    })
+
+    return () => {
+        closePopBox(popBoxId)
+    }
 }

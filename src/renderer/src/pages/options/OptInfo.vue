@@ -70,7 +70,7 @@ import { delay } from '@renderer/function/utils/systemUtil'
 import app from '@renderer/main'
 
 import { popInfo } from '@renderer/function/base'
-import { closePopBox, ensurePopBox, textPopBox } from '@renderer/function/utils/popBox'
+import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
 import {
     shallowRef,
     watch,
@@ -144,10 +144,10 @@ async function leaveGroup() {
 }
 
 async function checkSetChatInfoResult() {
-    const popId = textPopBox($t('正在确认操作……'), { title: $t('操作'), allowAutoClose: false })
+    const done = waitPopBox($t('正在确认操作……'))
     await delay(1000)
     await reloadUsers(false)
-    closePopBox(popId)
+    done()
 }
 //#endregion
 </script>

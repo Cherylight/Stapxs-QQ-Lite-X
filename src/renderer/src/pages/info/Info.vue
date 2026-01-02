@@ -255,7 +255,7 @@ import { GroupSession, Session, UserSession } from '@renderer/function/model/ses
 import { Member, User } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
 import { changeSession, qqLevelToEmoji } from '@renderer/function/utils/msgUtil'
-import { closePopBox, ensurePopBox, textPopBox } from '@renderer/function/utils/popBox'
+import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
 import { copyToClipboard, delay, getTrueLang } from '@renderer/function/utils/systemUtil'
 import { vSearch } from '@renderer/function/utils/vcmd'
 import {
@@ -444,10 +444,10 @@ function canEditMember(role: string) {
 }
 
 async function checkSetMemInfoResult() {
-    const popId = textPopBox($t('正在确认操作……'), { title: $t('操作'), allowAutoClose: false })
+    const done = waitPopBox($t('正在确认操作……'))
     await delay(1000)
     await (chat as GroupSession).reloadUserList(false)
-    closePopBox(popId)
+    done()
 }
 
 /**
