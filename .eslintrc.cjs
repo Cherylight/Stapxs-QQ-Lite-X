@@ -35,16 +35,17 @@ module.exports = {
             'error',
             {
                 paths: [
-                {
-                    name: 'vue',
-                    importNames: ['ref', 'reactive'],
-                    message: '禁止使用 ref 和 reactive'
-                }
+                    {
+                        name: 'vue',
+                        importNames: ['ref', 'reactive'],
+                        message: '禁止使用 ref 和 reactive'
+                    }
                 ]
             }
         ],
         // 允许while true
         'no-constant-condition': ['error', { 'checkLoops': false }],
+        'indent': ['warn', 4, { 'SwitchCase': 1 }],
 
         // === Vue 相关规则 ===
         // html 缩进
