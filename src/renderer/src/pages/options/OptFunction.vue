@@ -232,6 +232,28 @@
                 </div>
                 <Switch v-model="runtimeData.sysConfig.default_multiselect_forward" />
             </div>
+            <div class="opt-item">
+                <div :class="{changed: !OptionManager.checkDefault('reply_with_at')}" />
+                <font-awesome-icon :icon="['fas', 'at']" />
+                <div>
+                    <span>{{ $t('回复消息插入@') }}</span>
+                    <span>{{ $t('emm...回复消息没@好像挺另类的样子...') }}</span>
+                </div>
+                <div class="select-wrapper">
+                    <select v-model="runtimeData.sysConfig.reply_with_at"
+                        name="reply_with_at" title="reply_with_at">
+                        <option value="none">
+                            {{ $t('不添加（默认）') }}
+                        </option>
+                        <option value="prefix">
+                            {{ $t('前置') }}
+                        </option>
+                        <option value="insert">
+                            {{ $t('插入') }}
+                        </option>
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="ss-card">
             <header>{{ $t('其他') }}</header>

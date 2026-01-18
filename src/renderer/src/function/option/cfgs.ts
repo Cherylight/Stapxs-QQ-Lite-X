@@ -287,6 +287,9 @@ export const OptionInfos = {
     close_ad: {
         default: false
     },
+    reply_with_at: {
+        default: 'none' as 'none' | 'prefix' | 'insert'
+    },
     //#endregion
     //#region == Dev ====================================
     log_level: {

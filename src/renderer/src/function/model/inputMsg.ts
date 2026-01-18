@@ -7,7 +7,7 @@
  */
 import { shallowRef, shallowReactive, computed } from 'vue'
 import { Msg } from './msg'
-import { ImgSeg, ReplySeg, Seg, TxtSeg } from './seg'
+import { AtSeg, ImgSeg, ReplySeg, Seg, TxtSeg } from './seg'
 import { autoMarkRaw } from './utils'
 import app from '@renderer/main'
 import { runtimeData } from '../msg'
@@ -33,6 +33,9 @@ export class InputMsg {
      */
     setReply(msg: Msg) {
         this._reply.value = msg
+        if (runtimeData.sysConfig.reply_with_at === 'insert' && msg.sender?.user_id) {
+            this.addSq(new AtSeg(msg.sender.user_id))
+        }
     }
     /**
      * 移除当前回复消息
@@ -101,18 +104,23 @@ export class InputMsg {
         // 解析消息
         let back = this.parseMsgToSegs()
         // 插入引用
-        if (this.reply?.message_id) back = [new ReplySeg(this.reply.message_id), ...back]
+        if (this.reply?.message_id) {
+            const front: Seg[] = [new ReplySeg(this.reply.message_id)]
+            if (runtimeData.sysConfig.reply_with_at === 'prefix' && this.reply.sender?.user_id)
+                front.push(new AtSeg(this.reply.sender.user_id))
+            back = [...front, ...back]
+        }
         // 插入小尾巴
         if (runtimeData.sysConfig.msg_tail) {
-            const taill = (runtimeData.sysConfig.msg_tail as string).replaceAll(
+            const tail = (runtimeData.sysConfig.msg_tail).replaceAll(
                 '\\n',
                 '\n',
             )
-            if (taill && taill != '') {
+            if (tail && tail != '') {
                 for (let i = back.length - 1; i >= 0; i--) {
                     const seg = back[i]
                     if (seg instanceof TxtSeg) {
-                        seg.text += taill
+                        seg.text += tail
                         break
                     }
                 }
