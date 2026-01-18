@@ -1106,7 +1106,17 @@ export class MilkyAdapter implements AdapterInterface {
             id: data.data.service_id.toString(),
         }
     }
-    async lightAppParser(data: ISeg.LightAppSeg, _?: IncomingMessage): Promise<JsonSegData> {
+    async lightAppParser(data: ISeg.LightAppSeg, _?: IncomingMessage): Promise<JsonSegData | ForwardSegData> {
+        if (data.data.app_name === 'com.tencent.multimsg') {
+            const jsonData = JSON.parse(data.data.json_payload)
+            const forwardId = jsonData['meta']['detail']['resid']
+            return {
+                type: 'forward',
+                id: forwardId,
+                content: await this.getForwardMsg(forwardId),
+            }
+        }
+
         return {
             type: 'json',
             data: data.data.json_payload,
@@ -1250,9 +1260,9 @@ export class MilkyAdapter implements AdapterInterface {
 
     async nodeSerializer(msg: Msg): Promise<OutgoingForwardedMessage> {
         return {
-                sender_name: msg.sender.name,
-                user_id: msg.sender.user_id,
-                segments: await this.serializeSeg(msg.message),
+            sender_name: msg.sender.name,
+            user_id: msg.sender.user_id,
+            segments: await this.serializeSeg(msg.message),
         }
     }
     unmatchSerializer(seg: Seg): OutgoingSegment {

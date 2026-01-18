@@ -488,19 +488,19 @@ export default class NapCapOneBot extends OneBotAdapter {
         }
     }
     override async forwardParser(_data: ObForwardSeg, _?: ObMsg): Promise<ForwardSegData> {
-            const data = _data as any as NcObForwardSeg
-            const id = data.data.id
-            let nodes: ForwardNodeData[] = []
-            if (data.data.content){
-                nodes = await Promise.all(data.data.content.map(node => this.ncNodeParser(node)))
-            } else {
-                nodes = await this.getForwardMsg(id)
-            }
-            return {
-                type: 'forward',
-                id,
-                content: nodes,
-            }
+        const data = _data as any as NcObForwardSeg
+        const id = data.data.id
+        let nodes: ForwardNodeData[] = []
+        if (data.data.content){
+            nodes = await Promise.all(data.data.content.map(node => this.ncNodeParser(node)))
+        } else {
+            nodes = await this.getForwardMsg(id)
+        }
+        return {
+            type: 'forward',
+            id,
+            content: nodes,
+        }
     }
     override async jsonParser(data: ObJsonSeg, _?: ObMsg): Promise<JsonSegData> {
         const jsonData = JSON.parse(data.data.data)
