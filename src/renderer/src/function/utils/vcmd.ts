@@ -715,30 +715,55 @@ export const vTooltip = {
         const controller = new AbortController()
         const options = { signal: controller.signal }
         ;(vLongHover as any).mounted(el)
-        ;(el as any)._vTooltipController = controller
-
-        let tooltip: TooltipController | undefined
+        ;(el as any)._vTooltipData = {
+            instance: undefined,
+            controller,
+            tmpController: undefined,
+        }
+        const data = (el as any)._vTooltipData as {
+            instance: TooltipController | undefined,
+            controller: AbortController,
+            tmpController: AbortController | undefined,
+        }
 
         el.addEventListener('v-long-hover', (ev: Event) => {
             const event = ev as CustomEvent<{ x: number, y: number }>
             const detail = event.detail
             const compData = resolveBinding(binding.value, detail)
-            tooltip = addTooltip(compData, { x: detail.x, y: detail.y })
+            data.instance = addTooltip(compData, { x: detail.x, y: detail.y })
+            const tmpController = new AbortController()
+            data.tmpController = tmpController
+
+            window.addEventListener('mousemove', ()=>{
+                if (!data.instance) return
+                data.instance.close()
+                data.instance = undefined
+                data.tmpController?.abort()
+                data.tmpController = undefined
+            }, { signal: tmpController.signal, capture: true})
         }, options)
 
         el.addEventListener('v-long-hover-end', () => {
             if(binding.modifiers?.debug) return
-            tooltip?.close()
-            tooltip = undefined
+            data.instance?.close()
+            data.instance = undefined
+            data.tmpController?.abort()
+            data.tmpController = undefined
         }, options)
     },
 
     unmounted(el: HTMLElement) {
         (vLongHover as any).unmounted(el)
-        const controller = (el as any)._vTooltipController
-        if (!controller) return
 
-        controller.abort()
-        delete (el as any)._vTooltipController
+        const data = (el as any)._vTooltipData as {
+            instance: TooltipController | undefined,
+            controller: AbortController,
+            tmpController: AbortController | undefined,
+        }
+        data.tmpController?.abort()
+        data.instance?.close()
+        data.controller.abort()
+
+        delete (el as any)._vTooltipData
     }
 }
