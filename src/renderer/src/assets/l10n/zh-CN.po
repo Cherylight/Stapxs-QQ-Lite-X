@@ -2329,10 +2329,10 @@ msgid "屏蔽，不支持消息可能产生的空消息"
 msgstr ""
 
 msgid "回复消息插入@"
-msgstr ""
+msgstr "回复消息插入{'@'}"
 
 msgid "emm...回复消息没@好像挺另类的样子..."
-msgstr ""
+msgstr "emm...回复消息没{'@'}好像挺另类的样子..."
 
 msgid "不添加（默认）"
 msgstr ""
