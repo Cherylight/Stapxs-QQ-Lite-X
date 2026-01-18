@@ -35,7 +35,7 @@ body.with-bar .chat-pan {
 .chat-head {
     padding-top: 15px;
     position: absolute;
-    width: calc(100% - 60px);
+    width: 100%;
     top: 0;
     transition: transform 0.2s;
 }
@@ -55,7 +55,6 @@ body.with-bar .chat-pan {
     padding: 15px;
     margin: 15px;
     margin-top: 0;
-    width: 100%;
 }
 
 .chat-head > div.info > svg {
