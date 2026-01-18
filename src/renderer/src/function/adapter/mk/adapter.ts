@@ -1110,6 +1110,7 @@ export class MilkyAdapter implements AdapterInterface {
         if (data.data.app_name === 'com.tencent.multimsg') {
             const jsonData = JSON.parse(data.data.json_payload)
             const forwardId = jsonData['meta']['detail']['resid']
+            if (!forwardId) throw new Error('获取合并转发消息ID失败')
             return {
                 type: 'forward',
                 id: forwardId,
@@ -1213,7 +1214,7 @@ export class MilkyAdapter implements AdapterInterface {
         }
         for (let i = 0; i < messagesList.length; i++) {
             out.data.messages.push({
-                user_id: msgs[i].sender.user_id,
+                user_id: msgs[i].sender.user_id === 0 ? 1094950020 : msgs[i].sender.user_id,
                 sender_name: msgs[i].sender.name,
                 segments: messagesList[i],
             })
