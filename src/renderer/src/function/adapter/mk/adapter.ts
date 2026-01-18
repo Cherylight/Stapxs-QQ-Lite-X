@@ -705,7 +705,7 @@ export class MilkyAdapter implements AdapterInterface {
      * @returns
      */
     @api
-    async getForwardMsg(id: string): Promise<ForwardNodeData[]> {
+    async getForwardMsg(id: string): Promise<ForwardNodeData[] | undefined> {
         const data = await this.callApi(
             'GetForwardedMessages', { forward_id: id }
         )
@@ -1111,10 +1111,12 @@ export class MilkyAdapter implements AdapterInterface {
             const jsonData = JSON.parse(data.data.json_payload)
             const forwardId = jsonData['meta']['detail']['resid']
             if (!forwardId) throw new Error('获取合并转发消息ID失败')
+            const nodes = await this.getForwardMsg(forwardId)
+            if (!nodes) throw new Error('获取合并转发消息失败')
             return {
                 type: 'forward',
                 id: forwardId,
-                content: await this.getForwardMsg(forwardId),
+                content: nodes,
             }
         }
 
