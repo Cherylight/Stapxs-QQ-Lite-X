@@ -194,8 +194,8 @@ export function regIpcListener() {
         store.store = arg
     })
     // 获取设置
-    ipcMain.on('opt:getAll', (event) => {
-        event.returnValue = store.store
+    ipcMain.handle('opt:getAll', () => {
+        return store.store
     })
     ipcMain.on('opt:get', (event, arg) => {
         event.returnValue = store.get(arg)
