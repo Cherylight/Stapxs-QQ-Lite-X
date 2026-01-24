@@ -33,27 +33,49 @@ export interface SessionBoxData {
     alwaysTop: boolean
 }
 
-/**
- * @todo
- *  * preMessage
- *  * highlightInfo
- *  * showNotice
- */
 export class SessionBox {
     readonly type = 'box'
     // 基础属性
     id: string = uuid()
-    _name: ShallowRef<Name>
-    _icon: ShallowRef<string>
-    _color: ShallowRef<number>
-    _content: Set<Session> = shallowReactive(new Set())
+    private readonly _name: ShallowRef<Name>
+    private readonly _icon: ShallowRef<string>
+    private readonly _color: ShallowRef<number>
+    protected readonly _content: Set<Session> = shallowReactive(new Set())
     // 设置
-    _alwaysTop: ShallowRef<boolean> = shallowRef(false)
+    private readonly _alwaysTop: ShallowRef<boolean> = shallowRef(false)
 
     // 缓存
-    _preMessage: ShallowRef<Message|undefined> = shallowRef(undefined)
-    highlightInfo: string[] = shallowReactive([])
-    _showNotice: ComputedRef<boolean> = computed(()=>{
+    private readonly _preMessage: ComputedRef<Message|undefined> = computed(()=>{
+        let latestMsg: Message | undefined = undefined
+        for (const session of this._content) {
+            if (!session.preMessage) continue
+            if (!latestMsg && !session.preMessage.time) {
+                latestMsg = session.preMessage
+                continue
+            }
+            if (!session.preMessage.time) continue
+            if (!latestMsg?.time) {
+                latestMsg = session.preMessage
+                continue
+            }
+            if (latestMsg.time && session.preMessage.time.time <= latestMsg.time.time)
+                continue
+            latestMsg = session.preMessage
+        }
+        return latestMsg
+    })
+    private readonly _highlightInfo: ComputedRef<string[]> = computed(()=>{
+        const out: string[] = []
+        for (const session of this._content) {
+            // 过滤置顶会话
+            for (const info of session.highlightInfo) {
+                if (out.includes(info)) continue
+                out.push(info)
+            }
+        }
+        return out
+    })
+    private readonly _showNotice: ComputedRef<boolean> = computed(()=>{
         // 如果有置顶会话，则不显示通知
         for (const session of this._content) {
             if (session.alwaysTop) continue
@@ -209,8 +231,6 @@ export class SessionBox {
      * 卸载
      */
     unactive(): void {
-        this.preMessage = undefined
-        this.highlightInfo.length = 0
         for (const session of this._content) session.unactive()
     }
     /**
@@ -222,9 +242,6 @@ export class SessionBox {
         // 加入到收纳盒
         this._content.add(session)
         session.addBox(this)
-        // 更新预览消息
-        if (this.preMessage === undefined)
-            this.preMessage = session.preMessage
 
         // 自动离开群收纳盒
         if (runtimeData.sysConfig.bubble_sort_user &&
@@ -241,54 +258,15 @@ export class SessionBox {
         if (!this._content.has(session)) return
         this._content.delete(session)
         session.leaveBox(this)
-        // 更新预览消息
-        if (this.preMessage?.session?.id === session.id)
-            this.preMessage = undefined
         // 更新当前收纳盒
         if (runtimeData.nowChat?.id === session.id &&
             runtimeData.nowBox?.id === this.id)
             runtimeData.nowBox = undefined
 
-
         if (runtimeData.sysConfig.bubble_sort_user &&
             session.type === 'group' &&
             session.boxes.length === 0)
             BubbleBox.instance.putSession(session)
-    }
-    /**
-     * 会话上报自身新消息
-     * @param session 上报会话
-     * @param newMsg 新消息
-     */
-    sessionNewMessage(session: Session, newMsg: Message): void {
-        // 更新预览消息
-        if (session.preMessage === newMsg)
-            this.preMessage = newMsg
-
-        // 置顶会话不更新是否有通知 | 高亮信息（重复显示了）
-        if (session.alwaysTop) return
-        // 更新高亮信息
-        for (const info of session.highlightInfo) {
-            if (!this.highlightInfo.includes(info)) {
-                this.highlightInfo.push(info)
-            }
-        }
-    }
-    /**
-     * 会话上报自身已读状态
-     * @param readMsg 已读消息数量
-     */
-    sessionSetReaded(): void {
-        // 更新高亮信息
-        this.highlightInfo.length = 0
-        for (const s of this._content) {
-            // 过滤置顶会话
-            if (s.alwaysTop) continue
-            for (const info of s.highlightInfo) {
-                if (this.highlightInfo.includes(info)) continue
-                this.highlightInfo.push(info)
-            }
-        }
     }
     //#endregion
 
@@ -357,16 +335,16 @@ export class SessionBox {
         return this._preMessage.value
     }
 
-    set preMessage(value: Message | undefined) {
-        this._preMessage.value = value
+    get highlightInfo(): string[] {
+        return this._highlightInfo.value
     }
 
     get showNotice(): boolean {
         return this._showNotice.value
     }
 
-    private _sortContentByName: ShallowRef<Session[]> = shallowRef([])
-    private _sortContentByTime: ShallowRef<Session[]> = shallowRef([])
+    private readonly _sortContentByName: ShallowRef<Session[]> = shallowRef([])
+    private readonly _sortContentByTime: ShallowRef<Session[]> = shallowRef([])
 
     get sortContentByName(): Session[] {
         return this._sortContentByName.value
@@ -452,10 +430,6 @@ export class BubbleBox extends SessionBox {
         // 加入到收纳盒
         this._content.add(session)
         session.addBox(this)
-
-        // 更新预览消息
-        if (this.preMessage === undefined)
-            this.preMessage = session.preMessage
     }
 
     /**
@@ -468,10 +442,6 @@ export class BubbleBox extends SessionBox {
         if (!this._content.has(session)) return
         this._content.delete(session)
         session.leaveBox(this)
-
-        // 更新预览消息
-        if (this.preMessage?.session?.id === session.id)
-            this.preMessage = undefined
     }
 
     override get color(): string {

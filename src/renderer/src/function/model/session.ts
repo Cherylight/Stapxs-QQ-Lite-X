@@ -54,18 +54,18 @@ export abstract class Session {
     readonly messageList: Message[] = shallowReactive([])
     imgHead: Img | undefined
     imgTail: Img | undefined
-    readonly _newMsg = shallowRef(0)
+    private readonly _newMsg = shallowRef(0)
     headMsg?: Msg
-    readonly _preMessage = shallowRef<undefined|Message>()
+    private readonly _preMessage = shallowRef<undefined|Message>()
     // 输入信息
     inputMsg: InputMsg = new InputMsg()
     // 设置
-    alwaysTop: boolean = false
+    private readonly _alwaysTop = shallowRef(false)
     // 额外信息
     appendInfo?: string
     // 高亮信息
     readonly highlightInfo: string[] = shallowReactive([])
-    readonly _showNotice = shallowRef(false)
+    private readonly _showNotice = shallowRef(false)
     // 分组盒子
     boxes: SessionBox[] = []
 
@@ -329,10 +329,6 @@ export abstract class Session {
         if (msg instanceof Msg && msg.sender.user_id !== runtimeData.loginInfo.uin)
             this.newMsg ++
 
-        // 刷新收纳盒
-        for (const box of this.boxes) {
-            box.sessionNewMessage(this, msg)
-        }
         this.runHook('afterNewMessageHook', msg)
     }
 
@@ -451,11 +447,6 @@ export abstract class Session {
         if (!targetMsg) return
 
         await this.runHook('beforeSetReadHook')
-
-        // 向收纳盒上报消息
-        for (const box of this.boxes) {
-            box.sessionSetReaded()
-        }
 
         // 调用api
         // 过滤设置
@@ -703,6 +694,14 @@ export abstract class Session {
 
     set preMessage(value: Message | undefined) {
         this._preMessage.value = value
+    }
+
+    get alwaysTop(): boolean {
+        return this._alwaysTop.value
+    }
+
+    set alwaysTop(flag: boolean) {
+        this._alwaysTop.value = flag
     }
 
     get showNotice(): boolean {
