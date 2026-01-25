@@ -1,26 +1,29 @@
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
+import { defineConfig } from 'electron-vite'
 
 import * as viteConfig from './vite.config.ts'
 
-export default defineConfig({
+export default defineConfig((env) => ({
+    preload: {},
     main: {
-        plugins: [
-            externalizeDepsPlugin(),
-            viteStaticCopy({
-                targets: [
-                    { src: 'src/electron/assets', dest: './' },
-                ]
-            })
-        ],
         build: {
             lib: {
                 entry: 'src/electron/index.ts',
-            }
-        }
+            },
+            // externalizeDeps: {
+            //     exclude: [
+            //         'electron-store',
+            //         'electron-window-state',
+            //         'axios',
+            //         'log4js',
+            //         'express',
+            //         'ws',
+            //         'jsonpath',
+            //         'request',
+            //         'semver',
+            //         'zod',
+            //     ],
+            // },
+        },
     },
-    preload: {
-        plugins: [externalizeDepsPlugin()],
-    },
-    renderer: viteConfig.configFactory('out/renderer'),
-})
+    renderer: viteConfig.configFactory('out/renderer')(env),
+}))

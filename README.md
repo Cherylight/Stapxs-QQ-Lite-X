@@ -34,11 +34,11 @@ git clone https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X --recursive
 git submodule update --init
 ```
 
-在开始构建之前请安装依赖，请确保安装了 `yarn`：
+在开始构建之前请安装依赖，请确保安装了 `pnpm`：
 
 ```bash
 # 安装依赖
-yarn install
+pnpm install
 ```
 
 最后，在构建前 Stapxs QQ Lite X 使用了高德地图的部分 API 来显示位置共享的地图。在 `.env` 文件中提供了一个默认的高德地图 API Key，如果你打算自行部署，你可以在 [这里](https://lbs.amap.com/dev/key/app) 申请一个属于你自己的 API Key 并替换掉默认的 API Key。
@@ -53,13 +53,13 @@ Stapxs QQ Lite X 是一个基于 Vue 的单页应用，这意味着如果你想�
 
 ```bash
 # 运行本地调试
-yarn dev
+pnpm dev
 
 # 代码检查和自动格式化
-yarn lint
+pnpm lint
 
 # 构建应用
-yarn build
+pnpm build
 ```
 
 ### > 构建 Electron 客户端
@@ -72,10 +72,10 @@ yarn build
 
 ```bash
 # electron 运行本地调试
-yarn dev:electron
+pnpm dev:electron
 
 # electron 构建应用
-yarn build:win
+pnpm build:electron
 ```
 
 ### > 构建 Capacitor 应用
@@ -87,17 +87,17 @@ yarn build:win
 > 如果 Capacitor CLI 无法寻找到 Android Studio 以及 Android SDK，你可以将 `CAPACITOR_ANDROID_STUDIO_PATH` 和 `ANDROID_HOME` 导出到环境变量中；
 > 它们分别指向 Android Studio 的可执行文件路径和 Android SDK 的路径。
 
-你可以使用 `yarn open:android` 来打开 Android Studio。通过 Build -> Generate Signed Bundle or APK 来构建 APK 文件。
+你可以使用 `pnpm open:android` 来打开 Android Studio。通过 Build -> Generate Signed Bundle or APK 来构建 APK 文件。
 
-你也可以直接使用 `yarn build:android` 来构建 APK 文件。请检查修改 `capacitor.config.ts` 文件中的 `android.buildOptions` 中的 keyStore 配置。
+你也可以直接使用 `pnpm build:android` 来构建 APK 文件。请检查修改 `capacitor.config.ts` 文件中的 `android.buildOptions` 中的 keyStore 配置。
 
 构建结果将最终输出在 `src/mobile/android/app/build/outputs/apk/release` 目录下。
 
 #### iOS
 
-你可以使用 `yarn open:ios` 来打开 Xcode。通过 Product -> Archive 来构建 IPA 文件。
+你可以使用 `pnpm open:ios` 来打开 Xcode。通过 Product -> Archive 来构建 IPA 文件。
 
-你也可以直接使用 `yarn build:ios` 来构建 IPA 文件。此构建方式将执行 `scripts/build-export-ipa.sh` 脚本，构建将使用钥匙串中的默认开发者证书，请确保你的开发者证书已经配置。
+你也可以直接使用 `pnpm build:ios` 来构建 IPA 文件。此构建方式将执行 `scripts/build-export-ipa.sh` 脚本，构建将使用钥匙串中的默认开发者证书，请确保你的开发者证书已经配置。
 
 XCode 的构建结果将最终输出在 `src/mobile/ios/build` 目录下，脚本构建结果将输出在 `dist_capacitor` 目录下。
 
@@ -105,7 +105,7 @@ XCode 的构建结果将最终输出在 `src/mobile/ios/build` 目录下，脚�
 
 这儿是本项目的完整命令列表，你可以使用这些命令来快速构建和调试 Stapxs QQ Lite。
 
-**命令格式为 `yarn <命令>`，其中 `<命令>`为列表中的一个：**
+**命令格式为 `pnpm <命令>`，其中 `<命令>`为列表中的一个：**
 
 | 命令           | 描述                         |
 | -------------- | ---------------------------- |

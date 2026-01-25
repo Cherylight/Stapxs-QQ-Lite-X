@@ -13,8 +13,8 @@ const win = markRaw({
     _needBar: undefined as any as ComputedRef<boolean>,
     _needMargin: undefined as any as ComputedRef<boolean>,
 
-    _forceTilingState: shallowRef<undefined|boolean>(),
-    _darkMode: shallowRef<boolean|undefined>(undefined),
+    _forceTilingState: shallowRef<undefined | boolean>(),
+    _darkMode: shallowRef<boolean | undefined>(undefined),
     _vibrancyMode: shallowRef<boolean>(false),
 
     hasInit: false,
@@ -25,7 +25,8 @@ const win = markRaw({
         'bspwm',
         'awesome',
         'herbstluftwm',
-        'hyprland'
+        'hyprland',
+        'niri',
     ],
 
     /**
@@ -33,41 +34,41 @@ const win = markRaw({
      */
     async init() {
         // computed 初始化
-        this._needBar = computed(()=>{
+        this._needBar = computed(() => {
             if (backend.isWeb()) return false
             return !win.tiling
         })
-        this._needMargin = computed(()=>{
+        this._needMargin = computed(() => {
             if (backend.isWeb()) return false
             if (win.tiling) return false
             return !win.maximized
         })
-        this._isTiling = computed(()=>{
+        this._isTiling = computed(() => {
             if (backend.platform !== 'linux') return false
             return this.TILING_WMS.includes(backend.de || '')
         })
 
         // 最大化检测
-        backend.addListener(undefined, 'win:maximizedChanged',
-            (_, data) => win.maximized = data
+        backend.addListener(
+            undefined,
+            'win:maximizedChanged',
+            (_, data) => (win.maximized = data),
         )
-		win.maximized = await backend.call(undefined, 'win:isMaximized', true)
+        win.maximized = await backend.call(undefined, 'win:isMaximized', true)
         // 添加样式
         await this.loadAppendStyle()
-        watchEffect(()=>{
-            if (win.margin)
-                document.body.classList.add('margin')
-            else
-                document.body.classList.remove('margin')
+        watchEffect(() => {
+            if (win.margin) document.body.classList.add('margin')
+            else document.body.classList.remove('margin')
 
-            if (win.withBar)
-                document.body.classList.add('with-bar')
-            else
-                document.body.classList.remove('with-bar')
+            if (win.withBar) document.body.classList.add('with-bar')
+            else document.body.classList.remove('with-bar')
         })
         // 安全区域规划
-        document.body.style.setProperty('--safe-area-bottom',
-            Math.max(runtimeData.sysConfig.fs_adaptation, 0) + 'px')
+        document.body.style.setProperty(
+            '--safe-area-bottom',
+            Math.max(runtimeData.sysConfig.fs_adaptation, 0) + 'px',
+        )
         document.body.style.setProperty('--safe-area-top', '0')
         document.body.style.setProperty('--safe-area-left', '0')
         document.body.style.setProperty('--safe-area-right', '0')
@@ -76,21 +77,33 @@ const win = markRaw({
             const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
             if (safeArea) {
                 logger.debug('安全区域：', safeArea)
-                document.body.style.setProperty('--safe-area-top', safeArea.top + 'px')
-                document.body.style.setProperty('--safe-area-bottom', safeArea.bottom + 'px')
-                document.body.style.setProperty('--safe-area-left', safeArea.left + 'px')
-                document.body.style.setProperty('--safe-area-right', safeArea.right + 'px')
+                document.body.style.setProperty(
+                    '--safe-area-top',
+                    safeArea.top + 'px',
+                )
+                document.body.style.setProperty(
+                    '--safe-area-bottom',
+                    safeArea.bottom + 'px',
+                )
+                document.body.style.setProperty(
+                    '--safe-area-left',
+                    safeArea.left + 'px',
+                )
+                document.body.style.setProperty(
+                    '--safe-area-right',
+                    safeArea.right + 'px',
+                )
             }
         }
         // 添加配置监听
         // 亮暗模式
         this.refreshDarkMode()
-        watchEffect(()=>{
+        watchEffect(() => {
             this.refreshDarkMode()
         })
         // 透明模式
         this.refreshVibrancyState()
-        watchEffect(()=>{
+        watchEffect(() => {
             this.refreshVibrancyState()
         })
 
@@ -135,9 +148,11 @@ const win = markRaw({
             logger.info('UI 2.0 附加样式加载完成')
         }
 
-        if(platform != undefined) {
+        if (platform != undefined) {
             try {
-                await import(`@renderer/assets/css/append/append_${platform}.css`)
+                await import(
+                    `@renderer/assets/css/append/append_${platform}.css`
+                )
                 logger.info(`${platform} 平台附加样式加载完成`)
             } catch (error) {
                 logger.info('未找到对应平台的附加样式：' + platform)
@@ -150,23 +165,29 @@ const win = markRaw({
 
             const width = window.innerWidth
             const height = window.innerHeight
-            if(cssStyle) {
-                if(width > 600) {
-                    cssStyle.innerHTML = (width > height ? horizontalStyles : (horizontalStyles + verticalCss)) + appendCss
+            if (cssStyle) {
+                if (width > 600) {
+                    cssStyle.innerHTML =
+                        (width > height
+                            ? horizontalStyles
+                            : horizontalStyles + verticalCss) + appendCss
                 } else {
-                    cssStyle.innerHTML = horizontalStyles + verticalCss + appendCss
+                    cssStyle.innerHTML =
+                        horizontalStyles + verticalCss + appendCss
                 }
             }
 
-            if(backend.isDesktop()) {
+            if (backend.isDesktop()) {
                 backend.call(undefined, 'win:maximize', false)
-                const topBar = document.getElementsByClassName('top-bar')[0] as HTMLElement
-                if(topBar) {
+                const topBar = document.getElementsByClassName(
+                    'top-bar',
+                )[0] as HTMLElement
+                if (topBar) {
                     topBar.style.display = 'none'
                 }
             }
         }
-        if(backend.isMobile()) {
+        if (backend.isMobile()) {
             const styleTag = document.createElement('style')
             styleTag.id = 'mobile-css'
             document.head.appendChild(styleTag)
@@ -201,7 +222,7 @@ const win = markRaw({
             document.body.classList.add('vibrancy')
             runtimeData.tags.vibrancy = true
             logger.info('透明 UI 附加样式启用')
-        }else {
+        } else {
             document.body.classList.remove('vibrancy')
             runtimeData.tags.vibrancy = false
             logger.info('已移除透明 UI 效果禁用')
@@ -238,7 +259,7 @@ const win = markRaw({
         if (dark) {
             document.body.classList.remove('light')
             document.body.classList.add('dark')
-        }else {
+        } else {
             document.body.classList.remove('dark')
             document.body.classList.add('light')
         }
@@ -270,15 +291,17 @@ const win = markRaw({
         // linux 一大帮自
         if (backend.de === 'hyprland') return true
         if (backend.de === 'gnome') {
-            const gnomeExtInfo = await backend.call(undefined, 'sys:getGnomeExt', true)
+            const gnomeExtInfo = await backend.call(
+                undefined,
+                'sys:getGnomeExt',
+                true,
+            )
             if (gnomeExtInfo) {
                 const info = await gnomeExtInfo
                 if (
                     info['enable-all'] == 'true' ||
-                    (
-                        info['whitelist'] != undefined &&
-                        info['whitelist'].indexOf('stapxs-qq-lite') > 0
-                    )
+                    (info['whitelist'] != undefined &&
+                        info['whitelist'].indexOf('stapxs-qq-lite') > 0)
                 ) {
                     return true
                 }
@@ -321,7 +344,7 @@ const win = markRaw({
     },
     get vibrancyMode() {
         return this._vibrancyMode.value
-    }
+    },
 })
 
 export default win

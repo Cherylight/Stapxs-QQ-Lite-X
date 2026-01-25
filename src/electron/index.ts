@@ -10,6 +10,7 @@ import { regIpcListener } from './function/ipc.ts'
 import { Menu, session, app, protocol, BrowserWindow, Tray } from 'electron'
 import { touchBar } from './function/touchbar.ts'
 import { join } from 'path'
+import Icon from './assets/tray@2x.png?asset'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const isPrimary = app.requestSingleInstanceLock()
@@ -17,7 +18,7 @@ const logger = log4js.getLogger('background')
 export let logLevel = isDevelopment ? 'debug' : 'info'
 
 protocol.registerSchemesAsPrivileged([
-    { scheme: 'app', privileges: { secure: true, standard: true } }
+    { scheme: 'app', privileges: { secure: true, standard: true } },
 ])
 
 export let win = undefined as BrowserWindow | undefined
@@ -26,16 +27,15 @@ const isDev = import.meta.env.DEV
 
 async function createWindow() {
     const store = new Store()
-    if(store.get('opt_log_level')) {
+    if (store.get('opt_log_level')) {
         logLevel = (store.get('opt_log_level') ?? 'info') as string
     }
     logger.level = logLevel
 
-    /* eslint-disable no-console */
     console.log('')
     console.log('  ___ _                           _ _ _      __  __')
     console.log(' / __| |_ __ _ _ ____ ____ _ __ _| (_) |_ ___\\ \\/ /')
-    console.log(' \\__ \\  _/ _` | \'_ \\ \\ / _` / _` | | |  _/ -_)>  < ')
+    console.log(" \\__ \\  _/ _` | '_ \\ \\ / _` / _` | | |  _/ -_)>  < ")
     console.log(' |___/\\__\\__,_| .__/_\\_\\__, \\__, |_|_|\\__\\___/_/\\_\\')
     console.log('              |_|         |_|  |_|                 ')
     console.log('====CopyRight © Mr.Lee=============================')
@@ -50,7 +50,7 @@ async function createWindow() {
     // 创建窗口
     const mainWindowState = windowStateKeeper({
         defaultWidth: 850,
-        defaultHeight: 530
+        defaultHeight: 530,
     })
     let windowConfig = {
         x: mainWindowState.x,
@@ -59,16 +59,16 @@ async function createWindow() {
         height: mainWindowState.height,
         minWidth: 350,
         minHeight: 450,
-        icon: path.join(__dirname,'/public/img/icons/icon.png'),
+        icon: path.join(__dirname, '/public/img/icons/icon.png'),
         webPreferences: {
             preload: join(__dirname, '../preload/index.mjs'),
             sandbox: false,
             webSecurity: false,
         },
         maximizable: false,
-        fullscreen: false
+        fullscreen: false,
     } as Electron.BrowserWindowConstructorOptions
-    if(process.platform === 'darwin') {
+    if (process.platform === 'darwin') {
         // macOS
         windowConfig = {
             ...windowConfig,
@@ -76,27 +76,29 @@ async function createWindow() {
             trafficLightPosition: { x: 11, y: 10 },
             vibrancy: 'fullscreen-ui',
             transparent: true,
-            visualEffectState: 'followWindow'
+            visualEffectState: 'followWindow',
         }
-    } else if(process.platform === 'win32') {
+    } else if (process.platform === 'win32') {
         // Windows
         windowConfig = {
             ...windowConfig,
             backgroundColor: '#00000000',
             backgroundMaterial: 'acrylic',
-            frame: false
+            frame: false,
         }
-    } else if(process.platform === 'linux') {
+    } else if (process.platform === 'linux') {
         // Linux
         windowConfig = {
             ...windowConfig,
             transparent: true,
-            frame: false
+            frame: false,
         }
     }
     win = new BrowserWindow(windowConfig)
-    win.once('focus', () => {if(win)win.flashFrame(false)})
-    mainWindowState.manage(win)     // 窗口状态管理器
+    win.once('focus', () => {
+        if (win) win.flashFrame(false)
+    })
+    mainWindowState.manage(win) // 窗口状态管理器
     logger.info('创建窗体完成')
     // 注册 IPC 事务
     regIpcListener()
@@ -120,7 +122,7 @@ async function createWindow() {
         if (details.responseHeaders) {
             const imageAddress = [
                 'https://gchat.qpic.cn/gchatpic_new',
-                'https://multimedia.nt.qq.com.cn/download'
+                'https://multimedia.nt.qq.com.cn/download',
             ]
             const ignoreAddress = [
                 'devtools://',
@@ -130,27 +132,35 @@ async function createWindow() {
                 'http://localhost:8080',
                 'http://127.0.0.1:8080',
                 'http://localhost:8081',
-                'http://127.0.0.1:8081'
+                'http://127.0.0.1:8081',
             ]
-            if(imageAddress.some((address) =>
-                details.url.startsWith(address))) {
+            if (
+                imageAddress.some((address) => details.url.startsWith(address))
+            ) {
                 // 不缓存图片
                 details.responseHeaders['cache-control'] = ['max-age=300']
                 const contentType = details.responseHeaders['content-type']
-                if(contentType && contentType[0]) {
+                if (contentType && contentType[0]) {
                     const typeName = contentType[0].split('/')[1]
                     // 添加文件名方便下载
-                    details.responseHeaders['content-disposition'] = ['inline; filename="image.' + typeName + '"']
+                    details.responseHeaders['content-disposition'] = [
+                        'inline; filename="image.' + typeName + '"',
+                    ]
                 }
-            } else if (!ignoreAddress.some((address) =>
-                details.url.startsWith(address))) {
+            } else if (
+                !ignoreAddress.some((address) =>
+                    details.url.startsWith(address),
+                )
+            ) {
                 // 绕过 CSP 限制，X-Frame-Options 限制
                 details.responseHeaders['content-security-policy'] = ['*']
                 delete details.responseHeaders['x-frame-options']
                 // 修改缓存时间
-                if(details.url.indexOf('qlogo.cn') !== -1) {
+                if (details.url.indexOf('qlogo.cn') !== -1) {
                     // QQ 头像 URL 默认有 2592000（30 天）的缓存时间，这里修改为 3 天
-                    details.responseHeaders['cache-control'] = ['max-age=259200']
+                    details.responseHeaders['cache-control'] = [
+                        'max-age=259200',
+                    ]
                 }
             }
         }
@@ -166,9 +176,8 @@ app.on('second-instance', (_, cmd, workingDirectory) => {
 })
 
 app.on('window-all-closed', () => {
-    if (process.platform === 'win32')
-    {
-        app.removeAsDefaultProtocolClient('stapx-qq-lite')   // 取消默认协议
+    if (process.platform === 'win32') {
+        app.removeAsDefaultProtocolClient('stapx-qq-lite') // 取消默认协议
     }
     if (process.platform !== 'darwin') {
         app.quit()
@@ -181,10 +190,9 @@ app.on('ready', async () => {
         app.quit()
         return
     }
-    if (process.platform === 'win32')
-    {
-        app.setAppUserModelId('Stapx QQ Lite')              // 设置应用 ID
-        app.setAsDefaultProtocolClient('stapx-qq-lite')     // 设置为默认协议
+    if (process.platform === 'win32') {
+        app.setAppUserModelId('Stapx QQ Lite') // 设置应用 ID
+        app.setAsDefaultProtocolClient('stapx-qq-lite') // 设置为默认协议
     }
     // 注册 customFileProtocol 到 app 协议
     protocol.handle('app', async (request) => {
@@ -195,7 +203,7 @@ app.on('ready', async () => {
 
         // 确认文件存在并返回内容
         try {
-            const fileContent = await fs.promises.readFile(filePath) as any
+            const fileContent = (await fs.promises.readFile(filePath)) as any
             return new Response(fileContent, {
                 headers: { 'Content-Type': getMimeType(filePath) },
             })
@@ -206,12 +214,19 @@ app.on('ready', async () => {
     })
     // 创建托盘
     if (process.platform !== 'darwin') {
-        const icon = path.join(__dirname, 'assets/tray@2x.png')
-        const tray = new Tray(icon)
-        tray.setContextMenu(Menu.buildFromTemplate([
-            { label: '显示窗口', click: () => win?.show() },
-            { label: '退出', type: 'normal', click: () => { app.quit() }}
-        ]))
+        const tray = new Tray(Icon)
+        tray.setContextMenu(
+            Menu.buildFromTemplate([
+                { label: '显示窗口', click: () => win?.show() },
+                {
+                    label: '退出',
+                    type: 'normal',
+                    click: () => {
+                        app.quit()
+                    },
+                },
+            ]),
+        )
         tray.on('click', () => {
             win?.show()
         })
@@ -231,17 +246,17 @@ app.on('activate', () => {
 
 app.on('before-quit', () => {
     logger.info('正在退出程序 ……')
-    if(win) {
+    if (win) {
         win.destroy()
     }
 })
 
 // ================================
 
-function sendUrlToWindow(url: string ,args: string[] = []) {
+function sendUrlToWindow(url: string, args: string[] = []) {
     win?.webContents.send('sys:handleUri', {
         url: url,
-        args: args
+        args: args,
     })
 }
 

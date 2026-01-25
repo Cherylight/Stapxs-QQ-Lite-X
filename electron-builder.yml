@@ -6,17 +6,17 @@ directories:
     buildResources: build,
     output: dist_electron
 files:
-    - "!**/.vscode/*"
-    - "!src/*"
-    - "!electron.vite.config.{js,ts,mjs,cjs}"
-    - "!vite.config.{js,ts,mjs,cjs}"
-    - "!capacitor.config.{js,ts,mjs,cjs}"
-    - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,README/*}"
-    - "!{.env,.env.*,.envrc,.gitmodules,.tool-versions,stats.html}"
-    - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
-    - "!{dist*/*,build/*,scripts/*}"
-    - "!{scripts/*,dockerfile}"
-    - "!{ssqq.capacitor-onebot-connector,ssqq.npx-web-quick-start}/**/*"
+    - '!**/.vscode/*'
+    - '!src/*'
+    - '!electron.vite.config.{js,ts,mjs,cjs}'
+    - '!vite.config.{js,ts,mjs,cjs}'
+    - '!capacitor.config.{js,ts,mjs,cjs}'
+    - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,README/*}'
+    - '!{.env,.env.*,.envrc,.gitmodules,.tool-versions,stats.html}'
+    - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+    - '!{dist*/*,build/*,scripts/*}'
+    - '!{scripts/*,dockerfile}'
+    - '!{ssqq.capacitor-onebot-connector,ssqq.npx-web-quick-start}/**/*'
 
 asarUnpack:
     - resources/**
@@ -28,7 +28,6 @@ win:
     executableName: Stapxs QQ Lite X
     icon: build/icon-client-others.png
     legalTrademarks: Copyright © 2025-2026 Mr.Lee, and other contributors.
-    publisherName: Mr.Lee
 
 # macOS 配置
 mac:
@@ -61,13 +60,8 @@ linux:
     category: Network
     mimeTypes: [application/x-stapxs-qq-lite-x]
     desktop:
-        Type: Application
-        Name: Stapxs QQ Lite X
-        GenericName: Stapxs QQ Lite X Electron 客户端
-        Comment: 一个跨协议的 Stapxs QQ Lite 发行版。
-        Terminal: false
-        Category: Network
-        Icon: stapxs-qq-lite-x
+        entry:
+            GenericName: Stapxs QQ Lite X Electron 客户端
 
 # 其他配置
 npmRebuild: false
