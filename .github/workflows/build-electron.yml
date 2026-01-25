@@ -49,8 +49,8 @@ jobs:
                       identifier: mac-arm64
                     - os: ubuntu-latest
                       identifier: linux-x64
-                    - os: windows-11-arm
-                      identifier: win-arm
+                    # - os: windows-11-arm
+                    #   identifier: win-arm
         needs: init
 
         # 关键优化：设置全局环境变量，强制 Electron 将缓存存放在项目目录下
