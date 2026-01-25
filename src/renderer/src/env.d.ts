@@ -20,7 +20,6 @@ declare interface Window {
             lng: number
         },
     ) => void
-    __TAURI_INTERNALS__: any
     runtimeData: any
 }
 

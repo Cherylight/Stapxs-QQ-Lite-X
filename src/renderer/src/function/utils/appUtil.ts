@@ -4,20 +4,11 @@ import FileDownloader from 'js-file-downloader'
 import semver from 'semver'
 import appInfo from '../../../../../package.json'
 
-
 import { KeyboardInfo } from '@capacitor/keyboard'
 import { logger, popInfo } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
-import {
-    hslToRgb,
-    rgbToHsl,
-} from '@renderer/function/utils/systemUtil'
-import {
-    defineAsyncComponent,
-    h,
-    markRaw,
-    toRaw,
-} from 'vue'
+import { hslToRgb, rgbToHsl } from '@renderer/function/utils/systemUtil'
+import { defineAsyncComponent, h, markRaw, toRaw } from 'vue'
 import { GroupSession, Session, UserSession } from '../model/session'
 import { Notify } from '../notify'
 import { changeSession, sendMsgRaw } from './msgUtil'
@@ -29,7 +20,11 @@ import { changeSession, sendMsgRaw } from './msgUtil'
  * @param showHighlight 是否高亮显示
  * @returns 跳转是否成功
  */
-export function scrollToMsg(msg: Message, showAnimation: boolean = true, showHighlight = true): boolean {
+export function scrollToMsg(
+    msg: Message,
+    showAnimation: boolean = true,
+    showHighlight = true,
+): boolean {
     if (msg.session === undefined) return false
     if (msg.session !== runtimeData.nowChat) return false
     if (msg.session.isActive === false) return false
@@ -41,17 +36,15 @@ export function scrollToMsg(msg: Message, showAnimation: boolean = true, showHig
     if (!panDom) return false
 
     // 设置滚动动画
-    if (showAnimation === false)
-        panDom.style.scrollBehavior = 'unset'
-    else
-        panDom.style.scrollBehavior = 'smooth'
+    if (showAnimation === false) panDom.style.scrollBehavior = 'unset'
+    else panDom.style.scrollBehavior = 'smooth'
 
     const vh = window.innerHeight / 100
     panDom.scrollTop = msgDom.offsetTop - msgDom.offsetHeight - 20 * vh
     panDom.style.scrollBehavior = 'smooth'
 
     // 加高亮特效
-    if(showHighlight) {
+    if (showHighlight) {
         msgDom.style.transition = 'background 1s'
         msgDom.style.background = 'rgba(0, 0, 0, 0.06)'
         setTimeout(() => {
@@ -86,10 +79,14 @@ export function openLink(url: string, external = false) {
                         text: app.config.globalProperties.$t('打开…'),
                         fun: () => {
                             const shell = window.electron?.shell
-                            if (shell)
-                                shell.openExternal(url)
+                            if (shell) shell.openExternal(url)
                             else
-                                backend.call('', 'sys:openInBrowser', false, url)
+                                backend.call(
+                                    '',
+                                    'sys:openInBrowser',
+                                    false,
+                                    url,
+                                )
                         },
                     },
                     {
@@ -125,25 +122,29 @@ export async function reloadUsers(useCache: boolean = true) {
 
     // 拉取新数据
     const task: Promise<void>[] = []
-    let friendData: FriendData[]|undefined
-    let groupData: GroupData[]|undefined
+    let friendData: FriendData[] | undefined
+    let groupData: GroupData[] | undefined
     // 加载群组列表
-    task.push((async()=>{
-        groupData = await runtimeData.nowAdapter!.getGroupList(useCache)
-    })())
+    task.push(
+        (async () => {
+            groupData = await runtimeData.nowAdapter!.getGroupList(useCache)
+        })(),
+    )
     // 加载好友列表
-    task.push((async()=>{
-        friendData = await runtimeData.nowAdapter!.getFriendList(useCache)
-    })())
+    task.push(
+        (async () => {
+            friendData = await runtimeData.nowAdapter!.getFriendList(useCache)
+        })(),
+    )
     // 等待所有任务完成
     await Promise.all(task)
 
-	if (!groupData || !friendData) {
-		popInfo.error(
-			app.config.globalProperties.$t('加载用户列表失败，请稍后再试。'),
-		)
-		return
-	}
+    if (!groupData || !friendData) {
+        popInfo.error(
+            app.config.globalProperties.$t('加载用户列表失败，请稍后再试。'),
+        )
+        return
+    }
 
     // 清除旧数据
     Session.clear()
@@ -223,9 +224,9 @@ export function jumpToSession(session: Session, msg?: Message) {
     }
 
     changeSession(session)
-    session.activate().then(()=>{
+    session.activate().then(() => {
         // 跳转到对应消息
-        setTimeout(()=>{
+        setTimeout(() => {
             if (msg) scrollToMsg(msg, true)
         }, 500)
     })
@@ -257,7 +258,7 @@ export function downloadFile(
             nameCallback: function () {
                 return name
             },
-        }).catch(e=>logger.error(e as Error, '下载文件失败'))
+        }).catch((e) => logger.error(e as Error, '下载文件失败'))
     } else {
         backend.addListener(undefined, 'sys:downloadBack', (event, data) => {
             onprocess(data || event.payload)
@@ -285,9 +286,7 @@ export function updateWinColor(color: string) {
         const blue = parseInt(color.substr(4, 2), 16)
         // 平衡颜色亮度
         const hsl = rgbToHsl(red, green, blue)
-        if (
-            win.darkMode
-        ) {
+        if (win.darkMode) {
             hsl[2] = 0.8
         } else {
             hsl[2] = 0.3
@@ -316,8 +315,8 @@ export async function loadWinColor() {
 }
 
 /**
-* macOS：创建应用菜单
-*/
+ * macOS：创建应用菜单
+ */
 export function createMenu() {
     const { $t } = app.config.globalProperties
     // MacOS：初始化菜单
@@ -360,18 +359,22 @@ export function createMenu() {
         menuTitles.feedback = $t('在 Github 上反馈问题')
         menuTitles.license = $t('许可协议')
 
-        backend.call(undefined, 'sys:createMenu', false,
-            backend.type == 'tauri' ? { data: menuTitles} : menuTitles)
+        backend.call(undefined, 'sys:createMenu', false, menuTitles)
     }
 }
-export function updateMenu(config: { parent: string, id: string; action: string; value: string }) {
+export function updateMenu(config: {
+    parent: string
+    id: string
+    action: string
+    value: string
+}) {
     // MacOS：更新菜单
     backend.call(undefined, 'sys:updateMenu', false, config)
 }
 
 /**
-* Electron：注册系统 IPC
-*/
+ * Electron：注册系统 IPC
+ */
 export function createIpc() {
     // 服务发现
     backend.addListener(undefined, 'sys:serviceFound', (event, data) => {
@@ -392,29 +395,33 @@ export function createIpc() {
         const info = data ?? event.payload
         const session = Session.getSessionById(info.id)
         if (!session) return
-        sendMsgRaw(
-            session,
-            [new ReplySeg(String(info.msg)), new TxtSeg(info.content)]
-        )
+        sendMsgRaw(session, [
+            new ReplySeg(String(info.msg)),
+            new TxtSeg(info.content),
+        ])
         // 去消息列表内寻找，去除新消息标记
         session.setRead('sender')
     })
     // 应用功能
     backend.addListener(undefined, 'app:about', () => {
-            popBox({
-                title: app.config.globalProperties.$t('关于') + ' ' +
-                        app.config.globalProperties.$t('Stapxs QQ Lite X'),
-                comp: AboutPan,
-                props: { showUI: false },
-                allowAutoClose: false,
-            })
+        popBox({
+            title:
+                app.config.globalProperties.$t('关于') +
+                ' ' +
+                app.config.globalProperties.$t('Stapxs QQ Lite X'),
+            comp: AboutPan,
+            props: { showUI: false },
+            allowAutoClose: false,
         })
+    })
     backend.addListener(undefined, 'sys:handleUri', (event, data) => {
         logger.info(JSON.stringify(data ?? event.payload))
     })
     backend.addListener(undefined, 'app:changeTab', (event, name) => {
         window.focus()
-        document.getElementById('bar-' + (name ?? event.payload).toLowerCase())?.click()
+        document
+            .getElementById('bar-' + (name ?? event.payload).toLowerCase())
+            ?.click()
     })
     backend.addListener(undefined, 'app:openLink', (event, link) => {
         openLink(link ?? event.payload)
@@ -440,16 +447,16 @@ export function createIpc() {
 }
 
 /**
-* Capacitor：初始化移动平台
-*/
+ * Capacitor：初始化移动平台
+ */
 export async function loadMobile() {
     const { $t } = app.config.globalProperties
     // Capacitor：相关初始化
-    if(backend.isMobile()) {
+    if (backend.isMobile()) {
         // 注册回调监听
         backend.addListener('Onebot', 'onebot:event', (data) => {
             const msg = JSON.parse(data.data)
-            switch(data.type) {
+            switch (data.type) {
                 case 'onopen':
                     backendWs._onOpen({
                         address: runtimeData.connectInfo.address!,
@@ -461,134 +468,187 @@ export async function loadMobile() {
                 case 'onclose':
                     backendWs._onClose({
                         code: msg.code,
-                        message: msg.message
+                        message: msg.message,
                     })
                     break
                 case 'onerror': {
                     backendWs._onClose({
                         code: -1,
-                        message: $t('连接失败') + ': ' + msg.type
+                        message: $t('连接失败') + ': ' + msg.type,
                     })
                     break
                 }
-                case 'onServiceFound': setQuickLogin(msg.address, msg.port); break
-                default: break
+                case 'onServiceFound':
+                    setQuickLogin(msg.address, msg.port)
+                    break
+                default:
+                    break
             }
         })
         // 通知
-        const permission = await backend.call('LocalNotifications', 'checkPermissions', true)
+        const permission = await backend.call(
+            'LocalNotifications',
+            'checkPermissions',
+            true,
+        )
         const permissionStr = permission || permission.display
-        if(permissionStr.indexOf('prompt') != -1) {
-            await backend.call('LocalNotifications', 'requestPermissions', false)
-        } else if(permissionStr.indexOf('denied') != -1) {
+        if (permissionStr.indexOf('prompt') != -1) {
+            await backend.call(
+                'LocalNotifications',
+                'requestPermissions',
+                false,
+            )
+        } else if (permissionStr.indexOf('denied') != -1) {
             logger.error(null, '通知权限已被拒绝')
             logger.system('开发者阁下为什么要拒绝通知权限的请求呢？')
         } else {
             logger.debug('通知权限已开启')
             // 注册通知类型
-            backend.call('LocalNotifications', 'registerActionTypes', false,{
-                types:[{
-                    id: 'msgQuickReply',
-                    actions: [{
-                        id: 'REPLY_ACTION',
-                        title: '快速回复',
-                        requiresAuthentication: true,
-                        input: true,
-                        inputButtonTitle: '发送',
-                        inputPlaceholder: '输入回复内容……'
-                    }]
-                }] as ActionType[]
+            backend.call('LocalNotifications', 'registerActionTypes', false, {
+                types: [
+                    {
+                        id: 'msgQuickReply',
+                        actions: [
+                            {
+                                id: 'REPLY_ACTION',
+                                title: '快速回复',
+                                requiresAuthentication: true,
+                                input: true,
+                                inputButtonTitle: '发送',
+                                inputPlaceholder: '输入回复内容……',
+                            },
+                        ],
+                    },
+                ] as ActionType[],
             })
             // 注册相关事件
-            backend.addListener('LocalNotifications', 'localNotificationActionPerformed', (info) => {
-                const notification =
-                    info.notification as LocalNotificationSchema
-                if(info.actionId == 'tap') {
-                    // PS：通知被点击后会自动被关闭，所以这里不需要处理
-                    jumpToSession(notification.extra.userId,
-                        notification.extra.msgId)
-                } else if(info.actionId == 'REPLY_ACTION') {
-                    // 快速回复
-                    const session = Session.getSessionById(notification.extra.userId)
-                    if (!session) return
-                    sendMsgRaw(
-                        session,
-                        [
+            backend.addListener(
+                'LocalNotifications',
+                'localNotificationActionPerformed',
+                (info) => {
+                    const notification =
+                        info.notification as LocalNotificationSchema
+                    if (info.actionId == 'tap') {
+                        // PS：通知被点击后会自动被关闭，所以这里不需要处理
+                        jumpToSession(
+                            notification.extra.userId,
+                            notification.extra.msgId,
+                        )
+                    } else if (info.actionId == 'REPLY_ACTION') {
+                        // 快速回复
+                        const session = Session.getSessionById(
+                            notification.extra.userId,
+                        )
+                        if (!session) return
+                        sendMsgRaw(session, [
                             new ReplySeg(String(notification.extra.msgId)),
-                            new TxtSeg(info.inputValue ?? '')
-                        ]
-                    )
-                    // 去消息列表内寻找，去除新消息标记
-                    session.setRead('sender')
-                }
-            })
+                            new TxtSeg(info.inputValue ?? ''),
+                        ])
+                        // 去消息列表内寻找，去除新消息标记
+                        session.setRead('sender')
+                    }
+                },
+            )
         }
         // 键盘
-        backend.call('Keyboard', 'setAccessoryBarVisible', false, { isVisible: false })
-        backend.call('Keyboard', 'setResizeMode', false, { mode: 'none' })
-        backend.addListener('Keyboard', 'keyboardWillShow', async (info: KeyboardInfo) => {
-            const keyboardHeight = info.keyboardHeight
-
-            // 调整输入框高度
-            const sendMore = document.getElementById('send-more')
-            if(sendMore && keyboardHeight > window.innerHeight / 3) {
-                sendMore.style.paddingBottom = '10px'
-            }
-
-            const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
-            const tabBar = document.getElementsByTagName('ul')[0]
-            // iOS 26 后键盘背景是半透明的，不能让 webview 调整高度，会漏出背景的黑色
-            // 干脆把所有的 iOS 版本处理方法都改为内部避让
-            if(backend.platform == 'ios') {
-                const baseApp = document.getElementById('base-app')
-                if (safeArea && baseApp) {
-                    baseApp.style.setProperty('--safe-area-bottom', (keyboardHeight - safeArea.bottom + 100) + 'px')
-                }
-                // 调整菜单高度
-                if(safeArea && tabBar) {
-                    tabBar.style.setProperty('padding-bottom', (keyboardHeight - safeArea.bottom + 100) + 'px', 'important')
-                }
-            }
-
-            // 调整整个 HTML 的高度
-            // PS：仅用于解决 Android 在全屏沉浸式下键盘遮挡问题
-            const html = document.getElementsByTagName('html')[0]
-            if(html && backend.platform == 'android') {
-                html.style.height = `calc(100% - ${keyboardHeight + safeArea.top}px)`
-            }
+        backend.call('Keyboard', 'setAccessoryBarVisible', false, {
+            isVisible: false,
         })
+        backend.call('Keyboard', 'setResizeMode', false, { mode: 'none' })
+        backend.addListener(
+            'Keyboard',
+            'keyboardWillShow',
+            async (info: KeyboardInfo) => {
+                const keyboardHeight = info.keyboardHeight
+
+                // 调整输入框高度
+                const sendMore = document.getElementById('send-more')
+                if (sendMore && keyboardHeight > window.innerHeight / 3) {
+                    sendMore.style.paddingBottom = '10px'
+                }
+
+                const safeArea = await backend.call(
+                    'SafeArea',
+                    'getSafeArea',
+                    true,
+                )
+                const tabBar = document.getElementsByTagName('ul')[0]
+                // iOS 26 后键盘背景是半透明的，不能让 webview 调整高度，会漏出背景的黑色
+                // 干脆把所有的 iOS 版本处理方法都改为内部避让
+                if (backend.platform == 'ios') {
+                    const baseApp = document.getElementById('base-app')
+                    if (safeArea && baseApp) {
+                        baseApp.style.setProperty(
+                            '--safe-area-bottom',
+                            keyboardHeight - safeArea.bottom + 100 + 'px',
+                        )
+                    }
+                    // 调整菜单高度
+                    if (safeArea && tabBar) {
+                        tabBar.style.setProperty(
+                            'padding-bottom',
+                            keyboardHeight - safeArea.bottom + 100 + 'px',
+                            'important',
+                        )
+                    }
+                }
+
+                // 调整整个 HTML 的高度
+                // PS：仅用于解决 Android 在全屏沉浸式下键盘遮挡问题
+                const html = document.getElementsByTagName('html')[0]
+                if (html && backend.platform == 'android') {
+                    html.style.height = `calc(100% - ${keyboardHeight + safeArea.top}px)`
+                }
+            },
+        )
         backend.addListener('Keyboard', 'keyboardWillHide', async () => {
             const sendMore = document.getElementById('send-more')
-            if(sendMore) {
+            if (sendMore) {
                 sendMore.style.paddingBottom = 'var(--safe-area-bottom)'
             }
-            if(backend.platform == 'ios') {
+            if (backend.platform == 'ios') {
                 const baseApp = document.getElementById('base-app')
-                const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
+                const safeArea = await backend.call(
+                    'SafeArea',
+                    'getSafeArea',
+                    true,
+                )
                 if (safeArea && baseApp) {
-                    baseApp.style.setProperty('--safe-area-bottom', safeArea.bottom + 'px')
+                    baseApp.style.setProperty(
+                        '--safe-area-bottom',
+                        safeArea.bottom + 'px',
+                    )
                 }
 
                 const tabBar = document.getElementsByTagName('ul')[0]
-                if(tabBar) {
+                if (tabBar) {
                     tabBar.style.paddingBottom = ''
                 }
             }
             // 调整整个 HTML 的高度
             // PS：仅用于解决 Android 在全屏沉浸式下键盘遮挡问题
             const html = document.getElementsByTagName('html')[0]
-            if(html && backend.platform == 'android') {
+            if (html && backend.platform == 'android') {
                 html.style.height = 'calc(100%)'
             }
         })
         // 状态栏（Android）
-        backend.call('NavigationBar', 'setTransparency', false, { isTransparent: true })
-        backend.call('StatusBar', 'setOverlaysWebView', false, { overlay: true })
-        backend.call('StatusBar', 'setBackgroundColor', false, { color: '#ffffff00' })
+        backend.call('NavigationBar', 'setTransparency', false, {
+            isTransparent: true,
+        })
+        backend.call('StatusBar', 'setOverlaysWebView', false, {
+            overlay: true,
+        })
+        backend.call('StatusBar', 'setBackgroundColor', false, {
+            color: '#ffffff00',
+        })
     }
 }
 
-import { ActionType, LocalNotificationSchema } from '@capacitor/local-notifications'
+import {
+    ActionType,
+    LocalNotificationSchema,
+} from '@capacitor/local-notifications'
 import AboutPan from '@renderer/components/popBox/AboutPan.vue'
 import { backend } from '@renderer/runtime/backend'
 import { FriendData, GroupData } from '../adapter/interface'
@@ -604,18 +664,18 @@ import { ReplySeg, TxtSeg } from '../model/seg'
 import win from '@renderer/runtime/win'
 import SvgMedal from '@renderer/components/svg/SvgMedal.vue'
 /**
-* 初始化快速连接信息
-* @param address 地址
-* @param port 端口
-*/
+ * 初始化快速连接信息
+ * @param address 地址
+ * @param port 端口
+ */
 function setQuickLogin(address: string, port: number) {
-    if(loginInfo.quickLogin != null)
+    if (loginInfo.quickLogin != null)
         loginInfo.quickLogin.push({ address: address, port: port })
 }
 
 /**
-* 检查更新
-*/
+ * 检查更新
+ */
 export function checkUpdate() {
     if (import.meta.env.DEV) return
     if (import.meta.env.VITE_HASH) testVersionCheck()
@@ -624,7 +684,7 @@ export function checkUpdate() {
 
 interface GhCommits {
     commit: {
-        message: string,
+        message: string
     }
     html_url: string
     sha: string
@@ -655,9 +715,9 @@ function stableVersionCheck() {
 }
 
 /**
-* 展示更新弹窗
-* @param data 更新数据
-*/
+ * 展示更新弹窗
+ * @param data 更新数据
+ */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function showUpdateLog(data: any) {
     const appVersion = appInfo.version // 当前版本
@@ -667,14 +727,14 @@ function showUpdateLog(data: any) {
     //    如果缓存版本小于获取到的版本但是当前版本等于获取到的版本就是更新完成首次启动
     const latestVersion = data.tag_name.substring(1)
 
-    if (semver.lt(appVersion,latestVersion)) {
+    if (semver.lt(appVersion, latestVersion)) {
         // 有更新
         showReleaseLog(data, false)
     }
     if (
         cacheVersion &&
-        semver.eq(appVersion,latestVersion) &&
-        semver.lt(cacheVersion,latestVersion)
+        semver.eq(appVersion, latestVersion) &&
+        semver.lt(cacheVersion, latestVersion)
     ) {
         // 更新完成首次启动
         showReleaseLog(data, true)
@@ -708,86 +768,102 @@ function showReleaseLog(data: any, isUpdated: boolean) {
         message: msg,
         updated: isUpdated,
     }
-    const buttonGoUpdate = (!backend.isWeb()) ? [
-        {
-            text: $t('知道了'),
-        },
-        {
-            text: $t('下载更新…'),
-            master: true,
-            noClose: true,
-            fun: () => openLink(
-                data.html_url,
-                true
-            ),
-        },
-    ]: [
-        {
-            text: $t('查看…'),
-            noClose: true,
-            fun: () => openLink(data.html_url),
-        },
-        {
-            text: $t('刷新页面'),
-            master: true,
-            fun: () => location.reload(),
-        },
-    ]
+    const buttonGoUpdate = !backend.isWeb()
+        ? [
+              {
+                  text: $t('知道了'),
+              },
+              {
+                  text: $t('下载更新…'),
+                  master: true,
+                  noClose: true,
+                  fun: () => openLink(data.html_url, true),
+              },
+          ]
+        : [
+              {
+                  text: $t('查看…'),
+                  noClose: true,
+                  fun: () => openLink(data.html_url),
+              },
+              {
+                  text: $t('刷新页面'),
+                  master: true,
+                  fun: () => location.reload(),
+              },
+          ]
     popBox({
         comp: UpdatePan,
         props: toRaw(info),
-        button: isUpdated? [
-            {
-                text: $t('查看…'),
-                noClose: true,
-                fun: () => openLink(data.html_url, true),
-            },
-            {
-                text: $t('知道了'),
-                master: true,
-            },
-        ]: buttonGoUpdate,
+        button: isUpdated
+            ? [
+                  {
+                      text: $t('查看…'),
+                      noClose: true,
+                      fun: () => openLink(data.html_url, true),
+                  },
+                  {
+                      text: $t('知道了'),
+                      master: true,
+                  },
+              ]
+            : buttonGoUpdate,
     })
 }
 function showTestLog(data: GhCommits) {
     const { $t } = app.config.globalProperties
-    const pages = () => h('div', [
-        h('p', $t('新提交: {hash}', {
-            hash: data.sha.slice(0, 7),
-        })),
-        h('div', {
-            style: 'background-color: var(--color-font-r); padding: 10px; border-radius: 10px; margin-top: -10px;',
-        }, [
-            h('span', {
-                style: 'white-space: pre-wrap;'
-            }, data.commit.message)
-        ])
-    ])
-    const buttonGoUpdate = (!backend.isWeb()) ? [
-        {
-            text: $t('知道了'),
-        },
-        {
-            text: $t('下载更新…'),
-            master: true,
-            noClose: true,
-            fun: () => openLink(
-                'https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X/actions/workflows/build-electron.yml',
-                true
+    const pages = () =>
+        h('div', [
+            h(
+                'p',
+                $t('新提交: {hash}', {
+                    hash: data.sha.slice(0, 7),
+                }),
             ),
-        },
-    ]: [
-        {
-            text: $t('查看…'),
-            noClose: true,
-            fun: () => openLink(data.html_url),
-        },
-        {
-            text: $t('刷新页面'),
-            master: true,
-            fun: () => location.reload(),
-        },
-    ]
+            h(
+                'div',
+                {
+                    style: 'background-color: var(--color-font-r); padding: 10px; border-radius: 10px; margin-top: -10px;',
+                },
+                [
+                    h(
+                        'span',
+                        {
+                            style: 'white-space: pre-wrap;',
+                        },
+                        data.commit.message,
+                    ),
+                ],
+            ),
+        ])
+    const buttonGoUpdate = !backend.isWeb()
+        ? [
+              {
+                  text: $t('知道了'),
+              },
+              {
+                  text: $t('下载更新…'),
+                  master: true,
+                  noClose: true,
+                  fun: () =>
+                      openLink(
+                          'https://github.com/Chzxxuanzheng/Stapxs-QQ-Lite-X/actions/workflows/build-electron.yml',
+                          true,
+                      ),
+              },
+          ]
+        : [
+              {
+                  text: $t('查看…'),
+                  noClose: true,
+                  fun: () => openLink(data.html_url),
+              },
+              {
+                  text: $t('刷新页面'),
+                  master: true,
+                  fun: () => location.reload(),
+              },
+          ]
     popBox({
         comp: pages,
         svg: 'bullhorn',
@@ -796,18 +872,17 @@ function showTestLog(data: GhCommits) {
     })
 }
 
-const openCheckList: ((times: number)=>boolean)[] = []
+const openCheckList: ((times: number) => boolean)[] = []
 /**
-* 显示使用次数弹窗
-*/
+ * 显示使用次数弹窗
+ */
 export function checkOpenTimes() {
-    if (import.meta.env.DEV) return     // 开发环境不显示
+    if (import.meta.env.DEV) return // 开发环境不显示
     const times = +(localStorage.getItem('times') ?? 0)
     for (const func of openCheckList) {
-        if(func(times)) break
+        if (func(times)) break
     }
     localStorage.setItem('times', (times + 1).toString())
-
 }
 
 // 使用引导
@@ -833,14 +908,24 @@ openCheckList.push((times: number) => {
     if (runtimeData.sysConfig.close_ad) return false
     if (getTimes % 50 != 0) return false
 
-    const pages = () => h('div', {
-        'style': 'display:flex;flex-direction:column;padding:10px 5%;align-items:center;'
-    }, [
-        h(SvgMedal),
-        h('span', $t('好耶！Stapxs QQ Lite X 已经被打开 {times} 次了！', { times: getTimes })),
-        h('span', $t('真的不去点个 star 吗 ……')),
-        h('span', $t('tip: 可以去设置里禁止该弹窗')),
-    ])
+    const pages = () =>
+        h(
+            'div',
+            {
+                style: 'display:flex;flex-direction:column;padding:10px 5%;align-items:center;',
+            },
+            [
+                h(SvgMedal),
+                h(
+                    'span',
+                    $t('好耶！Stapxs QQ Lite X 已经被打开 {times} 次了！', {
+                        times: getTimes,
+                    }),
+                ),
+                h('span', $t('真的不去点个 star 吗 ……')),
+                h('span', $t('tip: 可以去设置里禁止该弹窗')),
+            ],
+        )
     popBox({
         title: $t('好耶'),
         svg: 'star',
@@ -853,9 +938,7 @@ openCheckList.push((times: number) => {
                 text: $t('好喔'),
                 master: true,
                 fun: () => {
-                    openLink(
-                        `https://github.com/${runtimeData.repoName}`,
-                    )
+                    openLink(`https://github.com/${runtimeData.repoName}`)
                 },
             },
         ],
@@ -865,11 +948,11 @@ openCheckList.push((times: number) => {
 })
 
 /**
-* 显示全局公告弹窗
-*/
+ * 显示全局公告弹窗
+ */
 export function checkNotice() {
     let url = 'https://lib.stapxs.cn/download/stapxs-qq-lite/notice-config.json'
-    if(import.meta.env.DEV) {
+    if (import.meta.env.DEV) {
         url = 'notice_local.json'
     }
     const version = 3
@@ -887,19 +970,31 @@ export function checkNotice() {
             }
             // 解析公告列表
             data.forEach((notice: any) => {
-                if(notice.version == version && (notice.client == import.meta.env.VITE_APP_CLIENT_TAG || notice.client == 'all')) {
+                if (
+                    notice.version == version &&
+                    (notice.client == import.meta.env.VITE_APP_CLIENT_TAG ||
+                        notice.client == 'all')
+                ) {
                     const noticeBody = notice as NoticeBodyV3
                     // 当前时间戳（毫秒）
                     const now = new Date().getTime()
                     noticeBody.show_date.forEach((dateInterval: number[]) => {
-                        if(dateInterval.length == 2) {
+                        if (dateInterval.length == 2) {
                             // 判断是否在时间区间内
-                            if(now >= dateInterval[0] && now <= dateInterval[1]) {
+                            if (
+                                now >= dateInterval[0] &&
+                                now <= dateInterval[1]
+                            ) {
                                 noticeBody.is_show = true
                             }
                         }
                     })
-                    if (noticeBody.is_important == true || (noticeBody.is_show && noticeBody.id && noticeShow.indexOf(noticeBody.id) < 0)) {
+                    if (
+                        noticeBody.is_important == true ||
+                        (noticeBody.is_show &&
+                            noticeBody.id &&
+                            noticeShow.indexOf(noticeBody.id) < 0)
+                    ) {
                         // 加载公告弹窗列表
                         for (let i = 0; i < noticeBody.pops.length; i++) {
                             // 添加弹窗
@@ -907,15 +1002,25 @@ export function checkNotice() {
                             const button: PopBoxButton[] = [
                                 {
                                     text:
-                                         
-                                        noticeBody.pops.length > 1 && i != noticeBody.pops.length - 1 ?
-                                            app.config.globalProperties.$t('继续') :
-                                            (info.button_text ? info.button_text : app.config.globalProperties.$t('确定')),
-                                         
+                                        noticeBody.pops.length > 1 &&
+                                        i != noticeBody.pops.length - 1
+                                            ? app.config.globalProperties.$t(
+                                                  '继续',
+                                              )
+                                            : info.button_text
+                                              ? info.button_text
+                                              : app.config.globalProperties.$t(
+                                                    '确定',
+                                                ),
+
                                     master: true,
                                     fun: () => {
                                         // 添加已读记录
-                                        if (noticeShow.indexOf(noticeBody.id) < 0 && !noticeBody.is_important) {
+                                        if (
+                                            noticeShow.indexOf(noticeBody.id) <
+                                                0 &&
+                                            !noticeBody.is_important
+                                        ) {
                                             noticeShow.push(noticeBody.id)
                                         }
                                         localStorage.setItem(
@@ -925,31 +1030,36 @@ export function checkNotice() {
                                     },
                                 },
                             ]
-                            if(info.link_url) {
+                            if (info.link_url) {
                                 button.unshift({
-                                    text: app.config.globalProperties.$t('打开…'),
+                                    text: app.config.globalProperties.$t(
+                                        '打开…',
+                                    ),
                                     master: false,
-									noClose: true,
+                                    noClose: true,
                                     fun: () => {
-                                        if(info.link_url) {
+                                        if (info.link_url) {
                                             openLink(info.link_url)
                                         }
-                                    }
+                                    },
                                 })
                             }
                             if (info.html) {
                                 htmlPopBox(info.html, {
                                     title: info.title,
-                                    button: button
+                                    button: button,
                                 })
-                            } else if(info.template) {
+                            } else if (info.template) {
                                 popBox({
                                     title: info.title,
                                     comp: defineAsyncComponent(
-                                        () => import(`@renderer/components/notice-component/${info.template}.vue`),
+                                        () =>
+                                            import(
+                                                `@renderer/components/notice-component/${info.template}.vue`
+                                            ),
                                     ),
                                     props: markRaw(info.template_data ?? {}),
-                                    button: button
+                                    button: button,
                                 })
                             } else {
                                 logger.error(null, '未知的公告类型')
@@ -962,14 +1072,18 @@ export function checkNotice() {
 }
 
 /**
-* TODO：后端代理请求模式（暂未使用）
-* @param type 请求类型
-* @param url 地址
-* @param cookies Cookies
-* @param data 数据
-*/
-export function BackendRequest(type: 'GET' | 'POST', url: string,
-        cookies: string[], data: any = undefined) {
+ * TODO：后端代理请求模式（暂未使用）
+ * @param type 请求类型
+ * @param url 地址
+ * @param cookies Cookies
+ * @param data 数据
+ */
+export function BackendRequest(
+    type: 'GET' | 'POST',
+    url: string,
+    cookies: string[],
+    data: any = undefined,
+) {
     backend.call(undefined, 'sys:requestHttp', false, {
         type: type,
         url: url,
@@ -979,10 +1093,10 @@ export function BackendRequest(type: 'GET' | 'POST', url: string,
 }
 
 /**
-* UM：统计事件统一上传方法
-* @param event 事件名
-* @param data 数据
-*/
+ * UM：统计事件统一上传方法
+ * @param event 事件名
+ * @param data 数据
+ */
 export function sendStatEvent(event: string, data: { [key: string]: any }) {
     if (!runtimeData.sysConfig.close_ga && !import.meta.env.DEV) {
         Umami.trackEvent(event, data)
@@ -1007,7 +1121,7 @@ export function shouldAutoFocus(): boolean {
     // 桌面端
     if (backend.type !== 'web') {
         // 除了苹果的不知道啥东西,都可以
-        if (['electron', 'tauri'].includes(backend.type)) {
+        if (['electron'].includes(backend.type)) {
             return true
         }
         return false
@@ -1015,7 +1129,11 @@ export function shouldAutoFocus(): boolean {
     // web端
     else {
         // 移动端浏览器不自动聚焦
-        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        if (
+            /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                navigator.userAgent,
+            )
+        ) {
             return false
         }
         return true

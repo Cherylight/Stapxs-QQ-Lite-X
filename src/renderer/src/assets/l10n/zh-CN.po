@@ -1629,9 +1629,6 @@ msgstr ""
 msgid "Bilibili 预览信息服务"
 msgstr ""
 
-msgid "Tauri 代理服务似乎没有正常启动"
-msgstr ""
-
 msgid "[图片]"
 msgstr ""
 

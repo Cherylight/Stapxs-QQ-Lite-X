@@ -8,7 +8,6 @@ body:
               - All
               - Web
               - Electron
-              - Tauri
               - 其他
     - type: textarea
       attributes:

@@ -1,9 +1,6 @@
 <template>
     <!-- 顶栏 -->
-    <div v-if="win.withBar"
-        class="top-bar"
-        name="appbar"
-        data-tauri-drag-region="true">
+    <div v-if="win.withBar" class="top-bar" name="appbar">
         <div class="space" />
         <div class="controller">
             <div class="min" @click="win.minimize()">
@@ -18,24 +15,36 @@
         </div>
     </div>
     <!-- 拖拽区域 -->
-    <div v-if="backend.platform == 'darwin'" class="controller mac-controller"
-        data-tauri-drag-region="true" />
+    <div
+        v-if="backend.platform == 'darwin'"
+        class="controller mac-controller"
+    />
     <div id="base-app" ref="base-app">
-        <div class="main-body" :style="{'--side-bar-width': runtimeData.sysConfig.side_bar_width + 'px'}">
+        <div
+            class="main-body"
+            :style="{
+                '--side-bar-width': runtimeData.sysConfig.side_bar_width + 'px',
+            }"
+        >
             <SideBar />
             <div class="main-box">
                 <Chat
                     v-if="driver.isConnected() && runtimeData.nowChat"
                     ref="chat"
                     v-model="runtimeData.nowChat.inputMsg"
-                    :chat="runtimeData.nowChat" />
+                    :chat="runtimeData.nowChat"
+                />
                 <!-- 背景 -->
-                <div v-if="!runtimeData.tags.vibrancy || !runtimeData.nowChat"
+                <div
+                    v-if="!runtimeData.tags.vibrancy || !runtimeData.nowChat"
                     v-hide="runtimeData.tags.noLogin"
-                    class="main-box-bg">
+                    class="main-box-bg"
+                >
                     <div class="ss-card choice-chat">
                         <template v-if="runtimeData.nowChat">
-                            <font-awesome-icon :icon="['fas', 'angles-right']" />
+                            <font-awesome-icon
+                                :icon="['fas', 'angles-right']"
+                            />
                             <span>(っ≧ω≦)っ</span>
                             <span>{{ $t('别划了别划了被看见了啦') }}</span>
                         </template>
@@ -59,7 +68,6 @@
             </div>
         </TransitionGroup>
 
-
         <!-- 全局搜索栏 -->
         <GlobalSessionSearchBar />
         <Viewer ref="viewer" />
@@ -72,7 +80,12 @@
         <Tooltips />
         <div id="mobile-css" />
     </div>
-    <div class="bg-blur" :style="{ backdropFilter: `blur(${runtimeData.sysConfig.background_img_blur}px)` }" />
+    <div
+        class="bg-blur"
+        :style="{
+            backdropFilter: `blur(${runtimeData.sysConfig.background_img_blur}px)`,
+        }"
+    />
 </template>
 
 <script setup lang="ts">
@@ -82,16 +95,15 @@ import * as App from './function/utils/appUtil'
 import { logger, popInfo, popList } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import { i18n, uptime } from '@renderer/main'
-import {
-    onMounted,
-    provide,
-    shallowReactive,
-    useTemplateRef
-} from 'vue'
+import { onMounted, provide, shallowReactive, useTemplateRef } from 'vue'
 import driver from '@renderer/function/driver'
 import { Notify } from '@renderer/function/notify'
 import { ensurePopBox } from '@renderer/function/utils/popBox'
-import { getDeviceType, getVersion, openLoginPan } from '@renderer/function/utils/systemUtil'
+import {
+    getDeviceType,
+    getVersion,
+    openLoginPan,
+} from '@renderer/function/utils/systemUtil'
 
 import GlobalSessionSearchBar from '@renderer/components/GlobalSessionSearchBar.vue'
 import Viewer from '@renderer/components/Viewer.vue'
@@ -126,13 +138,13 @@ const titleList = [
     '点击阅读《社交功能限制提醒》',
     '登录失败，Code 45',
     '你好世界！',
-    '这只是个普通的彩蛋！'
+    '这只是个普通的彩蛋！',
 ]
 if (import.meta.env.DEV) {
     document.title = 'Stapxs QQ Lite X(Dev)'
-}else {
+} else {
     const title = titleList[Math.floor(Math.random() * titleList.length)]
-    if(backend.platform == 'web') {
+    if (backend.platform == 'web') {
         document.title = title + '- Stapxs QQ Lite X'
     } else {
         document.title = title
@@ -143,11 +155,15 @@ if (import.meta.env.DEV) {
 
 //#region == 全局监听 ===================================================
 // moYu彩蛋
-window.moYu = () => { return '\x75\x6e\x64\x65\x66\x69\x6e\x65\x64' }
+window.moYu = () => {
+    return '\x75\x6e\x64\x65\x66\x69\x6e\x65\x64'
+}
 // 页面加载完成后
 onMounted(init)
 window.onbeforeunload = () => {
-    logger.system('开发者阁下—— 唔，阁下离开的太匆忙了！让我来帮开发者阁下收拾下东西吧。')
+    logger.system(
+        '开发者阁下—— 唔，阁下离开的太匆忙了！让我来帮开发者阁下收拾下东西吧。',
+    )
     new Notify().clear()
     runtimeData.nowAdapter?.close()
     runtimeData.nowAdapter = undefined
@@ -155,12 +171,12 @@ window.onbeforeunload = () => {
 // 绑定 runtimeData
 window.runtimeData = runtimeData
 
-useKeyboard('f12', ()=>{
+useKeyboard('f12', () => {
     if (!runtimeData.tags.dev) return
     backend.call(undefined, 'win:openDevTools', false)
 })
 
-useFrame(()=>{
+useFrame(() => {
     if (!baseApp.value) return
     baseApp.value.scrollTop = 0
 })
@@ -171,12 +187,20 @@ useFrame(()=>{
  * 初始化
  */
 async function init() {
-    if(import.meta.env.DEV)
+    if (import.meta.env.DEV)
         // eslint-disable-next-line
-        console.log('[ SSystem Bootloader Complete took ' + (new Date().getTime() - uptime) + 'ms, welcome to sar-dos on stapxs-qq-lite.su ]')
+        console.log(
+            '[ SSystem Bootloader Complete took ' +
+                (new Date().getTime() - uptime) +
+                'ms, welcome to sar-dos on stapxs-qq-lite.su ]',
+        )
     else
         // eslint-disable-next-line
-        console.log('[ SSystem Bootloader Complete took ' + (new Date().getTime() - uptime) + 'ms, welcome to ssqq on stapxs-qq-lite.user ]')
+        console.log(
+            '[ SSystem Bootloader Complete took ' +
+                (new Date().getTime() - uptime) +
+                'ms, welcome to ssqq on stapxs-qq-lite.user ]',
+        )
 
     // AMAP：初始化高德地图
     window._AMapSecurityConfig = import.meta.env.VITE_APP_AMAP_SECRET
@@ -191,16 +215,25 @@ async function init() {
         rafLoop()
     }
 
-    if(import.meta.env.DEV) {
-        logger.debug('stapxs-qq-lite.su:$/mnt/boot/dawnHunt/bin/core --pour /mnt/app/bin/main', true)
-        logger.system('[ dawnHuntCore Version: 1.0 Beta, dawnHuntDB: 2025-04-24 ]')
+    if (import.meta.env.DEV) {
+        logger.debug(
+            'stapxs-qq-lite.su:$/mnt/boot/dawnHunt/bin/core --pour /mnt/app/bin/main',
+            true,
+        )
+        logger.system(
+            '[ dawnHuntCore Version: 1.0 Beta, dawnHuntDB: 2025-04-24 ]',
+        )
     } else {
         logger.debug('stapxs-qq-lite.user:$/mnt/app/bin/main', true)
     }
     logger.debug('系统配置' + runtimeData.sysConfig)
 
     // 基础初始化完成
-    logger.system('欢迎回来，开发者。Stapxs QQ Lite X 正处于 ' + (import.meta.env.DEV ? 'development' : 'production') + ' 模式。正在为您加载更多功能。')
+    logger.system(
+        '欢迎回来，开发者。Stapxs QQ Lite X 正处于 ' +
+            (import.meta.env.DEV ? 'development' : 'production') +
+            ' 模式。正在为您加载更多功能。',
+    )
     // 加载移动平台特性
     App.loadMobile()
     // 服务发现
@@ -209,17 +242,19 @@ async function init() {
     //#endregion
 
     //#region == popstate监听 ==================================
-    if(backend.platform == 'web' && (getDeviceType() === 'Android' || getDeviceType() === 'iOS')) {
+    if (
+        backend.platform == 'web' &&
+        (getDeviceType() === 'Android' || getDeviceType() === 'iOS')
+    ) {
         window.addEventListener('popstate', () => {
-            if(!driver.isConnected()) {
+            if (!driver.isConnected()) {
                 // 离开提醒
-                ensurePopBox(
-                    $t('离开 Stapxs QQ Lite X？'),
-                    $t('离开')
-                ).then(ensure => {
-                    if (ensure) history.back()
-                    else history.pushState('ssqqweb', '', location.href)
-                })
+                ensurePopBox($t('离开 Stapxs QQ Lite X？'), $t('离开')).then(
+                    (ensure) => {
+                        if (ensure) history.back()
+                        else history.pushState('ssqqweb', '', location.href)
+                    },
+                )
             } else {
                 // 内部的页面返回处理，此处使用 watch backTimes 监听
                 runtimeData.watch.backTimes += 1
@@ -235,32 +270,35 @@ async function init() {
     //#region == 加载 Umami 统计功能 ============================
     if (!runtimeData.sysConfig.close_ga) {
         if (import.meta.env.DEV) {
-            logger.system('开发者，由于 Stapxs QQ Lite X 运行在调试模式下，分析组件并未初始化 …… 系统将无法捕获开发者阁下的访问状态，请悉知。')
+            logger.system(
+                '开发者，由于 Stapxs QQ Lite X 运行在调试模式下，分析组件并未初始化 …… 系统将无法捕获开发者阁下的访问状态，请悉知。',
+            )
         } else {
             const config = {
                 baseUrl: import.meta.env.VITE_APP_MU_ADDRESS,
-                websiteId: import.meta.env.VITE_APP_MU_ID
+                websiteId: import.meta.env.VITE_APP_MU_ID,
             } as any
             // 给页面添加一个来源域名方便在 electron 中获取
-            if(!backend.isWeb()) {
+            if (!backend.isWeb()) {
                 config.hostName = backend.type + '.stapxs.cn'
             }
             Umami.initialize(config)
             // 上报一些应用基础信息
             App.sendIdentifyData({
-                'app_version': import.meta.env.VITE_APP_CLIENT_TAG + ',' + getVersion(),
-                'os_version': backend.release,
-                'os_arch': backend.arch,
+                app_version:
+                    import.meta.env.VITE_APP_CLIENT_TAG + ',' + getVersion(),
+                os_version: backend.release,
+                os_arch: backend.arch,
             })
         }
     }
     //#endregion
 
     //#region == 公告弹窗 ======================================
-    openLoginPan()          // 打开登录面板
-    App.checkUpdate()       // 检查更新
-    App.checkOpenTimes()    // 检查打开次数
-    App.checkNotice()       // 检查公告
+    openLoginPan() // 打开登录面板
+    App.checkUpdate() // 检查更新
+    App.checkOpenTimes() // 检查打开次数
+    App.checkNotice() // 检查公告
     //#endregion
 
     if (new Date().getMonth() == 3 && new Date().getDate() == 1)

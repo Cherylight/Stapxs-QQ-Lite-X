@@ -9,7 +9,6 @@ body:
               - All
               - Web
               - Electron
-              - Tauri
               - Android
               - iOS/iPadOS
               - 其他

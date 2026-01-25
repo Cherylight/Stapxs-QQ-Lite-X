@@ -26,7 +26,6 @@ export default defineConfigWithVueTs(
         'src/renderer/public/**',
         'src/renderer/src/assets/**',
         'src/preload/**',
-        'src/tauri/**',
         'src/mobile/**',
         '*.config.*',
         'proxy.js',
