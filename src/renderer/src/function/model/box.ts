@@ -6,7 +6,6 @@
  * @Description: 提供分组的收纳盒
  */
 
-import { v4 as uuid } from 'uuid'
 import { Name } from './data'
 import {
     shallowReactive,
@@ -15,7 +14,7 @@ import {
     ShallowRef,
     watchEffect,
     computed,
-    ComputedRef
+    ComputedRef,
 } from 'vue'
 import { Message } from './message'
 import { GroupSession, Session } from './session'
@@ -36,7 +35,7 @@ export interface SessionBoxData {
 export class SessionBox {
     readonly type = 'box'
     // 基础属性
-    id: string = uuid()
+    id: string = crypto.randomUUID()
     private readonly _name: ShallowRef<Name>
     private readonly _icon: ShallowRef<string>
     private readonly _color: ShallowRef<number>
@@ -45,26 +44,31 @@ export class SessionBox {
     private readonly _alwaysTop: ShallowRef<boolean> = shallowRef(false)
 
     // 缓存
-    private readonly _preMessage: ComputedRef<Message|undefined> = computed(()=>{
-        let latestMsg: Message | undefined = undefined
-        for (const session of this._content) {
-            if (!session.preMessage) continue
-            if (!latestMsg && !session.preMessage.time) {
+    private readonly _preMessage: ComputedRef<Message | undefined> = computed(
+        () => {
+            let latestMsg: Message | undefined = undefined
+            for (const session of this._content) {
+                if (!session.preMessage) continue
+                if (!latestMsg && !session.preMessage.time) {
+                    latestMsg = session.preMessage
+                    continue
+                }
+                if (!session.preMessage.time) continue
+                if (!latestMsg?.time) {
+                    latestMsg = session.preMessage
+                    continue
+                }
+                if (
+                    latestMsg.time &&
+                    session.preMessage.time.time <= latestMsg.time.time
+                )
+                    continue
                 latestMsg = session.preMessage
-                continue
             }
-            if (!session.preMessage.time) continue
-            if (!latestMsg?.time) {
-                latestMsg = session.preMessage
-                continue
-            }
-            if (latestMsg.time && session.preMessage.time.time <= latestMsg.time.time)
-                continue
-            latestMsg = session.preMessage
-        }
-        return latestMsg
-    })
-    private readonly _highlightInfo: ComputedRef<string[]> = computed(()=>{
+            return latestMsg
+        },
+    )
+    private readonly _highlightInfo: ComputedRef<string[]> = computed(() => {
         const out: string[] = []
         for (const session of this._content) {
             // 过滤置顶会话
@@ -75,7 +79,7 @@ export class SessionBox {
         }
         return out
     })
-    private readonly _showNotice: ComputedRef<boolean> = computed(()=>{
+    private readonly _showNotice: ComputedRef<boolean> = computed(() => {
         // 如果有置顶会话，则不显示通知
         for (const session of this._content) {
             if (session.alwaysTop) continue
@@ -85,8 +89,7 @@ export class SessionBox {
     })
     _newMsg: ComputedRef<number> = computed(() => {
         let out = 0
-        for (const session of this._content)
-            out += session.newMsg
+        for (const session of this._content) out += session.newMsg
         return out
     })
     _isActive: ComputedRef<boolean> = computed(() => {
@@ -99,14 +102,16 @@ export class SessionBox {
 
     // 静态缓存
     static sessionBoxes: ShallowReactive<SessionBox[]> = shallowReactive([])
-    static alwaysTopBoxes: ShallowReactive<Set<SessionBox>> = shallowReactive(new Set())
+    static alwaysTopBoxes: ShallowReactive<Set<SessionBox>> = shallowReactive(
+        new Set(),
+    )
     constructor(name: string, icon: string, color: number) {
         this._name = shallowRef(new Name(name))
         this._icon = shallowRef(icon)
         this._color = shallowRef(color)
 
         // 显示的内容排序
-        watchEffect(()=>{
+        watchEffect(() => {
             this.sortContent()
         })
     }
@@ -128,7 +133,7 @@ export class SessionBox {
         SessionBox.alwaysTopBoxes.clear()
     }
     static getBoxById(id: string): SessionBox | undefined {
-        return this.sessionBoxes.find(box => box.id === id)
+        return this.sessionBoxes.find((box) => box.id === id)
     }
     //#endregion
 
@@ -161,7 +166,9 @@ export class SessionBox {
         for (const sessionId in runtimeData.sysConfig.session_box_map) {
             const session = Session.getSessionById(Number(sessionId))
             if (!session) continue
-            for (const boxId of runtimeData.sysConfig.session_box_map[sessionId]) {
+            for (const boxId of runtimeData.sysConfig.session_box_map[
+                sessionId
+            ]) {
                 const box = this.getBoxById(boxId)
                 if (!box) continue
                 box.putSession(session)
@@ -176,14 +183,14 @@ export class SessionBox {
         if (!runtimeData.loginInfo.uin) return
 
         // 保存收纳盒数据
-        runtimeData.sysConfig.boxes = this.sessionBoxes.map(
-            box => box.toData()
+        runtimeData.sysConfig.boxes = this.sessionBoxes.map((box) =>
+            box.toData(),
         )
         // 保存群组对应收纳盒数据
         const data = {}
         for (const session of Session.sessionList) {
             if (session.boxes.length === 0) continue
-            data[session.id] = session.boxes.map(box => box.id)
+            data[session.id] = session.boxes.map((box) => box.id)
         }
 
         runtimeData.sysConfig.session_box_map = data
@@ -244,8 +251,7 @@ export class SessionBox {
         session.addBox(this)
 
         // 自动离开群收纳盒
-        if (runtimeData.sysConfig.bubble_sort_user &&
-            session.type === 'group')
+        if (runtimeData.sysConfig.bubble_sort_user && session.type === 'group')
             BubbleBox.instance.removeSession(session)
     }
     /**
@@ -259,13 +265,17 @@ export class SessionBox {
         this._content.delete(session)
         session.leaveBox(this)
         // 更新当前收纳盒
-        if (runtimeData.nowChat?.id === session.id &&
-            runtimeData.nowBox?.id === this.id)
+        if (
+            runtimeData.nowChat?.id === session.id &&
+            runtimeData.nowBox?.id === this.id
+        )
             runtimeData.nowBox = undefined
 
-        if (runtimeData.sysConfig.bubble_sort_user &&
+        if (
+            runtimeData.sysConfig.bubble_sort_user &&
             session.type === 'group' &&
-            session.boxes.length === 0)
+            session.boxes.length === 0
+        )
             BubbleBox.instance.putSession(session)
     }
     //#endregion
@@ -276,7 +286,9 @@ export class SessionBox {
      * @returns
      */
     remove(): void {
-        const id = SessionBox.sessionBoxes.findIndex(box => box.id === this.id)
+        const id = SessionBox.sessionBoxes.findIndex(
+            (box) => box.id === this.id,
+        )
         if (id === -1) return
         // 从缓存中删除
         SessionBox.sessionBoxes.splice(id, 1)
@@ -368,34 +380,30 @@ export class SessionBox {
     get preMsg(): string {
         if (!this.preMessage) return ''
         let txt: string
-        if (this.preMessage instanceof Msg)
-            txt = this.preMessage.plaintext()
-        else
-            txt = this.preMessage.preMsg
+        if (this.preMessage instanceof Msg) txt = this.preMessage.plaintext()
+        else txt = this.preMessage.preMsg
         return this.preMessage.session?.showName + ':' + txt
     }
 
     private sortContent(): void {
-        this._sortContentByName.value = [...this._content].sort(
-            (a, b) => a.showNamePy.localeCompare(b.showNamePy)
+        this._sortContentByName.value = [...this._content].sort((a, b) =>
+            a.showNamePy.localeCompare(b.showNamePy),
         )
-        this._sortContentByTime.value = [...this._content].sort(
-            (a, b) => {
-                if (!a.preMessage?.time && b.preMessage?.time) return 1
-                if (a.preMessage?.time && !b.preMessage?.time) return -1
-                if (a.preMessage?.time && b.preMessage?.time) {
-                    return b.preMessage.time.time - a.preMessage.time.time
-                }
-                return a.showNamePy.localeCompare(b.showNamePy)
+        this._sortContentByTime.value = [...this._content].sort((a, b) => {
+            if (!a.preMessage?.time && b.preMessage?.time) return 1
+            if (a.preMessage?.time && !b.preMessage?.time) return -1
+            if (a.preMessage?.time && b.preMessage?.time) {
+                return b.preMessage.time.time - a.preMessage.time.time
             }
-        )
+            return a.showNamePy.localeCompare(b.showNamePy)
+        })
     }
 }
 
 export class BubbleBox extends SessionBox {
     static instance: BubbleBox = new BubbleBox()
     // 这玩意里的元素都是激活的，按照里面有没有元素算就行了
-    override _isActive: ComputedRef<boolean> = computed(()=>{
+    override _isActive: ComputedRef<boolean> = computed(() => {
         return this._content.size > 0
     })
 
@@ -403,7 +411,7 @@ export class BubbleBox extends SessionBox {
         super('群收纳盒', 'user-group', 0)
         SessionBox.sessionBoxes.pop() // 给自己删了
 
-        setTimeout(()=>{
+        setTimeout(() => {
             // 添加到群收纳盒
             Session.afterActiveHook.push((session: Session) => {
                 if (!runtimeData.sysConfig.bubble_sort_user) return
@@ -415,8 +423,7 @@ export class BubbleBox extends SessionBox {
 
             // 卸载时移除
             Session.afterUnactiveHook.push((session: Session) => {
-                if (this._content.has(session))
-                    this.removeSession(session)
+                if (this._content.has(session)) this.removeSession(session)
             })
         }, 0)
     }

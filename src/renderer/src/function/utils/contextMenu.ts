@@ -6,7 +6,6 @@
  * @Description: 右键菜单工具，用于创建右键菜单
  */
 
-import { v4 as uuid } from 'uuid'
 import { Component, markRaw, shallowReactive, shallowRef } from 'vue'
 import { Session } from '../model/session'
 import { SessionBox } from '../model/box'
@@ -25,7 +24,7 @@ export type ContextMenuController = {
     close: (ret?: any) => void
 }
 
-export const resolveMap = new Map<string, (arg?:any)=>void>()
+export const resolveMap = new Map<string, (arg?: any) => void>()
 export const contextMenus = shallowRef<ContextMenuData[]>([])
 
 /**
@@ -39,7 +38,7 @@ export function openContextMenu<T extends Component>(
     pos: { x: number; y: number },
     compData: VueCompData<T>,
 ): ContextMenuController {
-    const id = uuid()
+    const id = crypto.randomUUID()
     const controller = contextControllerMaker(id)
     contextMenus.value = [
         ...contextMenus.value,
@@ -48,7 +47,7 @@ export function openContextMenu<T extends Component>(
             pos,
             compData,
             controller,
-        }
+        },
     ]
     return controller
 }
@@ -63,7 +62,7 @@ export function closeContextMenu(id: string, ret?: any): void {
     if (!resolve) throw new Error(`无法找到 ID 为 ${id} 的右键菜单`)
     resolve(ret)
     resolveMap.delete(id)
-    contextMenus.value = contextMenus.value.filter(menu => menu.id !== id)
+    contextMenus.value = contextMenus.value.filter((menu) => menu.id !== id)
 }
 
 /**
@@ -76,14 +75,14 @@ function contextControllerMaker(id: string): ContextMenuController {
     })
     return {
         finish: promise,
-        close: (ret?: any) => closeContextMenu(id, ret)
+        close: (ret?: any) => closeContextMenu(id, ret),
     }
 }
 
 export const friendMenuInfo = shallowReactive<{
-	session?: Session,
-	box?: SessionBox
-}>({session: undefined, box: undefined})
+    session?: Session
+    box?: SessionBox
+}>({ session: undefined, box: undefined })
 
 /**
  * 打开好友右键菜单
@@ -94,28 +93,28 @@ export const friendMenuInfo = shallowReactive<{
  * @param box 盒子
  */
 export function openFriendMenu(
-	x: number,
-	y: number,
-	from: 'message' | 'friend',
-	session?: Session,
-	box?: SessionBox
+    x: number,
+    y: number,
+    from: 'message' | 'friend',
+    session?: Session,
+    box?: SessionBox,
 ): ContextMenuController {
-	friendMenuInfo.session = session
-	friendMenuInfo.box = box
-	const controller = openContextMenu(
-		{ x, y },
+    friendMenuInfo.session = session
+    friendMenuInfo.box = box
+    const controller = openContextMenu(
+        { x, y },
         {
             comp: markRaw(FriendMenu),
             props: {
                 from,
                 session,
-                box
-            }
+                box,
+            },
         },
-	)
-	controller.finish.then(() => {
-		friendMenuInfo.session = undefined
-		friendMenuInfo.box = undefined
-	})
-	return controller
+    )
+    controller.finish.then(() => {
+        friendMenuInfo.session = undefined
+        friendMenuInfo.box = undefined
+    })
+    return controller
 }

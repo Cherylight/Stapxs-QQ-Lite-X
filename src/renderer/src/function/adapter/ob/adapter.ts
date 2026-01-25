@@ -14,17 +14,16 @@ import {
     TxtSeg,
     UnknownSeg,
     VideoSeg,
-    XmlSeg
+    XmlSeg,
 } from '@renderer/function/model/seg'
-import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import {
+    GroupSession,
+    Session,
+    UserSession,
+} from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
 import { queueWait } from '@renderer/function/utils/systemUtil'
-import { v4 as uuid } from 'uuid'
-import {
-    shallowReactive,
-    shallowRef,
-    ShallowRef,
-} from 'vue'
+import { shallowReactive, shallowRef, ShallowRef } from 'vue'
 import type {
     AdapterInterface,
     AtAllSegData,
@@ -56,7 +55,7 @@ import type {
     UnknownSegData,
     UserData,
     VideoSegData,
-    XmlSegData
+    XmlSegData,
 } from '../interface'
 import { LoginInfo } from '../interface'
 import ObInfo from './ObInfo.vue'
@@ -103,7 +102,7 @@ import { logger } from '@renderer/function/base'
 export function api(
     _: any,
     propertyKey: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
 ) {
     const original = descriptor.value
     descriptor.value = async function (...args: any[]) {
@@ -120,12 +119,18 @@ export class OneBotAdapter implements AdapterInterface {
     name = 'OneBot'
     version = '0.0.1'
     protocol = 'ob'
-    heartBeatInfo = shallowReactive({lastBeatTime: 0, interval: -1, expectInterval: -1})
-    botInfo: ShallowRef<ObGetVersionInfo|undefined> = shallowRef(undefined)
+    heartBeatInfo = shallowReactive({
+        lastBeatTime: 0,
+        interval: -1,
+        expectInterval: -1,
+    })
+    botInfo: ShallowRef<ObGetVersionInfo | undefined> = shallowRef(undefined)
     protected url: string = ''
     protected ssl: boolean = false
     protected token?: string
-    protected connector: ObConnector = new ObConnector(this.onmessage.bind(this))
+    protected connector: ObConnector = new ObConnector(
+        this.onmessage.bind(this),
+    )
 
     constructor() {
         this.init()
@@ -158,11 +163,15 @@ export class OneBotAdapter implements AdapterInterface {
         this.eventProcessers['meta_event'] = this.metaEvent.bind(this)
         this.eventProcessers['notice'] = this.noticeEvent.bind(this)
 
-        this.noticeEventProcessers['group_increase'] = this.groupIncreaseEvent.bind(this)
-        this.noticeEventProcessers['group_decrease'] = this.groupDecreaseEvent.bind(this)
+        this.noticeEventProcessers['group_increase'] =
+            this.groupIncreaseEvent.bind(this)
+        this.noticeEventProcessers['group_decrease'] =
+            this.groupDecreaseEvent.bind(this)
         this.noticeEventProcessers['group_ban'] = this.groupBanEvent.bind(this)
-        this.noticeEventProcessers['group_recall'] = this.groupRecallEvent.bind(this)
-        this.noticeEventProcessers['friend_recall'] = this.friendRecallEvent.bind(this)
+        this.noticeEventProcessers['group_recall'] =
+            this.groupRecallEvent.bind(this)
+        this.noticeEventProcessers['friend_recall'] =
+            this.friendRecallEvent.bind(this)
         this.noticeEventProcessers['poke'] = this.pokeEvent.bind(this)
     }
 
@@ -184,8 +193,7 @@ export class OneBotAdapter implements AdapterInterface {
 
     async redirect(): Promise<AdapterInterface | undefined> {
         const implInfo = await this.getImplInfo()
-        if (!implInfo)
-            return undefined
+        if (!implInfo) return undefined
 
         const LagrangeOneBot = (await import('./LagrangeOneBot')).default
         const NapCatOneBot = (await import('./NapCapOneBot')).default
@@ -197,12 +205,14 @@ export class OneBotAdapter implements AdapterInterface {
         if (LLTwoBotOneBot.match(implInfo))
             return new LLTwoBotOneBot(this.connector, this.botInfo.value)
         return undefined
-
     }
 
-    async getAdapterInfo(): Promise<{[key: string]: string} | undefined> {
+    async getAdapterInfo(): Promise<{ [key: string]: string } | undefined> {
         // 获取适配器信息
-        const data: ObGetVersionInfo = await this.connector.send('get_version_info', {})
+        const data: ObGetVersionInfo = await this.connector.send(
+            'get_version_info',
+            {},
+        )
         return data.data
     }
 
@@ -215,7 +225,10 @@ export class OneBotAdapter implements AdapterInterface {
     //#region == 基础消息 ======================
     @api
     async getLoginInfo(): Promise<LoginInfo> {
-        const data: ObGetLoginInfo = await this.connector.send('get_login_info', {})
+        const data: ObGetLoginInfo = await this.connector.send(
+            'get_login_info',
+            {},
+        )
         return {
             uin: data.data.user_id,
             nickname: data.data.nickname,
@@ -225,7 +238,10 @@ export class OneBotAdapter implements AdapterInterface {
     @api
     async getImplInfo(): Promise<ImplInfo | undefined> {
         // 获取协议段信息
-        const data: ObGetVersionInfo = await this.connector.send('get_version_info', {})
+        const data: ObGetVersionInfo = await this.connector.send(
+            'get_version_info',
+            {},
+        )
         // 更新 botInfo
         this.botInfo.value = data
         return {
@@ -244,15 +260,18 @@ export class OneBotAdapter implements AdapterInterface {
 
         const friendData = new Map<number, FriendData>()
         // 加载好友列表
-        const data: ObGetFriendList = await this.connector.send('get_friend_list', {})
+        const data: ObGetFriendList = await this.connector.send(
+            'get_friend_list',
+            {},
+        )
         for (const item of data.data) {
             if (friendData.has(item.user_id)) continue
             friendData.set(item.user_id, {
                 user_id: item.user_id,
                 nickname: item.nickname,
                 remark: item.remark === '' ? undefined : item.remark,
-                class_id: 0,           // 默认分类ID为0
-                class_name: $t('好友'),     // 默认分类名称
+                class_id: 0, // 默认分类ID为0
+                class_name: $t('好友'), // 默认分类名称
             })
         }
 
@@ -265,7 +284,10 @@ export class OneBotAdapter implements AdapterInterface {
     async getGroupList(_: boolean = true): Promise<GroupData[]> {
         const groupData = new Map<number, GroupData>()
         // 加载群组列表
-        const data: ObGetGroupList = await this.connector.send('get_group_list', {})
+        const data: ObGetGroupList = await this.connector.send(
+            'get_group_list',
+            {},
+        )
         for (const item of data.data) {
             if (groupData.has(item.group_id)) continue
             groupData.set(item.group_id, {
@@ -280,14 +302,20 @@ export class OneBotAdapter implements AdapterInterface {
     }
 
     @api
-    async getUserInfo(userId: number, useCache: boolean = true): Promise<UserData> {
+    async getUserInfo(
+        userId: number,
+        useCache: boolean = true,
+    ): Promise<UserData> {
         // 获取用户信息
-        const data: ObGetStrangerInfo = await this.connector.send('get_stranger_info', {
-            user_id: userId,
-            no_cache: !useCache,
-        })
+        const data: ObGetStrangerInfo = await this.connector.send(
+            'get_stranger_info',
+            {
+                user_id: userId,
+                no_cache: !useCache,
+            },
+        )
         if (!this.friendListCache) await this.getFriendList()
-        const baseInfo = this.friendListCache?.find(f => f.user_id === userId)
+        const baseInfo = this.friendListCache?.find((f) => f.user_id === userId)
         return {
             id: userId,
             remark: baseInfo?.remark,
@@ -296,17 +324,20 @@ export class OneBotAdapter implements AdapterInterface {
             regTime: Date.now(),
             qqLevel: 0,
             age: data.data.age,
-            sex: getGender(data.data.sex)
+            sex: getGender(data.data.sex),
         }
     }
 
     @api
-    async getMemberList(group: GroupSession, _: boolean): Promise<MemberData[]> {
+    async getMemberList(
+        group: GroupSession,
+        _: boolean,
+    ): Promise<MemberData[]> {
         const data: ObGetGroupMemberList = await this.connector.send(
             'get_group_member_list',
-            {group_id: group.id},
+            { group_id: group.id },
         )
-        return data.data.map(item => ({
+        return data.data.map((item) => ({
             age: item.age,
             card: item.card,
             group_id: item.group_id,
@@ -325,7 +356,11 @@ export class OneBotAdapter implements AdapterInterface {
 
     //#region == 群聊相关 ======================
     @api
-    async setMemberCard(group: GroupSession, mem: Member, card: string): Promise<true> {
+    async setMemberCard(
+        group: GroupSession,
+        mem: Member,
+        card: string,
+    ): Promise<true> {
         await this.connector.send('set_group_card', {
             group_id: group.id,
             user_id: mem.user_id,
@@ -334,7 +369,11 @@ export class OneBotAdapter implements AdapterInterface {
         return true
     }
     @api
-    async setMemberTitle(group: GroupSession, mem: Member, title: string): Promise<true> {
+    async setMemberTitle(
+        group: GroupSession,
+        mem: Member,
+        title: string,
+    ): Promise<true> {
         await this.connector.send('set_group_special_title', {
             group_id: group.id,
             user_id: mem.user_id,
@@ -343,7 +382,11 @@ export class OneBotAdapter implements AdapterInterface {
         return true
     }
     @api
-    async banMember(group: GroupSession, mem: Member, time: number): Promise<true> {
+    async banMember(
+        group: GroupSession,
+        mem: Member,
+        time: number,
+    ): Promise<true> {
         await this.connector.send('set_group_ban', {
             group_id: group.id,
             user_id: mem.user_id,
@@ -361,11 +404,19 @@ export class OneBotAdapter implements AdapterInterface {
     }
     //#region == 消息相关 ===========================
     @api
-    async getForwardMsg(forwardId: string, msg?: ObMsg): Promise<ForwardNodeData[]> {
-        const { data }: ObGetForwardMsg = await this.connector.send('get_forward_msg', {
-            id: forwardId,
-        })
-        return await Promise.all(data.message.map(node => this.nodeParser(node, msg)))
+    async getForwardMsg(
+        forwardId: string,
+        msg?: ObMsg,
+    ): Promise<ForwardNodeData[]> {
+        const { data }: ObGetForwardMsg = await this.connector.send(
+            'get_forward_msg',
+            {
+                id: forwardId,
+            },
+        )
+        return await Promise.all(
+            data.message.map((node) => this.nodeParser(node, msg)),
+        )
     }
     @api
     async getMsg(_: Session, msgId: string): Promise<MsgData | undefined> {
@@ -395,14 +446,15 @@ export class OneBotAdapter implements AdapterInterface {
         } else {
             throw new Error('OneBot 不支持发送临时会话消息')
         }
-        if (!data.data.message_id) throw new Error('发送消息失败，返回值无message_id')
+        if (!data.data.message_id)
+            throw new Error('发送消息失败，返回值无message_id')
 
         return data.data.message_id.toString()
     }
     @api
     async recallMsg(msg: Msg): Promise<true> {
         await this.connector.send('delete_msg', {
-            message_id: msg.message_id
+            message_id: msg.message_id,
         })
         return true
     }
@@ -418,16 +470,10 @@ export class OneBotAdapter implements AdapterInterface {
         let sender: SenderData
         if (data.message_type === 'group' && data.sub_type === 'anonymous') {
             const msgSender = data.sender as ObAnonymousSender
-            sender = createSender(
-                Number(msgSender.id),
-                msgSender.id,
-            )
-        }else {
+            sender = createSender(Number(msgSender.id), msgSender.id)
+        } else {
             const msgSender = data.sender as ObPrivateSender | ObGroupSender
-            sender = createSender(
-                Number(msgSender.user_id),
-                msgSender.nickname,
-            )
+            sender = createSender(Number(msgSender.user_id), msgSender.nickname)
         }
         return {
             message_id: data.message_id.toString(),
@@ -446,7 +492,10 @@ export class OneBotAdapter implements AdapterInterface {
                 id: data.group_id,
                 type: 'group',
             }
-        } else if (data.message_type === 'private' && data.sub_type === 'group') {
+        } else if (
+            data.message_type === 'private' &&
+            data.sub_type === 'group'
+        ) {
             session_info = {
                 id: data.user_id,
                 group_id: data.group_id,
@@ -457,37 +506,47 @@ export class OneBotAdapter implements AdapterInterface {
                 id: data.user_id,
                 type: 'user',
             }
-
         }
         return session_info
     }
     async serializeMsg(msg: Msg): Promise<ObSeg<string, any>[]> {
-        const data = await Promise.all(msg.message.map(seg => this.serializeSeg(seg)))
+        const data = await Promise.all(
+            msg.message.map((seg) => this.serializeSeg(seg)),
+        )
         return data
     }
 
     //#region == 反序列化 ===========================
-    segParsers: Record<string, ((data: ObSeg<any, any>, msg?: ObMsg)=>Promise<SegData>)> = {}
+    segParsers: Record<
+        string,
+        (data: ObSeg<any, any>, msg?: ObMsg) => Promise<SegData>
+    > = {}
     async parseSeg(data: ObSeg<string, any>, msg?: ObMsg): Promise<SegData>
     async parseSeg(data: ObSeg<string, any>[], msg?: ObMsg): Promise<SegData[]>
-    async parseSeg(data: ObSeg<string, any> | ObSeg<string, any>[], msg?: ObMsg): Promise<SegData | SegData[]> {
+    async parseSeg(
+        data: ObSeg<string, any> | ObSeg<string, any>[],
+        msg?: ObMsg,
+    ): Promise<SegData | SegData[]> {
         if (Array.isArray(data)) {
-            return await Promise.all(data.map(d => this.parseSeg(d, msg)))
+            return await Promise.all(data.map((d) => this.parseSeg(d, msg)))
         } else {
             try {
                 const parser = this.segParsers[data.type]
                 if (parser) return await parser(data, msg)
                 return this.unknownParser(data)
-            }catch (err) {
-                logger.error(err as Error, '消息段解析失败:' + JSON.stringify(data))
-                return {type: 'error'}
+            } catch (err) {
+                logger.error(
+                    err as Error,
+                    '消息段解析失败:' + JSON.stringify(data),
+                )
+                return { type: 'error' }
             }
         }
     }
     async textParser(data: ObTextSeg, _?: ObMsg): Promise<TextSegData> {
         return {
             type: 'text',
-            text: data.data.text
+            text: data.data.text,
         }
     }
     async imageParser(data: ObImgSeg, _?: ObMsg): Promise<ImgSegData> {
@@ -503,13 +562,15 @@ export class OneBotAdapter implements AdapterInterface {
             id: Number(data.data.id),
         }
     }
-    async atParser(data: ObAtSeg, _?: ObMsg): Promise<AtSegData|AtAllSegData> {
+    async atParser(
+        data: ObAtSeg,
+        _?: ObMsg,
+    ): Promise<AtSegData | AtAllSegData> {
         if (data.data.qq === 'all') {
             return {
                 type: 'atall',
             }
-        }
-        else {
+        } else {
             return {
                 type: 'at',
                 user_id: Number(data.data.qq),
@@ -523,7 +584,10 @@ export class OneBotAdapter implements AdapterInterface {
             url: Resource.fromUrl(data.data.url),
         }
     }
-    async forwardParser(data: ObForwardSeg, msg?: ObMsg): Promise<ForwardSegData> {
+    async forwardParser(
+        data: ObForwardSeg,
+        msg?: ObMsg,
+    ): Promise<ForwardSegData> {
         const id: string = data.data.id
         const nodes = await this.getForwardMsg(id, msg)
         if (!nodes) throw new Error('获取合并转发消息失败')
@@ -546,14 +610,14 @@ export class OneBotAdapter implements AdapterInterface {
         return {
             type: 'xml',
             data: data.data.data,
-            id: uuid(),
+            id: crypto.randomUUID(),
         }
     }
     async jsonParser(data: ObJsonSeg, _?: ObMsg): Promise<JsonSegData> {
         return {
             type: 'json',
             data: data.data.data,
-            id: uuid(),
+            id: crypto.randomUUID(),
         }
     }
 
@@ -561,10 +625,13 @@ export class OneBotAdapter implements AdapterInterface {
         return {
             type: 'unknown',
             segType: data.type,
-            data: data
+            data: data,
         }
     }
-    async nodeParser(data: ObForwardNodeSeg, msg?: ObMsg): Promise<ForwardNodeData> {
+    async nodeParser(
+        data: ObForwardNodeSeg,
+        msg?: ObMsg,
+    ): Promise<ForwardNodeData> {
         return {
             sender: {
                 nickname: data.data.nickname,
@@ -576,12 +643,15 @@ export class OneBotAdapter implements AdapterInterface {
     //#endregion
 
     //#region == 序列化 =============================
-    segSerializer: Record<string, ((data: any) => Promise<ObSeg<string, any>>)> = {}
+    segSerializer: Record<string, (data: any) => Promise<ObSeg<string, any>>> =
+        {}
     async serializeSeg(seg: Seg): Promise<ObSeg<string, any>>
     async serializeSeg(seg: Seg[]): Promise<ObSeg<string, any>[]>
-    async serializeSeg(seg: Seg | Seg[]): Promise<ObSeg<string, any> | ObSeg<string, any>[]> {
+    async serializeSeg(
+        seg: Seg | Seg[],
+    ): Promise<ObSeg<string, any> | ObSeg<string, any>[]> {
         if (Array.isArray(seg)) {
-            return Promise.all(seg.map(d => this.serializeSeg(d)))
+            return Promise.all(seg.map((d) => this.serializeSeg(d)))
         } else {
             const serializer = this.segSerializer[seg.type]
             if (serializer) return await serializer(seg)
@@ -592,8 +662,8 @@ export class OneBotAdapter implements AdapterInterface {
         return {
             type: 'text',
             data: {
-                text: seg.text
-            }
+                text: seg.text,
+            },
         }
     }
     async imageSerializer(seg: ImgSeg): Promise<ObImgSeg> {
@@ -602,7 +672,7 @@ export class OneBotAdapter implements AdapterInterface {
             data: {
                 url: seg.rawUrl,
                 file: seg.rawUrl,
-            }
+            },
         }
     }
     async faceSerializer(seg: FaceSeg): Promise<ObFaceSeg> {
@@ -643,10 +713,10 @@ export class OneBotAdapter implements AdapterInterface {
         if (!id) throw new Error('合并转发消息没id无法序列化为标准Ob消息')
 
         return {
-            'type': 'forward',
-            'data': {
-                'id': id,
-            }
+            type: 'forward',
+            data: {
+                id: id,
+            },
         }
     }
     async replySerializer(seg: ReplySeg): Promise<ObReplySeg> {
@@ -654,7 +724,7 @@ export class OneBotAdapter implements AdapterInterface {
             type: 'reply',
             data: {
                 id: seg.id,
-            }
+            },
         }
     }
     async pokeSerializer(_seg: PokeSeg): Promise<ObPokeSeg> {
@@ -663,7 +733,7 @@ export class OneBotAdapter implements AdapterInterface {
             data: {
                 type: '1',
                 id: '-1',
-            }
+            },
         }
     }
     async xmlSerializer(seg: XmlSeg): Promise<ObXmlSeg> {
@@ -671,7 +741,7 @@ export class OneBotAdapter implements AdapterInterface {
             type: 'xml',
             data: {
                 data: seg.data,
-            }
+            },
         }
     }
     async jsonSerializer(seg: JsonSeg): Promise<ObJsonSeg> {
@@ -679,7 +749,7 @@ export class OneBotAdapter implements AdapterInterface {
             type: 'json',
             data: {
                 data: seg.data,
-            }
+            },
         }
     }
     async unknownSerializer(seg: UnknownSeg): Promise<ObSeg<string, any>> {
@@ -687,12 +757,12 @@ export class OneBotAdapter implements AdapterInterface {
     }
     async nodeSerializer(msg: Msg): Promise<ObForwardNodeSeg> {
         return {
-            'type': 'node',
-            'data': {
-                'nickname': msg.sender.name,
-                'user_id': msg.sender.user_id.toString(),
-                'content': await this.serializeSeg(msg.message),
-            }
+            type: 'node',
+            data: {
+                nickname: msg.sender.name,
+                user_id: msg.sender.user_id.toString(),
+                content: await this.serializeSeg(msg.message),
+            },
         }
     }
     unmatchSerializer(seg: Seg): ObSeg<string, any> {
@@ -703,18 +773,23 @@ export class OneBotAdapter implements AdapterInterface {
         }
         return {
             type: seg.type,
-            data: data
+            data: data,
         }
     }
     //#endregion
     //#endregion
 
     //#region == 事件相关 ===========================================
-    eventProcessers: Record<string, (event: any) => Promise<EventData | undefined>> = {}
+    eventProcessers: Record<
+        string,
+        (event: any) => Promise<EventData | undefined>
+    > = {}
     async messageEvent(event: ObMessageEvent): Promise<MsgEventData> {
         const process = async (data: ObMessageEvent) => {
-            if (data.sub_type === 'other') throw new Error('不支持 other 类型的消息')
-            if (data.sub_type === 'notice') throw new Error('不支持 notice 类型的消息')
+            if (data.sub_type === 'other')
+                throw new Error('不支持 other 类型的消息')
+            if (data.sub_type === 'notice')
+                throw new Error('不支持 notice 类型的消息')
 
             const originMsg: ObMsg = {
                 time: data.time,
@@ -738,39 +813,48 @@ export class OneBotAdapter implements AdapterInterface {
             }
             return out
         }
-        const sessionId = event.message_type === 'group' ? event.group_id : event.user_id
-        return await queueWait(process(event), `${event.message_type}-${sessionId}`)
+        const sessionId =
+            event.message_type === 'group' ? event.group_id : event.user_id
+        return await queueWait(
+            process(event),
+            `${event.message_type}-${sessionId}`,
+        )
     }
     async metaEvent(event: ObHeartEvent): Promise<undefined> {
         if (event.meta_event_type !== 'heartbeat') return
 
-
         if (this.heartBeatInfo.expectInterval === -1) {
-            this.heartBeatInfo.expectInterval = event.interval /  1000
+            this.heartBeatInfo.expectInterval = event.interval / 1000
             this.heartBeatInfo.lastBeatTime = event.time
             return
         }
 
-        this.heartBeatInfo.interval = event.time - this.heartBeatInfo.lastBeatTime
+        this.heartBeatInfo.interval =
+            event.time - this.heartBeatInfo.lastBeatTime
         this.heartBeatInfo.lastBeatTime = event.time
         this.heartBeatInfo.expectInterval = event.interval / 1000
     }
-    noticeEventProcessers: Record<string, (event: any) => Promise<EventData | undefined>> = {}
+    noticeEventProcessers: Record<
+        string,
+        (event: any) => Promise<EventData | undefined>
+    > = {}
     async noticeEvent(event: ObNoticeEvent): Promise<undefined | EventData> {
-        const eventType = event.notice_type === 'notify' ? event.sub_type : event.notice_type
+        const eventType =
+            event.notice_type === 'notify' ? event.sub_type : event.notice_type
         const processor = this.noticeEventProcessers[eventType ?? '']
         if (!processor) return
         const sessionId = event.group_id || event.user_id
         const type = event.group_id ? 'group' : 'user'
-        return await queueWait(
-            processor(event),
-            `${type}-${sessionId}`
-        )
+        return await queueWait(processor(event), `${type}-${sessionId}`)
     }
-    async groupIncreaseEvent(event: ObGroupIncreaseEvent): Promise<JoinEventData> {
+    async groupIncreaseEvent(
+        event: ObGroupIncreaseEvent,
+    ): Promise<JoinEventData> {
         const user = event.user_id
-        const eventOperator = event.operator_id === event.user_id ? undefined : event.operator_id
-        const operator = event.sub_type === 'approve' ? eventOperator : undefined
+        const eventOperator =
+            event.operator_id === event.user_id ? undefined : event.operator_id
+        const operator =
+            event.sub_type === 'approve' ? eventOperator : undefined
         const inviter = event.sub_type === 'invite' ? eventOperator : undefined
         return {
             type: 'join',
@@ -784,7 +868,9 @@ export class OneBotAdapter implements AdapterInterface {
             time: event.time,
         }
     }
-    async groupDecreaseEvent(event: ObGroupDecreaseEvent): Promise<LeaveEventData> {
+    async groupDecreaseEvent(
+        event: ObGroupDecreaseEvent,
+    ): Promise<LeaveEventData> {
         return {
             type: 'leave',
             session: {
@@ -796,7 +882,9 @@ export class OneBotAdapter implements AdapterInterface {
             time: event.time,
         }
     }
-    async groupBanEvent(event: ObGroupBanEvent): Promise<BanEventData|BanLiftEventData> {
+    async groupBanEvent(
+        event: ObGroupBanEvent,
+    ): Promise<BanEventData | BanLiftEventData> {
         if (event.sub_type === 'ban') {
             return {
                 type: 'ban',
@@ -809,7 +897,7 @@ export class OneBotAdapter implements AdapterInterface {
                 time: event.time,
                 duration: event.duration,
             }
-        }else {
+        } else {
             return {
                 type: 'banLift',
                 session: {
@@ -822,7 +910,9 @@ export class OneBotAdapter implements AdapterInterface {
             }
         }
     }
-    async groupRecallEvent (event: ObGroupRecallEvent): Promise<RecallEventData> {
+    async groupRecallEvent(
+        event: ObGroupRecallEvent,
+    ): Promise<RecallEventData> {
         return {
             type: 'recall',
             session: {
@@ -836,7 +926,9 @@ export class OneBotAdapter implements AdapterInterface {
             suffix: '',
         }
     }
-    async friendRecallEvent (event: ObFriendRecallEvent): Promise<RecallEventData> {
+    async friendRecallEvent(
+        event: ObFriendRecallEvent,
+    ): Promise<RecallEventData> {
         return {
             type: 'recall',
             session: {
@@ -875,11 +967,11 @@ export class OneBotAdapter implements AdapterInterface {
         }
     }
     //#endregion
-    get selfInfo(): {[key: string]: string} {
+    get selfInfo(): { [key: string]: string } {
         if (!this.botInfo.value) return {}
         return {
-            '协议端名称': this.botInfo.value.data.app_name,
-            '协议端版本': this.botInfo.value.data.app_version,
+            协议端名称: this.botInfo.value.data.app_name,
+            协议端版本: this.botInfo.value.data.app_version,
             'OneBot 版本': this.botInfo.value.data.protocol_version,
         }
     }
@@ -895,19 +987,20 @@ export class OneBotAdapter implements AdapterInterface {
     protected handleEvent(event: any) {
         const eventProcessor = this.eventProcessers[event.post_type]
         if (!eventProcessor) return
-        eventProcessor(event)
-            .then((data) => {
-                if (!data) return
-                handleEvent(data)
-            })
+        eventProcessor(event).then((data) => {
+            if (!data) return
+            handleEvent(data)
+        })
     }
 
-    private resetCache(){
+    private resetCache() {
         // 重置缓存
         this.friendListCache = null
     }
 
-    protected isDelete(_: ObMsg): boolean {return false}
+    protected isDelete(_: ObMsg): boolean {
+        return false
+    }
 }
 
 export default new OneBotAdapter()

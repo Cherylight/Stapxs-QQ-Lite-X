@@ -1,5 +1,4 @@
 import app from '@renderer/main'
-import { v4 as uuid } from 'uuid'
 import driver from '../../driver'
 import { Gender, Role } from '../enmu'
 import { SenderData } from '../interface'
@@ -46,8 +45,8 @@ class Request {
     constructor(
         action: string,
         params: any,
-        echo: string = uuid(),
-        timeout: number = 5000
+        echo: string = crypto.randomUUID(),
+        timeout: number = 5000,
     ) {
         // 生成Promise
         this.promise = new Promise((resolve, reject) => {
@@ -75,7 +74,11 @@ class Request {
      * @param data 响应内容
      * @returns
      */
-    static handleResponse(data: { echo: string, status: string, [key: string]: any }) {
+    static handleResponse(data: {
+        echo: string
+        status: string
+        [key: string]: any
+    }) {
         const request = Request.RequestMap.get(data.echo)
         if (!request) {
             logger.error(null, `未找到对应的请求: ${data.echo}`)
@@ -83,9 +86,8 @@ class Request {
         }
         clearTimeout(request.timeout)
         Request.RequestMap.delete(request.echo)
-        if (data.status !== 'ok') request.reject(
-            new ActionFailedError(request.params, data)
-        )
+        if (data.status !== 'ok')
+            request.reject(new ActionFailedError(request.params, data))
         else request.resolve(data)
     }
 
@@ -105,11 +107,14 @@ class Request {
                 echo: this.echo,
             } as ObRequest<any>)
         } catch (error) {
-            throw new Error('创建请求JSON失败' + JSON.stringify({
-                action: this.action,
-                params: this.params,
-                echo: this.echo,
-            }))
+            throw new Error(
+                '创建请求JSON失败' +
+                    JSON.stringify({
+                        action: this.action,
+                        params: this.params,
+                        echo: this.echo,
+                    }),
+            )
         }
     }
 }
@@ -120,9 +125,7 @@ class Request {
  */
 export class ObConnector {
     private onmessageHook: (msg: string) => void
-    constructor(
-        onmessage: (msg: string) => void,
-    ) {
+    constructor(onmessage: (msg: string) => void) {
         this.onmessageHook = onmessage
     }
 
@@ -131,16 +134,8 @@ export class ObConnector {
      * @param retry 重试次数
      * @returns
      */
-    async open(
-        url: string,
-        ssl: boolean,
-        token?: string,
-    ): Promise<boolean> {
-        driver.reset(
-            url,
-            ssl,
-            token,
-        ) // 重置driver状态
+    async open(url: string, ssl: boolean, token?: string): Promise<boolean> {
+        driver.reset(url, ssl, token) // 重置driver状态
         driver.onMessage(this.onmessage.bind(this)) // 设置消息钩子
         return await driver.open()
     }
@@ -150,12 +145,12 @@ export class ObConnector {
     }
 
     onmessage(getData: string) {
-        try{
+        try {
             const data = JSON.parse(getData)
             // 如果有echo，说明是请求响应
             if (data.echo) Request.handleResponse(data)
             else this.onmessageHook(data)
-        }catch (error) {
+        } catch (error) {
             logger.error(error as Error, 'WebSocket消息处理失败')
         }
     }
@@ -164,9 +159,7 @@ export class ObConnector {
      * 重置onmessage钩子
      * @param onmessage 新钩子
      */
-    setOnMessageHook(
-        onmessage: (msg: string) => void,
-    ): void {
+    setOnMessageHook(onmessage: (msg: string) => void): void {
         this.onmessageHook = onmessage
         driver.onMessage(this.onmessage.bind(this))
     }
@@ -197,10 +190,13 @@ export function $t(value: string): string {
  * @returns
  */
 export function getGender(sex: 'male' | 'female' | 'unknown'): Gender {
-    switch (sex){
-        case 'male': return Gender.Male
-        case 'female': return Gender.Female
-        case 'unknown': return Gender.Unknown
+    switch (sex) {
+        case 'male':
+            return Gender.Male
+        case 'female':
+            return Gender.Female
+        case 'unknown':
+            return Gender.Unknown
     }
 }
 
@@ -210,9 +206,12 @@ export function getGender(sex: 'male' | 'female' | 'unknown'): Gender {
  */
 export function getRole(role: 'owner' | 'admin' | 'member'): Role {
     switch (role) {
-        case 'owner': return Role.Owner
-        case 'admin': return Role.Admin
-        case 'member': return Role.User
+        case 'owner':
+            return Role.Owner
+        case 'admin':
+            return Role.Admin
+        case 'member':
+            return Role.User
     }
 }
 
@@ -292,6 +291,9 @@ export function parseCQ(cq: string) {
 export async function fileToBase64(file: File): Promise<string> {
     const arrayBuffer = await file.arrayBuffer()
     const bytes = new Uint8Array(arrayBuffer)
-    const binary = bytes.reduce((acc, byte) => acc + String.fromCodePoint(byte), '')
+    const binary = bytes.reduce(
+        (acc, byte) => acc + String.fromCodePoint(byte),
+        '',
+    )
     return btoa(binary)
 }
