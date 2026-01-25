@@ -54,7 +54,7 @@ const migrationFunc = {
         const save_password = String(old['save_password'])
         if (save_password === 'true') {
             tmp['auto_save_password'] = true
-        }else if (save_password !== undefined) {
+        } else if (save_password !== undefined) {
             tmp['auto_save_password'] = true
             tmp['saved_password'] = save_password
         }
@@ -62,8 +62,7 @@ const migrationFunc = {
         if (old['merge_forward_width_type'] !== undefined)
             tmp['merge_forward_width'] = old['merge_forward_width_type']
         // msg_tail
-        if (old['msg_taill'] !== undefined)
-            tmp['msg_tail'] = old['msg_taill']
+        if (old['msg_taill'] !== undefined) tmp['msg_tail'] = old['msg_taill']
         // 生成全局字段名称
         const re = {}
         for (const key in tmp) {
@@ -77,15 +76,20 @@ const migrationFunc = {
             }
         }
         // notice_group
-        const notice_group = old['notice_group'] as undefined | Record<string, number[]>
+        const notice_group = old['notice_group'] as
+            | undefined
+            | Record<string, number[]>
         if (notice_group !== undefined) {
             for (const userId in notice_group) {
-                re[`#TAG:user=${userId}##KEY:notice_group#`] = notice_group[userId]
+                re[`#TAG:user=${userId}##KEY:notice_group#`] =
+                    notice_group[userId]
             }
         }
         // boxes
         type BoxData = any
-        const boxes = old['boxes'] as undefined | Record<string, Record<string, BoxData>>
+        const boxes = old['boxes'] as
+            | undefined
+            | Record<string, Record<string, BoxData>>
         if (boxes !== undefined) {
             for (const userId in boxes) {
                 const data: BoxData[] = []
@@ -96,7 +100,9 @@ const migrationFunc = {
             }
         }
         // sessionBoxes
-        const sessionBoxes = old['sessionBoxes'] as undefined | Record<string, Record<string, string[]>>
+        const sessionBoxes = old['sessionBoxes'] as
+            | undefined
+            | Record<string, Record<string, string[]>>
         if (sessionBoxes !== undefined) {
             for (const userId in sessionBoxes) {
                 const data = {}
@@ -115,14 +121,16 @@ const migrationFunc = {
             old['#TAG:global##KEY:opt_dark_mode#'] = 'auto'
         else if (old['#TAG:global##KEY:opt_dark#'])
             old['#TAG:global##KEY:opt_dark_mode#'] = 'dark'
-        else
-            old['#TAG:global##KEY:opt_dark_mode#'] = 'light'
+        else old['#TAG:global##KEY:opt_dark_mode#'] = 'light'
         delete old['#TAG:global##KEY:opt_auto_dark#']
         delete old['#TAG:global##KEY:opt_dark#']
         old['_version'] = 2
         return old
     },
-} satisfies Record<number, (old: Record<string, any>) => Promise<Record<string, any>>>
+} satisfies Record<
+    number,
+    (old: Record<string, any>) => Promise<Record<string, any>>
+>
 
 /**
  * 检查并且自动迁移旧配置
@@ -131,13 +139,15 @@ const migrationFunc = {
  */
 export async function checkAndMigration(): Promise<void> {
     // 读取
-    const options = (await loadAllOptions(true)) ?? await oldVersionCheck()
+    const options = (await loadAllOptions(true)) ?? (await oldVersionCheck())
     if (!options) return
     const oldVersion = options['_version'] ?? 0
     const newOptions = await migration(options)
     // 保存
     if (oldVersion !== newOptions['_version']) {
-        const saveAllOptions = await import('./utils').then(mod => mod.saveAllOptions)
+        const saveAllOptions = await import('./utils').then(
+            (mod) => mod.saveAllOptions,
+        )
         await saveAllOptions(newOptions)
     }
 }
@@ -147,7 +157,9 @@ export async function checkAndMigration(): Promise<void> {
  * @param data 旧配置对象
  * @returns 新配置对象
  */
-export async function migration(data: Record<string, any>): Promise<Record<string, any>> {
+export async function migration(
+    data: Record<string, any>,
+): Promise<Record<string, any>> {
     // 迁移
     while (true) {
         const version = data['_version'] ?? 0
@@ -164,8 +176,12 @@ export async function migration(data: Record<string, any>): Promise<Record<strin
 /**
  * 旧版本配置检测
  */
-export async function oldVersionCheck(): Promise<Record<string, any> | undefined> {
-    const backend = await import('@renderer/runtime/backend').then(mod => mod.backend)
+export async function oldVersionCheck(): Promise<
+    Record<string, any> | undefined
+> {
+    const backend = await import('@renderer/runtime/backend').then(
+        (mod) => mod.backend,
+    )
     if (backend.type === 'electron') {
         const data = await backend.call(undefined, 'opt:getAll', true)
         // 登陆过的一定有address配置，通过该配置作为特征值
@@ -222,7 +238,7 @@ function oldOptLoader(data: Record<string, any>): Record<string, any> {
             options[key] = decodeURIComponent(value)
             try {
                 options[key] = JSON.parse(options[key])
-            } catch (e: unknown) {
+            } catch (_) {
                 // ignore
             }
         } else {

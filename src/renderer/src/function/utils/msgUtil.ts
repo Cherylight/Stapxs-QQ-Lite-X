@@ -1,4 +1,4 @@
-import anime from 'animejs'
+// import { animate } from 'animejs'
 
 import { runtimeData } from '@renderer/function/msg'
 import { Msg, SelfMsg } from '../model/msg'
@@ -11,19 +11,13 @@ import app from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
 
 /**
-* 发送消息
-* @param session 目标会话
-* @param msg 消息体
-*/
-export function sendMsgRaw(
-    session: Session,
-    msg: Seg[],
-): SelfMsg {
+ * 发送消息
+ * @param session 目标会话
+ * @param msg 消息体
+ */
+export function sendMsgRaw(session: Session, msg: Seg[]): SelfMsg {
     // 预览消息 =======================================================
-    const preMsg = SelfMsg.create(
-        msg,
-        session,
-    )
+    const preMsg = SelfMsg.create(msg, session)
     // 添加进会话
     session.addMessage(preMsg)
     // 发送消息
@@ -31,57 +25,81 @@ export function sendMsgRaw(
     return preMsg
 }
 
-/**
- * 戳一戳触发动画
- * @param animeBody 动画作用的元素
- * @param windowInfo 窗口信息，在 electron 中使用
- */
-export function pokeAnime(animeBody: HTMLElement | null, windowInfo = null as {
-            x: number
-            y: number
-            width: number
-            height: number
-        } | null) {
-    if (animeBody) {
-        const timeLine = anime.timeline({ targets: animeBody })
-        // 如果窗口小于 500px 播放完整的动画（手机端样式）
-        if (
-            (document.getElementById('app')?.offsetWidth ?? 500) <
-            500
-        ) {
-            navigator.vibrate([10, 740, 10])
-            timeLine.add({ translateX: 30, duration: 600, easing: 'cubicBezier(.44,.09,.53,1)' })
-                .add({ translateX: 0, duration: 150, easing: 'cubicBezier(.44,.09,.53,1)' })
-                .add({ translateX: [0, 25, 0], duration: 500, easing: 'cubicBezier(.21,.27,.82,.67)' })
-                .add({ targets: {}, duration: 1000 })
-                .add({ translateX: 70, duration: 1300, easing: 'cubicBezier(.89,.72,.72,1.13)' })
-                .add({ translateX: 0, duration: 100, easing: 'easeOutSine' })
-        }
-        timeLine.add({ translateX: [-10, 10, -5, 5, 0], duration: 500, easing: 'cubicBezier(.44,.09,.53,1)' })
-        timeLine.change = async () => {
-            if (animeBody) {
-                animeBody.parentElement?.parentElement?.classList.add( 'poking')
-                const teansformX = animeBody.style.transform
-                // teansformX 的数字可能是科学计数法，需要转换为普通数字
-                let num = Number((teansformX.match(/-?\d+\.?\d*/g) ?? [0])[0])
-                // 取整
-                num = Math.round(num)
-                // 输出 translateX
-                if (backend.isDesktop() && windowInfo) {
-                    await backend.call(undefined, 'win:move', false, {
-                            x: windowInfo.x + num,
-                            y: windowInfo.y,
-                        })
-                }
-            }
-        }
-        timeLine.changeComplete = () => {
-            if (animeBody) {
-                animeBody.parentElement?.parentElement?.classList.remove('poking')
-            }
-        }
-    }
-}
+// /**
+//  * 戳一戳触发动画
+//  * @param animeBody 动画作用的元素
+//  * @param windowInfo 窗口信息，在 electron 中使用
+//  */
+// export function pokeAnime(
+//     animeBody: HTMLElement | null,
+//     windowInfo = null as {
+//         x: number
+//         y: number
+//         width: number
+//         height: number
+//     } | null,
+// ) {
+//     if (!animeBody) return
+//     if (animeBody) {
+//         const timeLine = anime.timeline({ targets: animeBody })
+//         // 如果窗口小于 500px 播放完整的动画（手机端样式）
+//         if ((document.getElementById('app')?.offsetWidth ?? 500) < 500) {
+//             navigator.vibrate([10, 740, 10])
+//             timeLine
+//                 .add({
+//                     translateX: 30,
+//                     duration: 600,
+//                     easing: 'cubicBezier(.44,.09,.53,1)',
+//                 })
+//                 .add({
+//                     translateX: 0,
+//                     duration: 150,
+//                     easing: 'cubicBezier(.44,.09,.53,1)',
+//                 })
+//                 .add({
+//                     translateX: [0, 25, 0],
+//                     duration: 500,
+//                     easing: 'cubicBezier(.21,.27,.82,.67)',
+//                 })
+//                 .add({ targets: {}, duration: 1000 })
+//                 .add({
+//                     translateX: 70,
+//                     duration: 1300,
+//                     easing: 'cubicBezier(.89,.72,.72,1.13)',
+//                 })
+//                 .add({ translateX: 0, duration: 100, easing: 'easeOutSine' })
+//         }
+//         timeLine.add({
+//             translateX: [-10, 10, -5, 5, 0],
+//             duration: 500,
+//             easing: 'cubicBezier(.44,.09,.53,1)',
+//         })
+//         timeLine.change = async () => {
+//             if (animeBody) {
+//                 animeBody.parentElement?.parentElement?.classList.add('poking')
+//                 const teansformX = animeBody.style.transform
+//                 // teansformX 的数字可能是科学计数法，需要转换为普通数字
+//                 let num = Number((teansformX.match(/-?\d+\.?\d*/g) ?? [0])[0])
+//                 // 取整
+//                 num = Math.round(num)
+//                 // 输出 translateX
+//                 if (backend.isDesktop() && windowInfo) {
+//                     await backend.call(undefined, 'win:move', false, {
+//                         x: windowInfo.x + num,
+//                         y: windowInfo.y,
+//                     })
+//                 }
+//             }
+//         }
+//         timeLine.changeComplete = () => {
+//             if (animeBody) {
+//                 animeBody.parentElement?.parentElement?.classList.remove(
+//                     'poking',
+//                 )
+//             }
+//         }
+//     }
+// }
 
 /**
  * 判断是否需要显示时间戳（上下超过五分钟的消息）
@@ -116,8 +134,9 @@ export function changeSession(session: Session, fromBox?: SessionBox) {
         // 自己有收纳盒,应当会自己出现在自己的收纳盒中
         if (box) {
             runtimeData.nowBox = box
-        }else if (
-            session instanceof GroupSession && runtimeData.sysConfig.bubble_sort_user
+        } else if (
+            session instanceof GroupSession &&
+            runtimeData.sysConfig.bubble_sort_user
         ) {
             // 群收纳盒特殊适配
             runtimeData.nowBox = BubbleBox.instance
@@ -153,7 +172,9 @@ export function isImportant(user: IUser | number): boolean {
  */
 export async function singleForward(msgList: Msg[]) {
     const $t = app.config.globalProperties.$t
-    const ForwardPan = (await import('@renderer/components/popBox/ForwardPan.vue')).default
+    const ForwardPan = (
+        await import('@renderer/components/popBox/ForwardPan.vue')
+    ).default
     popBox({
         title: $t('转发消息'),
         svg: 'fa-arrows-turn-right',
@@ -161,7 +182,7 @@ export async function singleForward(msgList: Msg[]) {
         props: {
             msgs: msgList,
             type: 'single',
-        }
+        },
     })
 }
 
@@ -171,7 +192,9 @@ export async function singleForward(msgList: Msg[]) {
  */
 export async function mergeForward(msgList: Msg[]) {
     const $t = app.config.globalProperties.$t
-    const ForwardPan = (await import('@renderer/components/popBox/ForwardPan.vue')).default
+    const ForwardPan = (
+        await import('@renderer/components/popBox/ForwardPan.vue')
+    ).default
     popBox({
         title: $t('合并转发消息'),
         svg: 'fa-share-from-square',
@@ -179,7 +202,7 @@ export async function mergeForward(msgList: Msg[]) {
         props: {
             msgs: msgList,
             type: 'merge',
-        }
+        },
     })
 }
 
@@ -190,10 +213,10 @@ export async function mergeForward(msgList: Msg[]) {
  */
 export function qqLevelIcons(level) {
     const result = {
-        crown: 0,  // 皇冠
-        sun: 0,    // 太阳
-        moon: 0,   // 月亮
-        star: 0    // 星星
+        crown: 0, // 皇冠
+        sun: 0, // 太阳
+        moon: 0, // 月亮
+        star: 0, // 星星
     }
 
     result.crown = Math.floor(level / 64)
@@ -217,7 +240,7 @@ export function qqLevelIcons(level) {
  */
 export function qqLevelToEmoji(level) {
     const rawLevel = level
-    if(level <= 0) return level
+    if (level <= 0) return level
 
     const crown = Math.floor(level / 64)
     level %= 64
@@ -230,5 +253,13 @@ export function qqLevelToEmoji(level) {
 
     const star = level
 
-    return '👑'.repeat(crown) + '☀️'.repeat(sun) + '🌙'.repeat(moon) + '⭐️'.repeat(star) + '（' + rawLevel + '）'
+    return (
+        '👑'.repeat(crown) +
+        '☀️'.repeat(sun) +
+        '🌙'.repeat(moon) +
+        '⭐️'.repeat(star) +
+        '（' +
+        rawLevel +
+        '）'
+    )
 }

@@ -4,45 +4,55 @@
         :class="{
             'pop-box': true,
             'move-close': moveClose,
-        }">
+        }"
+    >
         <div
             ref="main"
             v-move="moveOptions"
             :class="{
                 'pop-box-body': true,
                 'ss-card': true,
-                'full': full,
-                'window': true
+                full: full,
+                window: true,
             }"
             :style="{
-                marginBottom: runtimeData.sysConfig.fs_adaptation > 0 ?
-                    `${40 + Number(runtimeData.sysConfig.fs_adaptation)}px` : '',
+                marginBottom:
+                    runtimeData.sysConfig.fs_adaptation > 0
+                        ? `${40 + Number(runtimeData.sysConfig.fs_adaptation)}px`
+                        : '',
                 transform: vw * 100 > 500 ? 'translate(-50%, -50%)' : '',
             }"
-            @v-move-right="closeByMove">
+            @v-move-right="closeByMove"
+        >
             <header v-if="title">
                 <div v-if="svg">
                     <font-awesome-icon :icon="['fas', svg]" />
                 </div>
                 <a>{{ title }}</a>
-                <font-awesome-icon v-if="allowAutoClose"
-                    :icon="['fas', 'xmark']" @click="autoClose" />
+                <font-awesome-icon
+                    v-if="allowAutoClose"
+                    :icon="['fas', 'xmark']"
+                    @click="autoClose"
+                />
             </header>
             <component
                 :is="props.data.comp"
                 v-bind="props.data.props"
                 v-model="model"
                 v-on="props.data.emit || {}"
-                @close-pop-box="closeSelf" />
+                @close-pop-box="closeSelf"
+            />
             <div v-if="buttons.length > 0" class="button">
-                <button v-for="(button, index) in buttons"
+                <button
+                    v-for="(button, index) in buttons"
                     :key="'pop-box-btn' + index"
                     v-focus="button.master"
                     :class="{
                         'ss-button': true,
-                        'master': button.master,
+                        master: button.master,
                     }"
-                    @click="clickButton($event, button)">
+                    @click="clickButton($event, button)"
+                >
                     {{ button.text }}
                 </button>
             </div>
@@ -53,13 +63,22 @@
 
 <script setup lang="ts" generic="T extends Component">
 import { runtimeData } from '@renderer/function/msg'
-import { closePopBox, PopBoxButton, PopBoxData } from '@renderer/function/utils/popBox'
-import { vEsc, vFocus, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
+import {
+    closePopBox,
+    PopBoxButton,
+    PopBoxData,
+} from '@renderer/function/utils/popBox'
+import {
+    vEsc,
+    vFocus,
+    vMove,
+    VMoveOptions,
+} from '@renderer/function/utils/vcmd'
 import { useViewportUnits } from '@renderer/function/utils/vuse'
-import anime from 'animejs'
+import { animate } from 'animejs'
 import { type Component, nextTick, shallowRef, useTemplateRef } from 'vue'
 
-const { props } = defineProps<{props: {id: string, data: PopBoxData<T>}}>()
+const { props } = defineProps<{ props: { id: string; data: PopBoxData<T> } }>()
 
 const model = defineModel<any>()
 
@@ -79,18 +98,16 @@ const moveClose = shallowRef(false)
 const moveOptions: VMoveOptions<HTMLDivElement> = {
     moveHook: (el, move: number) => {
         if (!allowAutoClose) return
-        if (vw.value * 100 <= 500)
-            el.style.transform = `translateX(${move}px)`
-        else
-            el.style.transform = `translate(calc(-50% + ${move}px), -50%)`
+        if (vw.value * 100 <= 500) el.style.transform = `translateX(${move}px)`
+        else el.style.transform = `translate(calc(-50% + ${move}px), -50%)`
     },
     endHook: (el) => {
         if (!allowAutoClose) return
-        el.style.transform = vw.value * 100 > 500 ?'translate(-50%, -50%)' : ''
+        el.style.transform = vw.value * 100 > 500 ? 'translate(-50%, -50%)' : ''
     },
     rightLimit: {
         value: 50 * vw.value,
-        type: 'px'
+        type: 'px',
     },
     speedCondition: {
         minMove: {
@@ -103,7 +120,7 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
         minMove: {
             value: 33,
             type: '%',
-        }
+        },
     },
 }
 
@@ -111,8 +128,7 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
  * 通过拖动关闭 PopBox
  */
 function closeByMove() {
-    if (allowAutoClose)
-        moveClose.value = true
+    if (allowAutoClose) moveClose.value = true
     nextTick(autoClose)
 }
 
@@ -124,9 +140,8 @@ function autoClose() {
     if (!allowAutoClose) {
         if (!popBoxEl.value) return
         const animeBody = popBoxEl.value
-        const timeLine = anime.timeline({ targets: animeBody })
         // 使用 animejs 实现一个沿中心左右摇晃的动画，摇晃三次
-        timeLine.add({
+        animate(animeBody, {
             rotate: [
                 { value: -10, duration: 75, easing: 'easeInOutSine' },
                 { value: 8, duration: 150, easing: 'easeInOutSine' },
@@ -160,7 +175,7 @@ function clickButton(
     event.stopPropagation()
     event.preventDefault()
 
-    if (button.fun?.length === 0) (button.fun as ()=>void)()
+    if (button.fun?.length === 0) (button.fun as () => void)()
     else if (button.fun?.length === 1) button.fun(event)
 
     if (button.noClose) return
