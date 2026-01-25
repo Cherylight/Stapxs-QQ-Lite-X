@@ -41,7 +41,6 @@ async function createWindow() {
     console.log('====CopyRight © Mr.Lee=============================')
     console.log('日志等级:', logLevel)
 
-    /* eslint-enable no-console */
     logger.info('欢迎使用 Stapxs QQ Lite X, 当前版本: ' + packageInfo.version)
 
     logger.info('启动平台架构：' + process.platform)
@@ -203,7 +202,7 @@ app.on('ready', async () => {
 
         // 确认文件存在并返回内容
         try {
-            const fileContent = (await fs.promises.readFile(filePath)) as any
+            const fileContent = await fs.promises.readFile(filePath)
             return new Response(fileContent, {
                 headers: { 'Content-Type': getMimeType(filePath) },
             })

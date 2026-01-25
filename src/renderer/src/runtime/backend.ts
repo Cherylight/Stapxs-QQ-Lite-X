@@ -8,20 +8,36 @@ import win from './win'
 
 export const backend = {
     type: 'web' as 'electron' | 'tauri' | 'capacitor' | 'web',
-    platform: undefined as 'win32' | 'darwin' | 'linux' | 'android' | 'ios' | 'web' | undefined,
+    platform: undefined as
+        | 'win32'
+        | 'darwin'
+        | 'linux'
+        | 'android'
+        | 'ios'
+        | 'web'
+        | undefined,
     de: undefined as undefined | string,
     release: '',
     arch: '' as string | undefined,
 
-    function: undefined as IpcRenderer |
-    {
-        invoke: <T>(cmd: string, args?: InvokeArgs, options?: InvokeOptions) => Promise<T>
-    } | {
-        capacitor: CapacitorGlobal,
-        plugins: CapacitorGlobal['Plugins'],
-        vConsole: VConsole
-    } | undefined,
-    listener: undefined as ((event: string, ...args: any[]) => void) | undefined,
+    function: undefined as
+        | IpcRenderer
+        | {
+              invoke: <T>(
+                  cmd: string,
+                  args?: InvokeArgs,
+                  options?: InvokeOptions,
+              ) => Promise<T>
+          }
+        | {
+              capacitor: CapacitorGlobal
+              plugins: CapacitorGlobal['Plugins']
+              vConsole: VConsole
+          }
+        | undefined,
+    listener: undefined as
+        | ((event: string, ...args: any[]) => void)
+        | undefined,
 
     isDesktop() {
         return this.type == 'electron' || this.type == 'tauri'
@@ -44,23 +60,26 @@ export const backend = {
         } else if (window.__TAURI_INTERNALS__ != undefined) {
             this.type = 'tauri'
             this.function = {
-                invoke: (await import('@tauri-apps/api/core')).invoke
+                invoke: (await import('@tauri-apps/api/core')).invoke,
             }
             this.listener = (await import('@tauri-apps/api/event')).listen
-        } else if (window.Capacitor != undefined && window.Capacitor.isNativePlatform()) {
+        } else if (window.Capacitor?.isNativePlatform()) {
             this.type = 'capacitor'
             this.function = {
                 capacitor: window.Capacitor,
                 plugins: window.Capacitor.Plugins,
                 vConsole: new VConsole({
                     theme: win.darkMode ? 'dark' : 'light',
-                })
+                }),
             }
-            this.listener = (type: string, name: string, callBack: (...args: any[]) => void) => {
+            this.listener = (
+                type: string,
+                name: string,
+                callBack: (...args: any[]) => void,
+            ) => {
                 window.Capacitor.Plugins[type].addListener(name, callBack)
             }
         }
-
 
         this.platform = await this.call(undefined, 'sys:getPlatform', true)
         const releaseData = await this.call('Onebot', 'sys:getRelease', true)
@@ -75,9 +94,11 @@ export const backend = {
             if ((navigator as any).userAgentData) {
                 os = (navigator as any).userAgentData.platform || os
                 try {
-                    const highEntropy = await (navigator as any).userAgentData.getHighEntropyValues(['platformVersion'])
+                    const highEntropy = await (
+                        navigator as any
+                    ).userAgentData.getHighEntropyValues(['platformVersion'])
                     version = highEntropy.platformVersion || version
-                } catch (e) {
+                } catch {
                     // 如果获取失败，保持 Unknown
                 }
             } else {
@@ -86,16 +107,22 @@ export const backend = {
 
                 if (/Windows NT (\d+\.\d+)/.test(ua)) {
                     os = 'Windows'
-                    version = ua.match(/Windows NT (\d+\.\d+)/)?.[1] ?? 'Unknown'
+                    version = /Windows NT (\d+\.\d+)/.exec(ua)?.[1] ?? 'Unknown'
                 } else if (/Mac OS X (\d+[_.]\d+[_.]?\d*)/.test(ua)) {
                     os = 'macOS'
-                    version = ua.match(/Mac OS X (\d+[_.]\d+[_.]?\d*)/)?.[1]?.replace(/_/g, '.') ?? 'Unknown'
+                    version =
+                        /Mac OS X (\d+[_.]\d+[_.]?\d*)/
+                            .exec(ua)?.[1]
+                            ?.replaceAll('_', '.') ?? 'Unknown'
                 } else if (/Android (\d+(\.\d+)?)/.test(ua)) {
                     os = 'Android'
-                    version = ua.match(/Android (\d+(\.\d+)?)/)?.[1] ?? 'Unknown'
+                    version = /Android (\d+(\.\d+)?)/.exec(ua)?.[1] ?? 'Unknown'
                 } else if (/iPhone OS (\d+[_.]\d+[_.]?\d*)/.test(ua)) {
                     os = 'iOS'
-                    version = ua.match(/iPhone OS (\d+[_.]\d+[_.]?\d*)/)?.[1]?.replace(/_/g, '.') ?? 'Unknown'
+                    version =
+                        /iPhone OS (\d+[_.]\d+[_.]?\d*)/
+                            .exec(ua)?.[1]
+                            ?.replaceAll('_', '.') ?? 'Unknown'
                 } else if (/Linux/.test(ua)) {
                     os = 'Linux'
                     version = 'Unknown'
@@ -128,47 +155,74 @@ export const backend = {
      * @param args 参数列表
      * @returns 返回值
      */
-    async call(type: string | undefined, name: string, needBack: boolean, ...args: any[]) {
+    async call(
+        type: string | undefined,
+        name: string,
+        needBack: boolean,
+        ...args: any[]
+    ) {
         if (!this.function) return undefined
 
         // 处理名称
         if (this.type == 'tauri') {
-            name = name.replaceAll(':', '_').replace(/([A-Z])/g, '_$1').toLowerCase()
+            name = name
+                .replaceAll(':', '_')
+                .replaceAll(/([A-Z])/g, '_$1')
+                .toLowerCase()
         }
         if (this.type == 'capacitor' && name.includes(':')) {
             name = name.split(':')[1]
         }
         // 调用对应方法
         // try {
-            if ('electron' == this.type && 'invoke' in this.function && 'send' in this.function) {
-                if (needBack) {
-                    return await this.function.invoke(name, ...args)
-                } else {
-                    this.function.send(name, ...args)
-                    return undefined
-                }
-            } else if ('tauri' == this.type && 'invoke' in this.function) {
-                // tauri 这边必须传入一个字典
-                if (args.length == 0 || Object.prototype.toString.call(args[0]) !== '[object Object]') {
-                    args = [{ data: args[0] }]
-                }
-                return await this.function.invoke(name, args[0])
-            } else if ('capacitor' == this.type && 'plugins' in this.function && 'capacitor' in this.function) {
-                // capacitor 这边必须传入一个字典
-                if (args.length == 0 || Object.prototype.toString.call(args[0]) !== '[object Object]') {
-                    args = [{ data: args[0] }]
-                }
-                let functionGet = this.function.capacitor[name]
-                if (type != undefined && functionGet == undefined) {
-                    functionGet = this.function.plugins[type][name] ?? this.function.capacitor[type][name]
-                }
-                const back = await functionGet(args[0])
-                if (Object.prototype.toString.call(back) === '[object Object]' && Object.keys(back).length == 1) {
-                    return back[Object.keys(back)[0]]
-                } else {
-                    return back
-                }
+        if (
+            'electron' == this.type &&
+            'invoke' in this.function &&
+            'send' in this.function
+        ) {
+            if (needBack) {
+                return await this.function.invoke(name, ...args)
+            } else {
+                this.function.send(name, ...args)
+                return undefined
             }
+        } else if ('tauri' == this.type && 'invoke' in this.function) {
+            // tauri 这边必须传入一个字典
+            if (
+                args.length == 0 ||
+                Object.prototype.toString.call(args[0]) !== '[object Object]'
+            ) {
+                args = [{ data: args[0] }]
+            }
+            return await this.function.invoke(name, args[0])
+        } else if (
+            'capacitor' == this.type &&
+            'plugins' in this.function &&
+            'capacitor' in this.function
+        ) {
+            // capacitor 这边必须传入一个字典
+            if (
+                args.length == 0 ||
+                Object.prototype.toString.call(args[0]) !== '[object Object]'
+            ) {
+                args = [{ data: args[0] }]
+            }
+            let functionGet = this.function.capacitor[name]
+            if (type != undefined && functionGet == undefined) {
+                functionGet =
+                    this.function.plugins[type][name] ??
+                    this.function.capacitor[type][name]
+            }
+            const back = await functionGet(args[0])
+            if (
+                Object.prototype.toString.call(back) === '[object Object]' &&
+                Object.keys(back).length == 1
+            ) {
+                return back[Object.keys(back)[0]]
+            } else {
+                return back
+            }
+        }
         // } catch (ex) {
         //     // logger.add('DEBUG', `调用后端方法 ${(type ?? '') + ' - '}${name} 失败`, ex)
         //     return undefined
@@ -183,10 +237,17 @@ export const backend = {
      * @param name 方法名称
      */
     callSync(name: string, ...args: any[]) {
-        if (this.type == 'electron' && this.function && 'sendSync' in this.function) {
+        if (
+            this.type == 'electron' &&
+            this.function &&
+            'sendSync' in this.function
+        ) {
             return this.function.sendSync(name, ...args)
         } else {
-            logger.error(new Error('此方法只支持 electron 平台'), '调用后端方法失败')
+            logger.error(
+                new Error('此方法只支持 electron 平台'),
+                '调用后端方法失败',
+            )
             return undefined
         }
     },
@@ -197,11 +258,15 @@ export const backend = {
      * @param name 事件名称
      * @param callBack 回调函数
      */
-    addListener(type: string | undefined, name: string, callBack: (...args: any[]) => void) {
-        if(this.listener) {
-            if(this.isDesktop()) {
+    addListener(
+        type: string | undefined,
+        name: string,
+        callBack: (...args: any[]) => void,
+    ) {
+        if (this.listener) {
+            if (this.isDesktop()) {
                 this.listener(name, callBack)
-            } else if(this.isMobile() && type) {
+            } else if (this.isMobile() && type) {
                 this.listener(type, name, callBack)
             }
         }

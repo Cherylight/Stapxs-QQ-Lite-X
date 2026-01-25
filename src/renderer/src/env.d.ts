@@ -12,10 +12,14 @@ declare module '*.vue' {
 declare interface Window {
     moYu: any
     _AMapSecurityConfig: string | undefined
-    createMap: (key: string | undefined, msgId: string, point: {
-        lat: number,
-        lng: number
-    }) => void
+    createMap: (
+        key: string | undefined,
+        msgId: string,
+        point: {
+            lat: number
+            lng: number
+        },
+    ) => void
     __TAURI_INTERNALS__: any
     runtimeData: any
 }
@@ -38,16 +42,16 @@ declare module '*.yml' {
 
 declare module '@renderer/assets/img/qq-face/public/assets/qq_emoji/_index.json' {
     const content: {
-        emojiId: string,
-        describe: '' | `/${string}`,
+        emojiId: string
+        describe: '' | `/${string}`
         assets: {
-            type: number,
-            path: string,
-            name: string,
+            type: number
+            path: string
+            name: string
         }[]
     }[]
     export default content
-}[]
+}
 
 declare interface PinyinOptions {
     heteronym?: boolean

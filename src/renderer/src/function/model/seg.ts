@@ -1,6 +1,24 @@
 import app from '@renderer/main'
 import { toRaw } from 'vue'
-import type { AtAllSegData, AtSegData, ErrorSegData, FaceSegData, FileSegData, ForwardSegData, ImgSegData, JsonSegData, MdSegData, MfaceSegData, PokeSegData, ReplySegData, SegData, TextSegData, UnknownSegData, VideoSegData, XmlSegData } from '../adapter/interface'
+import type {
+    AtAllSegData,
+    AtSegData,
+    ErrorSegData,
+    FaceSegData,
+    FileSegData,
+    ForwardSegData,
+    ImgSegData,
+    JsonSegData,
+    MdSegData,
+    MfaceSegData,
+    PokeSegData,
+    ReplySegData,
+    SegData,
+    TextSegData,
+    UnknownSegData,
+    VideoSegData,
+    XmlSegData,
+} from '../adapter/interface'
 import { popInfo } from '../base'
 import { downloadFile } from '../utils/appUtil'
 import { getSizeFromBytes } from '../utils/systemUtil'
@@ -13,7 +31,7 @@ import { Resource } from './resource'
 import { autoMarkRaw } from './utils'
 
 export const segType = {}
-type SegCon<T extends Seg> = { new(...args: any[]): T; type: string };
+type SegCon<T extends Seg> = { new (...args: any[]): T; type: string }
 function registerSegType<T extends Seg>(segClass: SegCon<T>): void {
     segType[segClass.type] = segClass
 }
@@ -21,18 +39,18 @@ function registerSegType<T extends Seg>(segClass: SegCon<T>): void {
 export abstract class Seg {
     declare static readonly type: string
 
-    abstract plaintext(msg?: Msg): string;
+    abstract plaintext(msg?: Msg): string
 
-    abstract serializeData(): SegData;
+    abstract serializeData(): SegData
 
     init?(): void | Promise<void>
-    getImgData?(): {url: string, id: string} | undefined
+    getImgData?(): { url: string; id: string } | undefined
 
-	static parse(data: SegData): Seg {
-		const type = data.type
-		const SegClass = segType[type] || UnknownSeg
-		return new SegClass(data)
-	}
+    static parse(data: SegData): Seg {
+        const type = data.type
+        const SegClass = segType[type] || UnknownSeg
+        return new SegClass(data)
+    }
 
     get type(): string {
         return (this.constructor as typeof Seg).type
@@ -58,10 +76,8 @@ export class TxtSeg extends Seg {
     constructor(data: TextSegData)
     constructor(data: string | TextSegData) {
         super()
-        if (typeof data === 'string')
-            this.text = data
-        else
-            this.text = data.text
+        if (typeof data === 'string') this.text = data
+        else this.text = data.text
         const { text, links } = MsgBodyFuns.parseTextMsg(this.text)
         this.praseMsg = text
         this.links = links
@@ -124,7 +140,7 @@ export class ImgSeg extends Seg {
             this._url = Resource.fromUrl(url)
             this.isFace = isFace || false
             this.summary = $t('[图片]')
-        }else {
+        } else {
             // constructor(data: ImgSegData)
             const data = arg1
             this._url = data.url
@@ -156,7 +172,8 @@ export class ImgSeg extends Seg {
     }
 
     get src(): string {
-        if (this.url.startsWith('base64:')) return 'data:image/png;base64,' + this.url.substring(9)
+        if (this.url.startsWith('base64:'))
+            return 'data:image/png;base64,' + this.url.substring(9)
         return this.url
     }
 
@@ -235,7 +252,7 @@ export class FaceSeg extends Seg {
         super()
         if (typeof arg === 'number') {
             this.id = arg
-        }else {
+        } else {
             this.text = arg.text
             this.id = arg.id
         }
@@ -266,10 +283,8 @@ export class AtSeg extends Seg {
     constructor(data: AtSegData)
     constructor(arg: AtSegData | number) {
         super()
-        if (typeof arg === 'number')
-            this.user_id = arg
-        else
-            this.user_id = Number(arg.user_id)
+        if (typeof arg === 'number') this.user_id = arg
+        else this.user_id = Number(arg.user_id)
     }
 
     plaintext(msg?: Msg): string {
@@ -319,17 +334,22 @@ export class FileSeg extends Seg {
     ext: string
     download_percent?: number
     static readonly viewerSupport = [
-        'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp',
-        'mp4', 'avi', 'mkv', 'flv',
-        'txt', 'md',
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'bmp',
+        'webp',
+        'mp4',
+        'avi',
+        'mkv',
+        'flv',
+        'txt',
+        'md',
     ]
     constructor(file: string, name: string, size: number)
     constructor(data: FileSegData)
-    constructor(
-        arg1: string | FileSegData,
-        arg2?: string,
-        arg3?: number
-    ) {
+    constructor(arg1: string | FileSegData, arg2?: string, arg3?: number) {
         super()
         if (typeof arg1 === 'string') {
             const file = arg1
@@ -371,7 +391,7 @@ export class FileSeg extends Seg {
         return this._url.raw
     }
 
-    get fileView(): { url: string, ext: string, txt?: string } | undefined {
+    get fileView(): { url: string; ext: string; txt?: string } | undefined {
         if (!this.url) return undefined
         if (!FileSeg.viewerSupport.includes(this.ext)) return undefined
         return {
@@ -391,13 +411,18 @@ export class FileSeg extends Seg {
             return
         }
         this.download_percent = 0
-        downloadFile(this.url, this.name, (event: ProgressEvent) => {
-            if (!event.lengthComputable) return
-            const percent = Math.floor((event.loaded / event.total) * 100)
-            this.download_percent = percent
-        }, () => {
-            this.download_percent = undefined
-        })
+        downloadFile(
+            this.url,
+            this.name,
+            (event: ProgressEvent) => {
+                if (!event.lengthComputable) return
+                const percent = Math.floor((event.loaded / event.total) * 100)
+                this.download_percent = percent
+            },
+            () => {
+                this.download_percent = undefined
+            },
+        )
     }
 
     override serializeData(): FileSegData {
@@ -447,7 +472,7 @@ export class VideoSeg extends Seg {
 @autoMarkRaw
 export class ForwardSeg extends Seg {
     static readonly type = 'forward'
-	id?: string
+    id?: string
     content: Msg[]
     constructor(msgs?: Msg[])
     constructor(data: ForwardSegData)
@@ -460,7 +485,7 @@ export class ForwardSeg extends Seg {
             super()
             const data = arg1 as ForwardSegData
             this.id = data.id
-			this.content = data.content.map(item => new ForwardMsg(item))
+            this.content = data.content.map((item) => new ForwardMsg(item))
             // 图片拼装
             let tail: undefined | Img
             for (const msg of this.content) {
@@ -479,16 +504,18 @@ export class ForwardSeg extends Seg {
         return '[' + $t('合并转发') + ']'
     }
 
-	get sending(): boolean {
-		return this.id === undefined
-	}
+    get sending(): boolean {
+        return this.id === undefined
+    }
 
     override serializeData(): ForwardSegData {
         if (!this.id) throw new Error('转发消息ID缺失')
         return {
             type: 'forward',
             id: this.id,
-            content: this.content.map(item => (item as ForwardMsg).serializeNodeData()),
+            content: this.content.map((item) =>
+                (item as ForwardMsg).serializeNodeData(),
+            ),
         }
     }
 }
@@ -498,13 +525,12 @@ export class ForwardSeg extends Seg {
 export class ReplySeg extends Seg {
     static readonly type = 'reply'
     id: string
-	msg?: Msg
+    msg?: Msg
     constructor(msgId: string)
     constructor(data: ReplySegData)
     constructor(data: ReplySegData | string) {
         super()
-        if (typeof data === 'string')
-            this.id = data
+        if (typeof data === 'string') this.id = data
         else this.id = data.id
     }
 
@@ -525,7 +551,9 @@ export class ReplySeg extends Seg {
 @autoMarkRaw
 export class PokeSeg extends Seg {
     static readonly type = 'poke'
-	constructor(_: PokeSegData) {super()}
+    constructor(_: PokeSegData) {
+        super()
+    }
     plaintext(_?: Msg): string {
         return '戳了戳你'
     }
@@ -550,9 +578,7 @@ export class XmlSeg extends Seg {
     }
 
     plaintext(_?: Msg): string {
-        let name = this.data.substring(
-            this.data.indexOf('<source name="') + 14,
-        )
+        let name = this.data.substring(this.data.indexOf('<source name="') + 14)
         name = name.substring(0, name.indexOf('"'))
         return '[' + name + ']'
     }
@@ -581,7 +607,7 @@ export class JsonSeg extends Seg {
     plaintext(_?: Msg): string {
         try {
             return JSON.parse(this.data).prompt
-        } catch (error) {
+        } catch {
             const { $t } = app.config.globalProperties
             return '[' + $t('卡片消息') + ']'
         }
@@ -591,7 +617,7 @@ export class JsonSeg extends Seg {
         return {
             type: 'json',
             data: this.data,
-            id: this.id
+            id: this.id,
         }
     }
 }
@@ -617,7 +643,7 @@ export class ErrorSeg extends Seg {
 export class UnknownSeg extends Seg {
     static readonly type = 'unknown'
     private readonly _type: string
-	data: object
+    data: object
     constructor(data: UnknownSegData) {
         super()
         this._type = data.segType

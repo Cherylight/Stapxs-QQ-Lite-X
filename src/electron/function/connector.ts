@@ -8,9 +8,9 @@ import { BrowserWindow, ipcMain } from 'electron'
 import { logLevel } from '../index.ts'
 
 export class Connector {
-    private logger = log4js.getLogger('connector')
+    private readonly logger = log4js.getLogger('connector')
 
-    private win: BrowserWindow
+    private readonly win: BrowserWindow
     private websocket: WebSocket | undefined
     private reconnectTimes = 0
 
@@ -29,7 +29,7 @@ export class Connector {
     }
 
     connect(url: string) {
-        if (url.indexOf('ws://') < 0 && url.indexOf('wss://') < 0) {
+        if (!url.includes('ws://') && !url.includes('wss://')) {
             url = 'wss://' + url
         }
 
@@ -75,13 +75,13 @@ export class Connector {
                 setTimeout(() => {
                     if (e.code == 1006) {
                         // 连接失败，尝试轮替协议重连
-                        if (url.indexOf('wss://') >= 0) {
+                        if (url.includes('wss://')) {
                             url = url.replace('wss://', 'ws://')
                         } else {
                             url = url.replace('ws://', 'wss://')
                         }
                         this.logger.warn('连接失败，尝试重连...')
-                        this.connect(url,)
+                        this.connect(url)
                     }
                     this.reconnectTimes++
                 }, 1500)
@@ -94,15 +94,15 @@ export class Connector {
     }
     static async httpRequest(
         url: string,
-        data: Record<string, any>,
-        header: Record<string, any>,
-        method: 'GET' | 'POST'
+        data: Record<string, unknown>,
+        header: Record<string, unknown>,
+        method: 'GET' | 'POST',
     ) {
         const params = { method, headers: header } as RequestInit
         if (method === 'GET') {
             const urlObj = new URL(url)
-            Object.keys(data).forEach(key => {
-                urlObj.searchParams.append(key, data[key])
+            Object.keys(data).forEach((key) => {
+                urlObj.searchParams.append(key, String(data[key]))
             })
             url = urlObj.toString()
         } else {

@@ -241,27 +241,27 @@ export class Time {
             case 'year':
                 timeConfig.year = 'numeric'
                 if (end === 'year') break
-            // eslint-disable-next-line no-fallthrough
+             
             case 'month':
                 timeConfig.month = '2-digit'
                 if (end === 'month') break
-            // eslint-disable-next-line no-fallthrough
+             
             case 'week':
                 if (start === 'week') timeConfig.weekday = 'short'
                 if (end === 'week') break
-            // eslint-disable-next-line no-fallthrough
+             
             case 'day':
                 timeConfig.day = '2-digit'
                 if (end === 'day') break
-            // eslint-disable-next-line no-fallthrough
+             
             case 'hour':
                 timeConfig.hour = 'numeric'
                 if (end === 'hour') break
-            // eslint-disable-next-line no-fallthrough
+             
             case 'minute':
                 timeConfig.minute = 'numeric'
                 if (end === 'minute') break
-            // eslint-disable-next-line no-fallthrough
+             
             case 'second':
                 timeConfig.second = 'numeric'
                 break

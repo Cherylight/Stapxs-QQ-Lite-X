@@ -15,7 +15,7 @@ import LoginPan from '@renderer/components/popBox/LoginPan.vue'
  * @returns Promise<void>
  */
 export function delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 /**
@@ -25,7 +25,6 @@ export function getDeviceType() {
     const userAgent = navigator.userAgent
     if (userAgent.indexOf('Android') > -1 || userAgent.indexOf('Adr') > -1) {
         return 'Android'
-        // eslint-disable-next-line
     } else if (!!userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)) {
         return 'iOS'
     } else if (userAgent.indexOf('Mac OS X') > -1) {
@@ -54,16 +53,19 @@ export function getTrueLang(): string {
  * @param name 文件名
  */
 export function getPortableFileLang(name: string) {
-    const files = import.meta.glob('@renderer/assets/l10n/*.po',
-        { eager: true, query: '?raw', import: 'default' })
-    const filePath = Object.keys(files).find(
-        (item) => item.includes(name))
+    const files = import.meta.glob('@renderer/assets/l10n/*.po', {
+        eager: true,
+        query: '?raw',
+        import: 'default',
+    })
+    const filePath = Object.keys(files).find((item) => item.includes(name))
     const final = {} as { [key: string]: string }
-    if(filePath) {
+    if (filePath) {
         const file = files[filePath] as string
         const items = PO.parse(file).items
-        for(const item of items) {
-            final[item.msgid] = item.msgstr[0] == '' ? item.msgid : item.msgstr[0]
+        for (const item of items) {
+            final[item.msgid] =
+                item.msgstr[0] == '' ? item.msgid : item.msgstr[0]
         }
     }
     return final
@@ -164,16 +166,16 @@ export function gitmojiToEmoji(name: string) {
  * @return HSL各值数组
  */
 export function rgbToHsl(r: number, g: number, b: number) {
-    (r /= 255), (g /= 255), (b /= 255)
+    r /= 255
+    g /= 255
+    b /= 255
     const max = Math.max(r, g, b),
         min = Math.min(r, g, b)
-    let h = 0,
-        s
+    let h = 0
+    let s = 0
     const l = (max + min) / 2
 
-    if (max == min) {
-        h = s = 0
-    } else {
+    if (max !== min) {
         const d = max - min
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
         switch (max) {
@@ -205,9 +207,9 @@ export function rgbToHsl(r: number, g: number, b: number) {
  * @return RGB色值数值
  */
 export function hslToRgb(h: number, s: number, l: number) {
-    let r, g, b
+    let r: number, g: number, b: number
 
-    if (s == 0) {
+    if (s === 0) {
         r = g = b = l
     } else {
         const hue2rgb = function hue2rgb(p: number, q: number, t: number) {
@@ -239,7 +241,7 @@ export function getSizeFromBytes(size: number): string {
         return ''
     }
 
-    const num = 1024.0
+    const num = 1024
 
     if (size < num) {
         return size + 'B'
@@ -300,11 +302,12 @@ export function getRandom(
             max = _length
             min = 0
         }
-        const random = parseInt((Math.random() * (max - min)).toString()) + min
+        const random =
+            Number.parseInt((Math.random() * (max - min)).toString()) + min
         if (mergeArr1[random] <= 9) {
             text1 = mergeArr1[random].toString()
         } else if (mergeArr1[random] > 9) {
-            text1 = String.fromCharCode(mergeArr1[random])
+            text1 = String.fromCodePoint(mergeArr1[random])
         }
         text += text1
     }
@@ -320,9 +323,9 @@ export function getRandom(
 export function randomNum(minNum: number, maxNum: number) {
     switch (arguments.length) {
         case 1:
-            return parseInt((Math.random() * minNum + 1).toString(), 10)
+            return Number.parseInt((Math.random() * minNum + 1).toString(), 10)
         case 2:
-            return parseInt(
+            return Number.parseInt(
                 (Math.random() * (maxNum - minNum + 1) + minNum).toString(),
                 10,
             )
@@ -336,7 +339,7 @@ export function randomNum(minNum: number, maxNum: number) {
  * @param args 参数列表
  * @returns 随机选择的元素
  */
-export function randomChoice<T>(...args: T[]): T{
+export function randomChoice<T>(...args: T[]): T {
     const id = randomNum(0, args.length - 1)
     return args[id]
 }
@@ -371,12 +374,12 @@ export function getTimeConfig(date: Date) {
     if (date.getTime() < 50 * year) {
         const base = {} as Intl.DateTimeFormatOptions
         const time = date.getTime()
-        if (true && time < hour) base.second = 'numeric'
+        if (time < hour) base.second = 'numeric'
         if (minute < time && time < day) base.minute = 'numeric'
         if (hour < time && time < month) base.hour = 'numeric'
         if (day < time && time < year) base.day = 'numeric'
-        if (month < time && true) base.month = 'short'
-        if (year < time && true) base.year = 'numeric'
+        if (month < time) base.month = 'short'
+        if (year < time) base.year = 'numeric'
         return base
     }
     // 日期型
@@ -410,9 +413,8 @@ export function pastTimeFormat(time: number): string {
     const pastTime = Date.now() - time
     if (pastTime <= 30 * second) return i18n.global.t('刚刚')
     else if (pastTime <= minute) return i18n.global.t('1分钟前')
-    else if (pastTime <= 10 * minute) return (
-        Math.floor(pastTime / minute) + i18n.global.t('分钟前')
-    )
+    else if (pastTime <= 10 * minute)
+        return Math.floor(pastTime / minute) + i18n.global.t('分钟前')
 
     const config = getTimeConfig(new Date(time))
     const lang = getTrueLang()
@@ -428,7 +430,7 @@ export function getCm(): number {
     div.style.visibility = 'hidden'
     document.body.appendChild(div)
     const dpi = div.offsetWidth
-    document.body.removeChild(div)
+    div.remove()
     return dpi
 }
 
@@ -440,7 +442,11 @@ const queueWaitMap = new Map<string, Promise<any>>()
  * @param timeout 超时
  * @returns
  */
-export function queueWait<T>(promise: Promise<T>, id: string, timeout: number = 10_000): Promise<T> {
+export function queueWait<T>(
+    promise: Promise<T>,
+    id: string,
+    timeout: number = 10_000,
+): Promise<T> {
     const selfPromise = new Promise<T>((_resolve, _reject) => {
         // 结束处理
         const end = () => {
@@ -472,10 +478,8 @@ export function queueWait<T>(promise: Promise<T>, id: string, timeout: number = 
 
         // 执行
         const prePromise = queueWaitMap.get(id)
-        if (prePromise)
-            prePromise.finally(executePromise)
-        else
-            executePromise()
+        if (prePromise) prePromise.finally(executePromise)
+        else executePromise()
     })
     queueWaitMap.set(id, selfPromise)
 
@@ -490,13 +494,13 @@ export async function getApi(url: string) {
     // 先尝试在前端请求
     try {
         const response = await fetch(url)
-        if(response.ok) {
+        if (response.ok) {
             const data = await response.json()
             return data
         }
     } catch (error) {
         logger.error(error as Error, '前端请求 API 失败，尝试后端请求……')
-        if(!backend.isWeb()) {
+        if (!backend.isWeb()) {
             return await backend.call('Onebot', 'sys:getApi', true, url)
         } else {
             return null
@@ -516,13 +520,12 @@ export async function copyToClipboard(text: string)
 export async function copyToClipboard(content: ClipboardItem[])
 export async function copyToClipboard(content: ClipboardItem[] | string) {
     if (window.navigator.clipboard === undefined) {
-        popInfo.error( i18n.global.t('当前环境不支持剪贴板操作'))
+        popInfo.error(i18n.global.t('当前环境不支持剪贴板操作'))
         throw new Error('当前环境不支持剪贴板操作')
     }
     if (typeof content === 'string')
         await window.navigator.clipboard.writeText(content)
-    else
-        await window.navigator.clipboard.write(content)
+    else await window.navigator.clipboard.write(content)
 }
 
 /**
@@ -531,8 +534,7 @@ export async function copyToClipboard(content: ClipboardItem[] | string) {
 export function getVersion(): string {
     if (import.meta.env.VITE_HASH)
         return `${packageInfo.version}-${import.meta.env.VITE_HASH}`
-    else
-        return packageInfo.version
+    else return packageInfo.version
 }
 
 /**
@@ -541,7 +543,9 @@ export function getVersion(): string {
  * @returns DNS解析结果
  */
 export async function dns(host: string): Promise<DnsElem[]> {
-    const data = await fetch(`https://dns.alidns.com/resolve?name=${host}.`).then(res => res.json())
+    const data = await fetch(
+        `https://dns.alidns.com/resolve?name=${host}.`,
+    ).then((res) => res.json())
     if (!data['Answer']) return []
     return data['Answer'].map((item: any) => {
         return {
@@ -551,14 +555,22 @@ export async function dns(host: string): Promise<DnsElem[]> {
     })
 }
 
-function getDnsType(type: number): 'A' | 'AAAA' | 'CNAME' | 'SRV' | 'TXT' | 'OTHER' {
-    switch(type) {
-        case 1: return 'A'
-        case 5: return 'CNAME'
-        case 16: return 'TXT'
-        case 28: return 'AAAA'
-        case 33: return 'SRV'
-        default: return 'OTHER'
+function getDnsType(
+    type: number,
+): 'A' | 'AAAA' | 'CNAME' | 'SRV' | 'TXT' | 'OTHER' {
+    switch (type) {
+        case 1:
+            return 'A'
+        case 5:
+            return 'CNAME'
+        case 16:
+            return 'TXT'
+        case 28:
+            return 'AAAA'
+        case 33:
+            return 'SRV'
+        default:
+            return 'OTHER'
     }
 }
 

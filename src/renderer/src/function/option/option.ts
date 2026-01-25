@@ -1,7 +1,7 @@
 import { RunTimeDataElem } from '../elements/information'
 import type { OptionInfos } from './cfgs'
 import { checkAndMigration, migration } from './migration'
-// eslint-disable-next-line no-restricted-imports
+ 
 import { shallowReactive } from 'vue'
 import { loadAllOptions, saveAllOptions } from './utils'
 

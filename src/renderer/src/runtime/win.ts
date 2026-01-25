@@ -154,7 +154,7 @@ const win = markRaw({
                     `@renderer/assets/css/append/append_${platform}.css`
                 )
                 logger.info(`${platform} 平台附加样式加载完成`)
-            } catch (error) {
+            } catch {
                 logger.info('未找到对应平台的附加样式：' + platform)
             }
         }

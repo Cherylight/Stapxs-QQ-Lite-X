@@ -28,7 +28,7 @@ if(argv['port']) {
     port = argv['port']
 }
 if(argv['help'] || !hostname || !port) {
-    // eslint-disable-next-line no-console
+     
     console.log(`
         Stapxs QQ Lite 网页服务工具：
             --hostname  指定服务运行的主机名

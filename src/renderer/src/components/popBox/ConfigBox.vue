@@ -13,23 +13,29 @@
         <div class="config-box-base session-body-container">
             <BoxBody :data="baseBox" :from="init ? 'new' : 'friend'" />
             <div class="color-select">
-                <div :style="{'--color': baseBox.color}"
-                    @click="setColor" />
+                <div :style="{ '--color': baseBox.color }" @click="setColor" />
                 <div />
             </div>
-            <input v-once
+            <input
+                v-once
                 v-auto-focus="init"
                 :placeholder="$t('你也是起名困难症嘛？')"
                 :value="baseBox.showName"
                 type="text"
                 class="box-name-input"
-                @input="setName">
+                @input="setName"
+            />
             <div class="icon-select">
-                <font-awesome-icon v-for="icon in allIcons"
+                <font-awesome-icon
+                    v-for="icon in allIcons"
                     :key="icon"
                     :icon="['fas', icon]"
-                    :class="{selected: baseBox.icon === icon}"
-                    @click="baseBox.icon = icon;console.log(icon)" />
+                    :class="{ selected: baseBox.icon === icon }"
+                    @click="
+                        baseBox.icon = icon
+                        console.log(icon)
+                    "
+                />
             </div>
         </div>
         <!-- 群组搜索与选择 -->
@@ -38,58 +44,110 @@
                 <input
                     v-auto-focus="!init"
                     v-search="searchInfo"
-                    :placeholder="$t('搜索 ……')">
+                    :placeholder="$t('搜索 ……')"
+                />
             </div>
             <div>
-                <TinySessionBody v-for="session in displaySession"
+                <TinySessionBody
+                    v-for="session in displaySession"
                     :key="session.id"
                     :session="session"
                     :selected="selectedSession.includes(session)"
-                    @click="selectedSession.includes(session) ?
-                        unselect(session) :
-                        select(session)" />
+                    @click="
+                        selectedSession.includes(session)
+                            ? unselect(session)
+                            : select(session)
+                    "
+                />
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-
 import BoxBody from '@renderer/components/BoxBody.vue'
 import TinySessionBody from '@renderer/components/TinySessionBody.vue'
 import { SessionBox } from '@renderer/function/model/box'
 import { Session } from '@renderer/function/model/session'
 import { randomChoice, randomNum } from '@renderer/function/utils/systemUtil'
 import { vAutoFocus, vSearch } from '@renderer/function/utils/vcmd'
-import {
-    computed,
-    onUnmounted,
-    shallowReactive,
-    shallowRef,
-} from 'vue'
+import { computed, onUnmounted, shallowReactive, shallowRef } from 'vue'
 
 const allIcons = [
     // 常用分组图标
-    'box', 'boxes', 'folder', 'folder-open', 'archive',
-    'layer-group', 'th-large', 'th', 'grip-horizontal',
-    'cubes', 'cube', 'inbox', 'clipboard', 'briefcase',
-    'toolbox', 'heart', 'star', 'bookmark', 'tag',
+    'box',
+    'boxes',
+    'folder',
+    'folder-open',
+    'archive',
+    'layer-group',
+    'th-large',
+    'th',
+    'grip-horizontal',
+    'cubes',
+    'cube',
+    'inbox',
+    'clipboard',
+    'briefcase',
+    'toolbox',
+    'heart',
+    'star',
+    'bookmark',
+    'tag',
 
     // 其他常用图标
-    'home', 'user', 'users', 'cog', 'bell', 'calendar',
-    'clock', 'envelope', 'phone', 'globe', 'shield',
-    'key', 'lock', 'unlock', 'eye', 'camera', 'image',
-    'file', 'download', 'upload', 'cloud', 'database',
-    'server', 'chart-bar', 'chart-pie', 'trophy', 'robot',
-    'yin-yang', 'gear', 'gears', 'user-gear',
+    'home',
+    'user',
+    'users',
+    'cog',
+    'bell',
+    'calendar',
+    'clock',
+    'envelope',
+    'phone',
+    'globe',
+    'shield',
+    'key',
+    'lock',
+    'unlock',
+    'eye',
+    'camera',
+    'image',
+    'file',
+    'download',
+    'upload',
+    'cloud',
+    'database',
+    'server',
+    'chart-bar',
+    'chart-pie',
+    'trophy',
+    'robot',
+    'yin-yang',
+    'gear',
+    'gears',
+    'user-gear',
 
     // 表情图标
-    'smile', 'laugh', 'thumbs-up', 'fire',
-    'crown', 'gem', 'magic', 'wand-magic-sparkles',
+    'smile',
+    'laugh',
+    'thumbs-up',
+    'fire',
+    'crown',
+    'gem',
+    'magic',
+    'wand-magic-sparkles',
 
     // 分类图标
-    'gamepad', 'music', 'video', 'book', 'graduation-cap',
-    'shopping-cart', 'car', 'plane', 'bicycle'
+    'gamepad',
+    'music',
+    'video',
+    'book',
+    'graduation-cap',
+    'shopping-cart',
+    'car',
+    'plane',
+    'bicycle',
 ]
 // // TODO:获取所有 FontAwesome 图标
 // 这得做虚拟列表...不想做,先仍这里吧...
@@ -115,11 +173,11 @@ const allIcons = [
 //         ]
 //     }
 // }
-const { init=false } = defineProps<{
+const { init = false } = defineProps<{
     init?: boolean
 }>()
 
-const baseBox = defineModel<SessionBox>({required: true})
+const baseBox = defineModel<SessionBox>({ required: true })
 
 // 初始化新收纳盒数据
 if (init) {
@@ -133,13 +191,13 @@ onUnmounted(() => {
 })
 
 // 设置颜色
-function setColor(event: MouseEvent|TouchEvent) {
+function setColor(event: MouseEvent | TouchEvent) {
     const target = event.target as HTMLElement
     let x: number
     const width: number = target.clientWidth
     if (event instanceof MouseEvent) {
         x = event.clientX
-    }else {
+    } else {
         x = event.touches[0].clientX
     }
     x -= target.getBoundingClientRect().left
@@ -150,12 +208,9 @@ const originalName = baseBox.value.showName
 function setName(event: Event) {
     const input = event.target as HTMLInputElement
     const value = input.value.trim()
-    if (value === '')
-        baseBox.value.name = originalName
-    else
-        baseBox.value.name = value
+    if (value === '') baseBox.value.name = originalName
+    else baseBox.value.name = value
 }
-
 
 //#region == 群组选择 =========================================
 const selectedSession = shallowRef<Session[]>([])
@@ -166,15 +221,17 @@ const searchInfo = shallowReactive({
 })
 // 初始化已选择的会话
 for (const [index, session] of [...searchInfo.originList].entries()) {
-    if (!session.boxes.find(item => item.id === baseBox.value.id)) continue
+    if (!session.boxes.some((item) => item.id === baseBox.value.id)) continue
     selectedSession.value.push(session)
     searchInfo.originList.splice(index, 1)
 }
 const refreshDisplaySession = shallowRef(0)
 const displaySession = computed(() => {
-    refreshDisplaySession.value
+    void refreshDisplaySession.value
     const headSession = selectedSession.value
-    const mainSession = searchInfo.isSearch ?searchInfo.query :searchInfo.originList
+    const mainSession = searchInfo.isSearch
+        ? searchInfo.query
+        : searchInfo.originList
     return [...headSession, ...mainSession]
 })
 /**
@@ -195,7 +252,7 @@ function select(session: Session) {
     searchInfo.originList.splice(index, 1)
 
     // 刷新显示列表
-    refreshDisplaySession.value ++
+    refreshDisplaySession.value++
 }
 /**
  * 取消选择会话
@@ -213,7 +270,7 @@ function unselect(session: Session) {
     searchInfo.originList.unshift(session)
 
     // 刷新显示列表
-    refreshDisplaySession.value ++
+    refreshDisplaySession.value++
 }
 //#endregion
 </script>

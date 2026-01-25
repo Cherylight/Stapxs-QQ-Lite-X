@@ -8,7 +8,7 @@
 -->
 <template>
     <div>
-        <div style="margin-top: 15px;" />
+        <div style="margin-top: 15px" />
         <header v-show="sideBarState === 'open'" class="side-bar-header">
             <div class="base only">
                 <span>{{ $t('收纳盒') }}</span>
@@ -20,7 +20,8 @@
                     v-auto-focus
                     v-search="searchInfo"
                     type="text"
-                    :placeholder="$t('搜索 ……')">
+                    :placeholder="$t('搜索 ……')"
+                />
                 <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
             </label>
         </header>
@@ -29,20 +30,27 @@
                 <BoxBody
                     :data="BubbleBox.instance"
                     from="friend"
-                    @user-click="session=>changeSession(session, BubbleBox.instance)" />
+                    @user-click="
+                        (session) => changeSession(session, BubbleBox.instance)
+                    "
+                />
                 <BoxBody
                     v-for="box in SessionBox.sessionBoxes"
                     :key="box.id"
-                    v-menu.prevent="event => openFriendMenu(
-                        event.x,
-                        event.y,
-                        'friend',
-                        undefined,
-                        box
-                    )"
+                    v-menu.prevent="
+                        (event) =>
+                            openFriendMenu(
+                                event.x,
+                                event.y,
+                                'friend',
+                                undefined,
+                                box,
+                            )
+                    "
                     :data="box"
                     from="friend"
-                    @user-click="session=>changeSession(session, box)" />
+                    @user-click="(session) => changeSession(session, box)"
+                />
             </template>
             <!-- 搜索用的 -->
             <template v-else>
@@ -50,13 +58,14 @@
                     v-for="box in searchInfo.query"
                     :key="box.id"
                     :data="box"
-                    from="friend" />
+                    from="friend"
+                />
             </template>
         </div>
     </div>
 </template>
 
-<script setup lang="tsx">
+<script setup lang="ts">
 import BoxBody from '@renderer/components/BoxBody.vue'
 
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
@@ -66,10 +75,7 @@ import { popBox } from '@renderer/function/utils/popBox'
 import { vAutoFocus, vMenu, vSearch } from '@renderer/function/utils/vcmd'
 import { i18n } from '@renderer/main'
 import ConfigBox from '@renderer/components/popBox/ConfigBox.vue'
-import {
-    markRaw,
-    shallowReactive,
-} from 'vue'
+import { markRaw, shallowReactive } from 'vue'
 
 const $t = i18n.global.t
 

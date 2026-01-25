@@ -15,126 +15,153 @@
 
 <template>
     <div>
-        <div v-if="item instanceof XmlSeg"
+        <div
+            v-if="item instanceof XmlSeg"
             @click="View.cardClick('xml-' + id)"
-            v-html="View.buildXML(item.data, item.id, id)" />
+            v-html="View.buildXML(item.data, item.id, id)"
+        />
         <div v-else>
-            <div v-if="info?.type == 'default'"
+            <div
+                v-if="info?.type == 'default'"
                 @click="View.cardClick('json-' + id)"
-                v-html="buildJSON(info, id)" />
-            <div v-else-if="info?.type == 'tencent.map'"
+                v-html="buildJSON(info, id)"
+            />
+            <div
+                v-else-if="info?.type == 'tencent.map'"
                 v-once
                 class="msg-comp-map"
-                @click="View.cardClick('map-' + id)">
+                @click="View.cardClick('map-' + id)"
+            >
                 <p>{{ info.app.title }}</p>
                 <span>{{ info.app.desc }}</span>
-                <div :id="'map-' + id"
+                <div
+                    :id="'map-' + id"
                     class="map"
                     :data-url="createMap()"
-                    data-urlOpenType="_self" />
+                    data-urlOpenType="_self"
+                />
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-    import app from '@renderer/main'
+import app from '@renderer/main'
 
-    import { defineComponent } from 'vue'
-    import { MsgBodyFuns as ViewFuns } from '@renderer/function/model/msg-body'
-    import { JsonSeg, XmlSeg } from '@renderer/function/model/seg'
+import { defineComponent } from 'vue'
+import { MsgBodyFuns as ViewFuns } from '@renderer/function/model/msg-body'
+import { JsonSeg, XmlSeg } from '@renderer/function/model/seg'
 
-    export default defineComponent({
-        name: 'CardMessage',
-        components: {},
-        props: {
-            item: {
-                type: [XmlSeg,JsonSeg],
-                required: true,
-            },
-            id: {
-                type: String,
-                required: true,
-            }
+export default defineComponent({
+    name: 'CardMessage',
+    components: {},
+    props: {
+        item: {
+            type: [XmlSeg, JsonSeg],
+            required: true,
         },
-		emits: {
-			'page-view': (_arg1: any, _arg2: any) => true,
-		},
-        data() {
-            return {
-                View: ViewFuns,
-                info: ViewFuns.getJSONType(this),
-                JsonSeg,
-                XmlSeg,
-            }
+        id: {
+            type: String,
+            required: true,
         },
-        methods: {
-            /**
-             * 构建基础 JSON 消息
-             * @param info 卡片信息
-             * @param id 消息 ID
-             */
-            buildJSON(data: any, id: string) {
-                try {
-                    const info = data.app
-                    const div = document.createElement('div')
-                    // 构建 HTML
-                    const html = '<p>' + info.title +
-                        '</p>' + '<span>' + info.desc + '</span>' +
-                        '<img style="' + (info.preview === undefined ? 'display:none' : '') + '" src="' + info.preview + '">' +
-                        (info.name? '<div><img src="' + info.icon + '"><span>' + info.name + '</span></div>': '')
-                    div.className = 'msg-json'
-                    div.id = 'json-' + id
-                    div.dataset.url = info.url
-                    div.dataset.urlOpenType = info.urlOpenType
-                    div.innerHTML = html
-                    // 附加信息
-                    if (Object.keys(data.append).length > 0) {
-                        // 将 append 里的信息附加到 div 上
-                        for (const key in data.append) {
-                            div.dataset[key] = data.append[key]
-                        }
+    },
+    emits: {
+        'page-view': (_arg1: any, _arg2: any) => true,
+    },
+    data() {
+        return {
+            View: ViewFuns,
+            info: ViewFuns.getJSONType(this),
+            JsonSeg,
+            XmlSeg,
+        }
+    },
+    methods: {
+        /**
+         * 构建基础 JSON 消息
+         * @param info 卡片信息
+         * @param id 消息 ID
+         */
+        buildJSON(data: any, id: string) {
+            try {
+                const info = data.app
+                const div = document.createElement('div')
+                // 构建 HTML
+                const html =
+                    '<p>' +
+                    info.title +
+                    '</p>' +
+                    '<span>' +
+                    info.desc +
+                    '</span>' +
+                    '<img style="' +
+                    (info.preview === undefined ? 'display:none' : '') +
+                    '" src="' +
+                    info.preview +
+                    '">' +
+                    (info.name
+                        ? '<div><img src="' +
+                          info.icon +
+                          '"><span>' +
+                          info.name +
+                          '</span></div>'
+                        : '')
+                div.className = 'msg-json'
+                div.id = 'json-' + id
+                div.dataset.url = info.url
+                div.dataset.urlOpenType = info.urlOpenType
+                div.innerHTML = html
+                // 附加信息
+                if (Object.keys(data.append).length > 0) {
+                    // 将 append 里的信息附加到 div 上
+                    for (const key in data.append) {
+                        div.dataset[key] = data.append[key]
                     }
-                    // 返回
-                    return div.outerHTML
-                } catch (ex) {
-                    return ('<span v-else class="msg-unknown">( ' + app.config.globalProperties.$t('解析消息错误') + ': json )</span>')
                 }
-            },
-
-            /**
-             * 创建高德地图模块
-             */
-            createMap() {
-                const json = JSON.parse(this.item.data)
-                window.createMap(import.meta.env.VITE_APP_AMAP_KEY, this.id, {
-                    lat: json.meta['Location.Search'].lat,
-                    lng: json.meta['Location.Search'].lng,
-                })
-                return this.info?.app.url
-            },
+                // 返回
+                return div.outerHTML
+            } catch {
+                return (
+                    '<span v-else class="msg-unknown">( ' +
+                    app.config.globalProperties.$t('解析消息错误') +
+                    ': json )</span>'
+                )
+            }
         },
-    })
+
+        /**
+         * 创建高德地图模块
+         */
+        createMap() {
+            const json = JSON.parse(this.item.data)
+            window.createMap(import.meta.env.VITE_APP_AMAP_KEY, this.id, {
+                lat: json.meta['Location.Search'].lat,
+                lng: json.meta['Location.Search'].lng,
+            })
+            return this.info?.app.url
+        },
+    },
+})
 </script>
 
 <style scoped>
-    .msg-comp-map {
-        cursor: pointer;
-    }
-    .msg-comp-map > p {
-        font-weight: bold;
-        margin-bottom: 0;
-    }
-    .msg-comp-map > span {
-        font-size: 0.9rem;
-        opacity: 0.7;
-    }
-    .msg-comp-map > div.map {
-        height: 200px;
-        border-radius: 7px;
-        margin-top: 10px;
-        width: 400px;
-        max-width: calc(100vw - 150px);
-        pointer-events: none;
-    }
+.msg-comp-map {
+    cursor: pointer;
+}
+.msg-comp-map > p {
+    font-weight: bold;
+    margin-bottom: 0;
+}
+.msg-comp-map > span {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+.msg-comp-map > div.map {
+    height: 200px;
+    border-radius: 7px;
+    margin-top: 10px;
+    width: 400px;
+    max-width: calc(100vw - 150px);
+    pointer-events: none;
+}
 </style>

@@ -1,47 +1,67 @@
 <template>
-    <div class="chat-bottom"
+    <div
+        class="chat-bottom"
         :class="{ hide: hide }"
         :style="{
             '--open-reply': inputMsg.reply ? '1' : '0',
             '--input-height': textAreaHeight + 'px',
-            '--input-pan-height': inputPanHeight + 'px'
+            '--input-pan-height': inputPanHeight + 'px',
         }"
         @mouseenter="hoverStart()"
-        @mouseleave="hoverEnd()">
+        @mouseleave="hoverEnd()"
+    >
         <!-- 表情面板 -->
         <Transition name="pan">
-            <FacePan v-show="details === 'face' && !focusHide" class="chat-bottom-pan"
-                @send-msg="sendMsg" />
+            <FacePan
+                v-show="details === 'face' && !focusHide"
+                class="chat-bottom-pan"
+                @send-msg="sendMsg"
+            />
         </Transition>
         <!-- 精华消息 -->
         <Transition v-if="session instanceof GroupSession" name="pan">
-            <EssenceMsgsPan v-show="details === 'essence' && !focusHide" :key="session.id"
-                class="chat-bottom-pan" :session="session" @close="switchDetail('essence')" />
+            <EssenceMsgsPan
+                v-show="details === 'essence' && !focusHide"
+                :key="session.id"
+                class="chat-bottom-pan"
+                :session="session"
+                @close="switchDetail('essence')"
+            />
         </Transition>
         <!-- 定位点 -->
         <div id="chat-bottom-top" />
         <!-- 图片指示器 -->
         <Transition name="img-pan">
-            <div v-show="inputMsg.imgCache.size > 0 && !focusHide"
+            <div
+                v-show="inputMsg.imgCache.size > 0 && !focusHide"
                 :class="{
                     'img-pan': true,
                     'ss-card': true,
                 }"
-                @wheel="($event.currentTarget as HTMLElement).scrollLeft += $event.deltaY">
+                @wheel="
+                    ($event.currentTarget as HTMLElement).scrollLeft +=
+                        $event.deltaY
+                "
+            >
                 <div class="imgs">
-                    <div v-for="[key, value] in inputMsg.imgCache"
-                        :key="'imgCache-' + key">
+                    <div
+                        v-for="[key, value] in inputMsg.imgCache"
+                        :key="'imgCache-' + key"
+                    >
                         <div class="img-btns">
                             <div @click="editImg(key)">
                                 <font-awesome-icon :icon="['fas', 'pencil']" />
                             </div>
-                            <hr>
+                            <hr />
                             <div @click="inputMsg.rmImg(key)">
-                                <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'xmark']" />
+                                <font-awesome-icon
+                                    style="color: var(--color-red)"
+                                    :icon="['fas', 'xmark']"
+                                />
                             </div>
                         </div>
                         <div class="img">
-                            <img :src="value" :alt="`[SQ:${key}]`">
+                            <img :src="value" :alt="`[SQ:${key}]`" />
                         </div>
                         <span>[SQ:{{ key }}]</span>
                     </div>
@@ -52,59 +72,76 @@
         <div ref="input-pan" class="input-pan ss-card">
             <!-- 更多功能 -->
             <div class="more-detail">
-                <div
-                    :title="$t('图片')"
-                    @click="selectImg">
+                <div :title="$t('图片')" @click="selectImg">
                     <font-awesome-icon :icon="['fas', 'image']" />
                 </div>
-                <div v-if="!(session instanceof TempSession)"
+                <div
+                    v-if="!(session instanceof TempSession)"
                     :title="$t('文件')"
-                    @click="selectFile">
+                    @click="selectFile"
+                >
                     <font-awesome-icon :icon="['fas', 'folder']" />
                 </div>
                 <div
                     :title="$t('表情')"
-                    :class="{'select': details === 'face'}"
-                    @click="switchDetail('face')">
+                    :class="{ select: details === 'face' }"
+                    @click="switchDetail('face')"
+                >
                     <font-awesome-icon :icon="['fas', 'face-laugh']" />
                 </div>
-                <div v-if="session instanceof UserSession"
+                <div
+                    v-if="session instanceof UserSession"
                     :title="$t('戳一戳')"
-                    @click="emit('sendPoke', session.baseUser)">
+                    @click="emit('sendPoke', session.baseUser)"
+                >
                     <font-awesome-icon :icon="['fas', 'fa-hand-point-up']" />
                 </div>
-                <div v-if="session instanceof GroupSession"
-                    :class="{'select': details === 'essence'}"
-                    :title="$t('精华消息')" @click="switchDetail('essence')">
+                <div
+                    v-if="session instanceof GroupSession"
+                    :class="{ select: details === 'essence' }"
+                    :title="$t('精华消息')"
+                    @click="switchDetail('essence')"
+                >
                     <font-awesome-icon :icon="['fas', 'star']" />
                 </div>
                 <div class="space" />
-                <div class="send"
-                    :class="{'disable': inputMsg.isVoid}"
-                    :title="inputMsg.isVoid ? $t('空消息不可以发送哦～') : $t('发送消息')"
-                    @click="sendMsg()">
+                <div
+                    class="send"
+                    :class="{ disable: inputMsg.isVoid }"
+                    :title="
+                        inputMsg.isVoid
+                            ? $t('空消息不可以发送哦～')
+                            : $t('发送消息')
+                    "
+                    @click="sendMsg()"
+                >
                     <span>{{ $t('发送') }}</span>
                     <font-awesome-icon :icon="['fas', 'angle-right']" />
                 </div>
             </div>
-            <hr>
+            <hr />
             <!-- At 指示器 -->
             <div
                 ref="find-bar"
                 class="at-tag"
                 :class="{
-                    'show': atFindMode
-                }">
-                <div v-for="item, id in atFindList"
+                    show: atFindMode,
+                }"
+            >
+                <div
+                    v-for="(item, id) in atFindList"
                     :key="'atFind-' + item.user_id"
                     ref="at-find-items"
-                    :class="{selected: atSelected === id}"
-                    @click="choiceAt(id)">
-                    <img :src="item.face" :alt="item.name">
+                    :class="{ selected: atSelected === id }"
+                    @click="choiceAt(id)"
+                >
+                    <img :src="item.face" :alt="item.name" />
                     <div>
                         <span>{{ item.name }}</span>
-                        <span v-if="item.role !== Role.User || item.title"
-                            v-user-role="item.role">
+                        <span
+                            v-if="item.role !== Role.User || item.title"
+                            v-user-role="item.role"
+                        >
                             <template v-if="item.title">
                                 {{ item.title }}
                             </template>
@@ -126,10 +163,12 @@
                 </div>
             </div>
             <!-- 回复指示器 -->
-            <div :class="{
-                'input-special-tag': true,
-                'show': inputMsg.reply
-            }">
+            <div
+                :class="{
+                    'input-special-tag': true,
+                    show: inputMsg.reply,
+                }"
+            >
                 <font-awesome-icon :icon="['fas', 'reply']" />
                 <span>
                     {{ inputMsg.reply?.preMsg }}
@@ -140,11 +179,20 @@
             </div>
             <!-- 消息发送框 -->
             <div class="input">
-                <div v-if="session.isActive && session instanceof GroupSession && session.getMe().banTime"
+                <div
+                    v-if="
+                        session.isActive &&
+                        session instanceof GroupSession &&
+                        session.getMe().banTime
+                    "
                     class="ban"
-                    :u="update">
+                    :u="update"
+                >
                     <font-awesome-icon :icon="['fas', 'ban']" />
-                    {{ $t('禁言ing...剩余时间:') + session.getMe().banTime?.format() }}
+                    {{
+                        $t('禁言ing...剩余时间:') +
+                        session.getMe().banTime?.format()
+                    }}
                 </div>
                 <textarea
                     v-else
@@ -157,7 +205,8 @@
                     @keyup="mainKeyUp"
                     @click="selectSQIn()"
                     @compositionstart="handleCompositionStart"
-                    @compositionend="handleCompositionEnd" />
+                    @compositionend="handleCompositionEnd"
+                />
             </div>
         </div>
     </div>
@@ -168,7 +217,12 @@ import EssenceMsgsPan from '@renderer/components/EssenceMsgsPan.vue'
 import FacePan from '@renderer/components/FacePan.vue'
 
 import { IUser, Member } from '@renderer/function/model/user'
-import { GroupSession, Session, TempSession, UserSession } from '@renderer/function/model/session'
+import {
+    GroupSession,
+    Session,
+    TempSession,
+    UserSession,
+} from '@renderer/function/model/session'
 import { logger, popInfo } from '@renderer/function/base'
 import imageCompression from 'browser-image-compression'
 import app from '@renderer/main'
@@ -176,7 +230,15 @@ import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
 import { delay } from '@renderer/function/utils/systemUtil'
 import { runtimeData } from '@renderer/function/msg'
 import { AtSeg } from '@renderer/function/model/seg'
-import { useTemplateRef, shallowRef, nextTick, inject, TemplateRef, computed, watchEffect } from 'vue'
+import {
+    useTemplateRef,
+    shallowRef,
+    nextTick,
+    inject,
+    TemplateRef,
+    computed,
+    watchEffect,
+} from 'vue'
 import Viewer from '../Viewer.vue'
 import { Role } from '@renderer/function/adapter/enmu'
 import { vUserRole } from '@renderer/function/utils/vcmd'
@@ -186,30 +248,31 @@ import { uploadFile } from '@renderer/function/input'
 import { InputMsg } from '@renderer/function/model/inputMsg'
 import { useFrame, useUpdate } from '@renderer/function/utils/vuse'
 
-const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> = inject('viewer')!
+const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
+    inject('viewer')!
 
 const { session, focusHide = false } = defineProps<{
     session: Session
-	focusHide?: boolean
+    focusHide?: boolean
 }>()
 const inputMsg = defineModel<InputMsg>({ required: true })
 
 const emit = defineEmits<{
-    sendPoke: [user: IUser],
-    scrollBottom: [smooth: boolean],
+    sendPoke: [user: IUser]
+    scrollBottom: [smooth: boolean]
 }>()
 
 const atFindMode = shallowRef(false)
 const atFindList = shallowRef<Member[]>([])
 const atSelected = shallowRef<number>(0)
-const details = shallowRef<'face'|'essence'|undefined>()
+const details = shallowRef<'face' | 'essence' | undefined>()
 const onAtFind = shallowRef(false)
 const inputPanHeight = shallowRef(0)
 const update = useUpdate()
 
-const textAreaHeight = computed(()=>{
+const textAreaHeight = computed(() => {
     if (!inputMsg.value.content) return 0
-    inputMsg.value.content
+    void inputMsg.value.content
     if (!mainInput.value) return 0
     const dom = mainInput.value as HTMLTextAreaElement
     dom.style.height = 'auto'
@@ -219,9 +282,11 @@ const textAreaHeight = computed(()=>{
 })
 
 const hover = shallowRef(false)
-const sendTimeout = shallowRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-const hide = computed<boolean>(()=>{
-	if (focusHide) return true
+const sendTimeout = shallowRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+)
+const hide = computed<boolean>(() => {
+    if (focusHide) return true
     if (!runtimeData.sysConfig.hide_chat_bottom) return false
     if (sendTimeout.value) return false
     if (compositionTag.value) return false
@@ -240,19 +305,19 @@ function $t(key: string): string {
 
 let lastInputVoid = inputMsg.value.isVoid
 // 延迟1s隐藏
-watchEffect(()=>{
+watchEffect(() => {
     if (lastInputVoid === inputMsg.value.isVoid) return
     lastInputVoid = inputMsg.value.isVoid
     if (!inputMsg.value.isVoid) return
 
     clearTimeout(sendTimeout.value)
-    sendTimeout.value = setTimeout(()=>{
+    sendTimeout.value = setTimeout(() => {
         sendTimeout.value = undefined
     }, 500)
 })
 
 // 计算输入框高度
-useFrame(()=>{
+useFrame(() => {
     if (!inputPan.value) return
     inputPanHeight.value = (inputPan.value as HTMLElement).offsetHeight
 })
@@ -269,10 +334,10 @@ function init() {
  * 切换辅助面板
  * @param detail
  */
-function switchDetail(detail: 'face'|'essence' | undefined) {
-    if (details.value === detail){
+function switchDetail(detail: 'face' | 'essence' | undefined) {
+    if (details.value === detail) {
         details.value = undefined
-    }else {
+    } else {
         details.value = undefined
         // 等待消失动画
         setTimeout(() => {
@@ -309,7 +374,7 @@ function mainKeyDown(event: KeyboardEvent) {
     }
 
     if (event.key !== 'Enter') return
-    if (compositionTag.value) return      // 乱七八糟的输入法忽略
+    if (compositionTag.value) return // 乱七八糟的输入法忽略
     let canSend = false
     switch (runtimeData.sysConfig.send_key) {
         case 'none':
@@ -342,18 +407,24 @@ function mainKeyDown(event: KeyboardEvent) {
     // meta + enter
     // alt + enter
     // 上述组合不自带enter,需要手动补充
-    if(canSend) {
+    if (canSend) {
         event.preventDefault()
         event.stopPropagation()
         sendMsg()
-    } else if(event.key === 'Enter' &&
-        (event.ctrlKey || event.metaKey || event.altKey)) {
+    } else if (
+        event.key === 'Enter' &&
+        (event.ctrlKey || event.metaKey || event.altKey)
+    ) {
         // 否则触发回车逻辑，补充换行
         inputMsg.value.content += '\n'
     }
 }
 function mainKeyUp(event: KeyboardEvent) {
-    if (event.key === '@' && !onAtFind.value && session instanceof GroupSession) {
+    if (
+        event.key === '@' &&
+        !onAtFind.value &&
+        session instanceof GroupSession
+    ) {
         logger.add('UI', '开始匹配群成员列表 ……')
         atFindMode.value = true
     }
@@ -374,13 +445,10 @@ function sendMsg() {
     //               ^^^^^^^ 0 ^^^^^^^   ^^^^^^^^^^ 1 ^^^^^^^^^^
     // 在发送操作触发之后，将会解析此条字符串排列出最终需要发送的消息结构用于发送。
 
-    sendMsgRaw(
-        session,
-        inputMsg.value.render(),
-    )
+    sendMsgRaw(session, inputMsg.value.render())
     // 发送后事务
     inputMsg.value.clear()
-    nextTick(async ()=>{
+    nextTick(async () => {
         await delay(100)
         emit('scrollBottom', true)
     })
@@ -405,11 +473,7 @@ function selectSQIn() {
     for (const sq of inputMsg.value.sqList) {
         const start = inputMsg.value.content.indexOf(sq)
         const end = start + sq.length
-        if (
-            start !== -1 &&
-            cursorPosition > start &&
-            cursorPosition < end
-        ) {
+        if (start !== -1 && cursorPosition > start && cursorPosition < end) {
             nextTick(() => {
                 mainInput.value!.selectionStart = start
                 mainInput.value!.selectionEnd = end
@@ -421,7 +485,7 @@ function selectSQIn() {
 
 //#region == At相关 ============================================
 // 搜索at信息
-watchEffect(()=>{
+watchEffect(() => {
     if (!atFindMode.value) return
 
     const content = inputMsg.value.content
@@ -442,33 +506,27 @@ watchEffect(()=>{
 
     // 搜索过滤
     const members = (session as GroupSession).memberList
-    atFindList.value = members.filter(m=>m.match(search))
+    atFindList.value = members.filter((m) => m.match(search))
     // 重置选择位置
     if (atSelected.value >= atFindList.value.length) {
         atSelected.value = atFindList.value.length - 1
     }
 })
 // 限制选择的范围
-watchEffect(()=>{
-    if (atSelected.value < 0)
-        atSelected.value = atFindList.value.length - 1
-    if (atSelected.value >= atFindList.value.length)
-        atSelected.value = 0
+watchEffect(() => {
+    if (atSelected.value < 0) atSelected.value = atFindList.value.length - 1
+    if (atSelected.value >= atFindList.value.length) atSelected.value = 0
 
     // 出界滚动
     const container = atFindBar.value
     const item = atFindItems.value?.[atSelected.value]
     if (!container || !item) return
-    nextTick(()=>fitScroll(container, item))
+    nextTick(() => fitScroll(container, item))
 })
 function keyCheck(event: KeyboardEvent): boolean {
     if (!atFindMode.value) return false
-    if (
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.shiftKey
-    ) return false
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+        return false
     switch (event.key) {
         case 'ArrowDown':
             // 下移
@@ -507,7 +565,8 @@ function choiceAt(id: number) {
 
     // 删除输入框内的 At 文本
     inputMsg.value.content = inputMsg.value.content.substring(
-        0, inputMsg.value.content.lastIndexOf('@')
+        0,
+        inputMsg.value.content.lastIndexOf('@'),
     )
     // 添加 at 信息
     inputMsg.value.addSq(new AtSeg(member.user_id))
@@ -533,11 +592,7 @@ function addImg(event: ClipboardEvent) {
     if (!(event.clipboardData && event.clipboardData.items)) {
         return
     }
-    for (
-        let i = 0, len = event.clipboardData.items.length;
-        i < len;
-        i++
-    ) {
+    for (let i = 0, len = event.clipboardData.items.length; i < len; i++) {
         const item = event.clipboardData.items[i]
         if (item.kind === 'file') {
             const file = item.getAsFile()
@@ -571,10 +626,7 @@ async function setImg(file: File) {
         const options = { maxSizeMB: 3, useWebWorker: true }
         try {
             popInfo.info($t('正在压缩图片 ……'))
-            const compressedFile = await imageCompression(
-                file,
-                options,
-            )
+            const compressedFile = await imageCompression(file, options)
             logger.info(
                 '图片压缩成功，原大小：' +
                     file.size / 1024 / 1024 +
@@ -602,12 +654,12 @@ function fileToDataURL(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader()
 
-        reader.onload = function(event) {
+        reader.onload = function (event) {
             if (!event.target) reject(new Error('读取文件失败'))
             else resolve(event.target.result as string) // 这就是 data URL
         }
 
-        reader.onerror = function(error) {
+        reader.onerror = function (error) {
             reject(error)
         }
 
@@ -665,7 +717,7 @@ function hoverEnd(event?: MouseEvent) {
     if (dTime <= 0) {
         hover.value = false
         staticTime = undefined
-    }else {
+    } else {
         hoverTimeout = setTimeout(() => {
             hover.value = false
             staticTime = undefined
@@ -681,18 +733,18 @@ defineExpose({
 </script>
 
 <style scoped>
-    /* 更多功能面板动画 */
-    .pan-enter-active,
-    .pan-leave-active {
-        transition: opacity 0.3s;
-    }
+/* 更多功能面板动画 */
+.pan-enter-active,
+.pan-leave-active {
+    transition: opacity 0.3s;
+}
 
-    .pan-enter-from {
-        transform: translateX(20px);
-        opacity: 0;
-    }
+.pan-enter-from {
+    transform: translateX(20px);
+    opacity: 0;
+}
 
-    .pan-leave-to {
-        opacity: 0;
-    }
+.pan-leave-to {
+    opacity: 0;
+}
 </style>

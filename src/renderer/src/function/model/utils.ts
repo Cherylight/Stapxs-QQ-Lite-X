@@ -48,22 +48,22 @@ export function formatTime(time: number,
         else switch (config) {
             case 'year':
                 timeConfig.year = 'numeric'
-            // eslint-disable-next-line no-fallthrough
+             
             case 'month':
                 timeConfig.month = '2-digit'
-            // eslint-disable-next-line no-fallthrough
+             
             case 'week':
                 if (config === 'week') timeConfig.weekday = 'short'
-            // eslint-disable-next-line no-fallthrough
+             
             case 'day':
                 timeConfig.day = '2-digit'
-            // eslint-disable-next-line no-fallthrough
+             
             case 'hour':
                 timeConfig.hour = 'numeric'
-            // eslint-disable-next-line no-fallthrough
+             
             case 'minute':
                 timeConfig.minute = 'numeric'
-            // eslint-disable-next-line no-fallthrough
+             
             case 'second':
                 timeConfig.second = 'numeric'
                 break

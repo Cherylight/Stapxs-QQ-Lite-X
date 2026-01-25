@@ -35,18 +35,17 @@ import { pastTimeFormat } from './systemUtil'
  * }
  */
 export function useStayEvent<T extends Event, C>(
-    getPos: (event: T) => { x: number, y: number } | void,
+    getPos: (event: T) => { x: number; y: number } | void,
     hooks: {
-        onFit?: ((eventData: MenuEventData, ctx: C) => void) |
-        ((eventData: MenuEventData) => void) |
-        ((ctx: C) => void) |
-        (() => void)
-        onLeave?: ((ctx: C) => void) |
-        (() => void)
-        onFail?: ((ctx: C) => void) |
-        (() => void)
+        onFit?:
+            | ((eventData: MenuEventData, ctx: C) => void)
+            | ((eventData: MenuEventData) => void)
+            | ((ctx: C) => void)
+            | (() => void)
+        onLeave?: ((ctx: C) => void) | (() => void)
+        onFail?: ((ctx: C) => void) | (() => void)
     },
-    continueTime: number
+    continueTime: number,
 ): {
     handle: (event: T, ctx?: C | undefined) => void
     handleEnd: (event: T) => void
@@ -56,7 +55,7 @@ export function useStayEvent<T extends Event, C>(
     // 表示是否符合条件
     let fit: boolean = false
     // 记录开始位置
-    let startPos: { x: number, y: number } | undefined = undefined
+    let startPos: { x: number; y: number } | undefined = undefined
     // settiemout
     let timeout: number
     // 开始时事件数据
@@ -75,7 +74,7 @@ export function useStayEvent<T extends Event, C>(
         fit = false
         end = false
         ctx = _ctx
-        startPos = getPos(event) as { x: number, y: number }
+        startPos = getPos(event) as { x: number; y: number }
         if (!startPos) return
         startEventData = {
             x: startPos.x,
@@ -93,8 +92,10 @@ export function useStayEvent<T extends Event, C>(
         if (!pos) return
         if (!startPos) return
         // 位置改变
-        if (Math.abs(pos.x - startPos.x) > 10 ||
-            Math.abs(pos.y - startPos.y) > 10) {
+        if (
+            Math.abs(pos.x - startPos.x) > 10 ||
+            Math.abs(pos.y - startPos.y) > 10
+        ) {
             _setEnd()
         }
     }
@@ -113,29 +114,31 @@ export function useStayEvent<T extends Event, C>(
     }
     const _callFit = () => {
         if (hooks.onFit?.length === 0) {
-            (hooks.onFit as () => void)()
+            ;(hooks.onFit as () => void)()
         } else if (hooks.onFit?.length === 1) {
             let arg
             if (ctx) arg = ctx
             else arg = startEventData
-
             ;(hooks.onFit as (arg: MenuEventData | C) => void)(arg)
         } else if (hooks.onFit?.length === 2) {
-            (hooks.onFit as (eventData: MenuEventData, ctx?: C) => void)(startEventData, ctx)
+            ;(hooks.onFit as (eventData: MenuEventData, ctx?: C) => void)(
+                startEventData,
+                ctx,
+            )
         }
     }
     const _callLeave = () => {
         if (hooks.onLeave?.length === 0) {
-            (hooks.onLeave as () => void)()
+            ;(hooks.onLeave as () => void)()
         } else if (hooks.onLeave?.length === 1) {
-            (hooks.onLeave as (ctx?: C) => void)(ctx)
+            ;(hooks.onLeave as (ctx?: C) => void)(ctx)
         }
     }
     const _callFail = () => {
         if (hooks.onFail?.length === 0) {
-            (hooks.onFail as () => void)()
+            ;(hooks.onFail as () => void)()
         } else if (hooks.onFail?.length === 1) {
-            (hooks.onFail as (ctx?: C) => void)(ctx)
+            ;(hooks.onFail as (ctx?: C) => void)(ctx)
         }
     }
     return {
@@ -150,7 +153,10 @@ export function useStayEvent<T extends Event, C>(
  * @param delay 延迟时间，默认 500ms
  * @returns 返回一个Ref对象，当尝过delay时长未更新后更新
  */
-export function useBaseDebounced<T>(getValue: () => T, delay: number = 500): ShallowRef<T> {
+export function useBaseDebounced<T>(
+    getValue: () => T,
+    delay: number = 500,
+): ShallowRef<T> {
     const result: ShallowRef<T> = shallowRef(getValue())
     let timeout: ReturnType<typeof setTimeout>
     watch(getValue, (newValue) => {
@@ -170,7 +176,7 @@ export function useBaseDebounced<T>(getValue: () => T, delay: number = 500): Sha
  */
 export function useInterval(
     callback: () => void,
-    interval: number
+    interval: number,
 ): ReturnType<typeof setInterval> {
     const timer = setInterval(callback, interval)
     onUnmounted(() => {
@@ -184,7 +190,7 @@ export function useInterval(
  * @param callback
  * @returns 一个停止函数
  */
-export function useFrame(callback: () => void): ()=>void {
+export function useFrame(callback: () => void): () => void {
     let stopFlag = false
     const loop = () => {
         callback()
@@ -192,8 +198,8 @@ export function useFrame(callback: () => void): ()=>void {
         requestAnimationFrame(loop)
     }
     requestAnimationFrame(loop)
-    onUnmounted(_ => stopFlag = true)
-    return () => stopFlag = true
+    onUnmounted((_) => (stopFlag = true))
+    return () => (stopFlag = true)
 }
 
 export function usePasttime(time: number): ComputedRef<string> {
@@ -202,7 +208,7 @@ export function usePasttime(time: number): ComputedRef<string> {
         trigger.value++
     }, 1000 * 10)
     return computed(() => {
-        trigger.value
+        void trigger.value
         return pastTimeFormat(time)
     })
 }
@@ -214,31 +220,35 @@ export function usePasttime(time: number): ComputedRef<string> {
  * @param callback 回调
  */
 export function useEventListener<T extends keyof DocumentEventMap>(
-    target: Document|Window,
+    target: Document | Window,
     event: T,
     callback: (event: DocumentEventMap[T]) => void,
-    capture?: boolean
+    capture?: boolean,
 ): void
 export function useEventListener(
-    target: Document|Window,
+    target: Document | Window,
     event: Exclude<string, keyof DocumentEventMap>,
     callback: ((event: Event) => void) | ((event: CustomEvent) => void),
-    capture?: boolean
+    capture?: boolean,
 ): void
 export function useEventListener(
-    target: Document|Window,
+    target: Document | Window,
     event: string,
     callback: (event: any) => void,
-    capture: boolean = false
+    capture: boolean = false,
 ): void {
     onMounted(() => target.addEventListener(event, callback, { capture }))
     onUnmounted(() => target.removeEventListener(event, callback, { capture }))
 }
 
-let viewportUnitsCache: { vw: ShallowRef<number>, vh: ShallowRef<number> } | undefined
-export function useViewportUnits(): { vw: ShallowRef<number>, vh: ShallowRef<number> } {
-    if (viewportUnitsCache)
-        return viewportUnitsCache
+let viewportUnitsCache:
+    | { vw: ShallowRef<number>; vh: ShallowRef<number> }
+    | undefined
+export function useViewportUnits(): {
+    vw: ShallowRef<number>
+    vh: ShallowRef<number>
+} {
+    if (viewportUnitsCache) return viewportUnitsCache
 
     const vw = shallowRef(window.innerWidth / 100)
     const vh = shallowRef(window.innerHeight / 100)
@@ -266,7 +276,9 @@ export function useViewportUnits(): { vw: ShallowRef<number>, vh: ShallowRef<num
  * @param keys 按键
  * @param callback 回调，返回true则阻断事件传播
  */
-export function useKeyboard(...args: [string, ...string[], () => boolean | undefined | void]) {
+export function useKeyboard(
+    ...args: [string, ...string[], () => boolean | undefined | void]
+) {
     if (args.length > 2) {
         const cb = args.at(-1) as () => boolean | undefined
         for (const key of args.slice(0, -1)) {
@@ -276,7 +288,10 @@ export function useKeyboard(...args: [string, ...string[], () => boolean | undef
         return
     }
     // 支持组合键，如 'ctrl+shift+alt+s' 或 'a+b+c'
-    const keyList = args[0].toLowerCase().split('+').map(k => k.trim())
+    const keyList = args[0]
+        .toLowerCase()
+        .split('+')
+        .map((k) => k.trim())
     const cb = args[1] as () => boolean | undefined
     const modifierKeys = ['ctrl', 'shift', 'alt', 'meta']
 
@@ -323,9 +338,13 @@ export function useLocalStorage<T>(key: string, defaultValue: T): Ref<T> {
     }
     const storageData = localStorage.getItem(key)
     const data = ref<T>(storageData ? parser(storageData) : defaultValue)
-    watch(data, (newValue) => {
-        localStorage.setItem(key, serializer(newValue))
-    }, { deep: true })
+    watch(
+        data,
+        (newValue) => {
+            localStorage.setItem(key, serializer(newValue))
+        },
+        { deep: true },
+    )
     return data as Ref<T>
 }
 

@@ -13,22 +13,21 @@
             <input
                 v-auto-focus
                 v-search="searchInfo"
-                :placeholder="$t('搜索 ……')">
-            <button v-if="!multiselectMode"
-                @click="multiselectMode=true">
+                :placeholder="$t('搜索 ……')"
+            />
+            <button v-if="!multiselectMode" @click="multiselectMode = true">
                 多选
             </button>
-            <button v-if="multiselectMode"
-                @click="runForward">
-                发送
-            </button>
+            <button v-if="multiselectMode" @click="runForward">发送</button>
         </div>
         <div>
-            <TinySessionBody v-for="session in displaySession"
+            <TinySessionBody
+                v-for="session in displaySession"
                 :key="session.id"
                 :session="session"
                 :selected="selected.includes(session)"
-                @click="clickChat(session)" />
+                @click="clickChat(session)"
+            />
         </div>
     </div>
 </template>
@@ -57,7 +56,7 @@ import {
 
 //#region == 声明/导出变量 ===========================================================
 // 变量
-type MsgWhileSend = {session: Session, msgs: SelfMsg[]}[]
+type MsgWhileSend = { session: Session; msgs: SelfMsg[] }[]
 const { $t } = app.config.globalProperties
 const selected: ShallowRef<Session[]> = shallowRef([])
 const multiselectMode: ShallowRef<boolean> = shallowRef(false)
@@ -68,18 +67,17 @@ const searchInfo = shallowReactive({
     isSearch: false,
 })
 const displaySession = computed(() => {
-    refreshDisplaySession.value
+    void refreshDisplaySession.value
     const headSession = selected.value
-    const mainSession = searchInfo.isSearch ?searchInfo.query :searchInfo.originList
+    const mainSession = searchInfo.isSearch
+        ? searchInfo.query
+        : searchInfo.originList
     return [...headSession, ...mainSession]
 })
 
-const {
-    msgs,
-    type
-} = defineProps<{
-    msgs: Msg[],
-    type: 'single' | 'merge',
+const { msgs, type } = defineProps<{
+    msgs: Msg[]
+    type: 'single' | 'merge'
 }>()
 
 const emit = defineEmits<{
@@ -93,21 +91,24 @@ init()
 /**
  * 初始化乱七八糟的参数
  */
-function init(){
+function init() {
     const activeChat = Array.from(Session.activeSessions).sort((a, b) => {
         if (!a.preMessage?.time) return 1
         if (!b.preMessage?.time) return -1
         return b.preMessage.time.time - a.preMessage.time.time
     })
-    const allChat = Session.sessionList.filter(item => !activeChat.includes(item))
+    const allChat = Session.sessionList.filter(
+        (item) => !activeChat.includes(item),
+    )
 
     searchInfo.originList = shallowReactive([...activeChat, ...allChat])
-    multiselectMode.value = runtimeData.sysConfig.default_multiselect_forward ?? false
+    multiselectMode.value =
+        runtimeData.sysConfig.default_multiselect_forward ?? false
 }
 /**
  * 运行发送消息确认框
  */
-async function runForward(){
+async function runForward() {
     close()
     let previewMsg: SelfPreMsg[]
     let title: string
@@ -122,53 +123,57 @@ async function runForward(){
 
     popBox({
         title: title,
-        comp: () => h(
-            'div',
-            {style: {overflowY: 'auto'}},
-            [h(
-                MsgBar,
-                markRaw({
-                    msgs: previewMsg,
-                    canInteraction: false,
-                    showIcon: false,
-                    dimNonExistentMsg: false,
-                    withoutAvatar: true,
-                })
-            )]
-        ),
-        button: [{
-            text: $t('取消'),
-        }, {
-            text: $t('确定'),
-            master: true,
-            fun: async () => {
-                try {
-                    if (type === 'single') {
-                        whileSendMsg = await createSingleSendMsgs(msgs)
-                    } else {
-                        whileSendMsg = await createMergeSendMsg(msgs)
-                    }
-                    sendMsg(whileSendMsg)
-                    popInfo.info($t('转发成功'))
-                } catch (e) {
-                    logger.error(e as Error, '转发失败')
-                    popInfo.error( $t('转发失败'))
-                }
+        comp: () =>
+            h('div', { style: { overflowY: 'auto' } }, [
+                h(
+                    MsgBar,
+                    markRaw({
+                        msgs: previewMsg,
+                        canInteraction: false,
+                        showIcon: false,
+                        dimNonExistentMsg: false,
+                        withoutAvatar: true,
+                    }),
+                ),
+            ]),
+        button: [
+            {
+                text: $t('取消'),
             },
-        },],
+            {
+                text: $t('确定'),
+                master: true,
+                fun: async () => {
+                    try {
+                        if (type === 'single') {
+                            whileSendMsg = await createSingleSendMsgs(msgs)
+                        } else {
+                            whileSendMsg = await createMergeSendMsg(msgs)
+                        }
+                        sendMsg(whileSendMsg)
+                        popInfo.info($t('转发成功'))
+                    } catch (e) {
+                        logger.error(e as Error, '转发失败')
+                        popInfo.error($t('转发失败'))
+                    }
+                },
+            },
+        ],
     })
 
-    if(!runtimeData.sysConfig.jump_forward)return
-    if(selected.value.length > 1)return
+    if (!runtimeData.sysConfig.jump_forward) return
+    if (selected.value.length > 1) return
     const chat = selected.value[0]
-    nextTick(() => {changeSession(chat)})
+    nextTick(() => {
+        changeSession(chat)
+    })
 }
 /**
  * 直接发送消息的函数
  * @param msgs
  */
-async function sendMsg(msgs: MsgWhileSend){
-    const main = async (session: Session, msgs: SelfMsg[])=>{
+async function sendMsg(msgs: MsgWhileSend) {
+    const main = async (session: Session, msgs: SelfMsg[]) => {
         for (const msg of msgs) {
             await session.addMessage(msg)
             await msg.send()
@@ -180,16 +185,16 @@ async function sendMsg(msgs: MsgWhileSend){
     }
     await Promise.all(tasks)
 }
-function close(){
+function close() {
     emit('closePopBox')
 }
 /**
  * 创建单条转发消息预览
  * @param msgs
  */
-function createSinglePreview(msgs: Msg[]): SelfPreMsg[]{
+function createSinglePreview(msgs: Msg[]): SelfPreMsg[] {
     const out: SelfPreMsg[] = []
-    msgs.forEach((msg: Msg)=>{
+    msgs.forEach((msg: Msg) => {
         out.push(SelfPreMsg.create(msg.message))
     })
     return out
@@ -198,7 +203,7 @@ function createSinglePreview(msgs: Msg[]): SelfPreMsg[]{
  * 创建合并转发消息预览
  * @param msg
  */
-function createMergePreview(msgs: Msg[]): SelfPreMsg[]{
+function createMergePreview(msgs: Msg[]): SelfPreMsg[] {
     const Msg = SelfPreMsg.createMerge(msgs)
     return [Msg]
 }
@@ -206,18 +211,20 @@ function createMergePreview(msgs: Msg[]): SelfPreMsg[]{
  * 创建单条转发消息发送内容
  * @param msgs
  */
-async function createSingleSendMsgs(msgs: Msg[]): Promise<MsgWhileSend>{
-    const out: Promise<{session: Session, msgs: SelfMsg[]}>[] = []
+async function createSingleSendMsgs(msgs: Msg[]): Promise<MsgWhileSend> {
+    const out: Promise<{ session: Session; msgs: SelfMsg[] }>[] = []
     const main = async (session: Session) => {
         const sessionMsg: SelfMsg[] = []
         await session.activate()
         for (const msg of msgs) {
-            sessionMsg.push(SelfMsg.create(
-                msg.message.map(item => item.copy()),
-                session,
-            ))
+            sessionMsg.push(
+                SelfMsg.create(
+                    msg.message.map((item) => item.copy()),
+                    session,
+                ),
+            )
         }
-        return {session, msgs: sessionMsg}
+        return { session, msgs: sessionMsg }
     }
     for (const session of selected.value) {
         out.push(main(session))
@@ -229,14 +236,19 @@ async function createSingleSendMsgs(msgs: Msg[]): Promise<MsgWhileSend>{
  * 创建合并转发消息发送内容
  * @param msgs
  */
-async function createMergeSendMsg(msgs: Msg[]): Promise<MsgWhileSend>{
-    const out: Promise<{session: Session, msgs: SelfMsg[]}>[] = []
+async function createMergeSendMsg(msgs: Msg[]): Promise<MsgWhileSend> {
+    const out: Promise<{ session: Session; msgs: SelfMsg[] }>[] = []
     const main = async (session: Session) => {
         await session.activate()
-        return {session, msgs: [SelfMsg.createMerge(
-            msgs.map(item => item.copy()),
+        return {
             session,
-        )]}
+            msgs: [
+                SelfMsg.createMerge(
+                    msgs.map((item) => item.copy()),
+                    session,
+                ),
+            ],
+        }
     }
     for (const session of selected.value) {
         out.push(main(session))
@@ -244,22 +256,20 @@ async function createMergeSendMsg(msgs: Msg[]): Promise<MsgWhileSend>{
     return Promise.all(out)
 }
 function clickChat(chat: Session) {
-    if(!multiselectMode.value){
+    if (!multiselectMode.value) {
         selected.value = [chat]
         runForward()
-    }else {
+    } else {
         const index = selected.value.indexOf(chat)
         if (index > -1) {
             selected.value.splice(index, 1)
             searchInfo.originList.unshift(chat)
-        }
-        else {
+        } else {
             selected.value.push(chat)
             const index = searchInfo.originList.indexOf(chat)
-            if (index > -1)
-                searchInfo.originList.splice(index, 1)
+            if (index > -1) searchInfo.originList.splice(index, 1)
         }
-        refreshDisplaySession.value ++
+        refreshDisplaySession.value++
     }
 }
 //#endregion

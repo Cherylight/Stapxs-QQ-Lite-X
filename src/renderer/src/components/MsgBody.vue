@@ -128,9 +128,9 @@
                             }"
                         >
                             <div v-if="item.type === undefined" />
-                            <span v-else-if="isDebugMsg" class="msg-text">{{
-                                item
-                            }}</span>
+                            <span v-else-if="isDebugMsg" class="msg-text">
+                                {{ item }}
+                            </span>
                             <template v-else-if="item instanceof TxtSeg">
                                 <div
                                     v-if="hasMarkdown()"
@@ -889,12 +889,6 @@ defineExpose({
 </script>
 
 <script lang="ts">
-export interface MsgBodyConfig {
-    specialMe?: boolean // 是否特殊处理自己的消息
-    showIcon?: boolean // 是否显示消息图标
-    dimNonExistentMsg?: boolean // 是否淡化不存在的消息
-}
-
 export default defineComponent({
     name: 'MsgBody',
     inject: ['viewer'],
@@ -961,7 +955,7 @@ export default defineComponent({
             try {
                 protocol = new URL(link).protocol + '//'
                 domain = new URL(link).hostname
-            } catch (ignore) {
+            } catch {
                 // ignore
             }
             sendStatEvent('link_view', { domain: domain })

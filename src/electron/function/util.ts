@@ -1,4 +1,4 @@
-import child_process from 'child_process'
+import child_process from 'node:child_process'
 import log4js from 'log4js'
 import jp from 'jsonpath'
 import axios from 'axios'
@@ -7,26 +7,9 @@ import { logLevel } from '../index.ts'
 
 const logger = log4js.getLogger('util')
 
-export function queryKeys(keyPath: string, value: string) {
-    return new Promise((resolve, reject) => {
-        try {
-            child_process.exec(
-                `reg query ${keyPath} /v ${value}`,
-                (error, stdout, stderr) => {
-                    if (error) {
-                        reject(error)
-                        return
-                    }
-                    resolve({ stdout, stderr })
-                },
-            )
-        } catch (error) {
-            reject(error)
-        }
-    }) as Promise<{ stdout: any; stderr: any }>
-}
-
-export function runCommand(command: string) {
+export async function runCommand(
+    command: string,
+): Promise<{ stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
         try {
             child_process.exec(command, (error, stdout, stderr) => {
@@ -39,7 +22,14 @@ export function runCommand(command: string) {
         } catch (error) {
             reject(error)
         }
-    }) as Promise<{ stdout: any; stderr: any }>
+    })
+}
+
+export async function queryKeys(
+    keyPath: string,
+    value: string,
+): Promise<{ stdout: string; stderr: string }> {
+    return await runCommand(`reg query ${keyPath} /v ${value}`)
 }
 
 async function getFinalRedirectUrl(initialUrl: string) {
@@ -54,10 +44,10 @@ async function getFinalRedirectUrl(initialUrl: string) {
         const MAX_REDIRECTS = 10
         const response = await axios.get(url.toString(), {
             maxRedirects: MAX_REDIRECTS,
-            validateStatus: (status) => status < 400
+            validateStatus: (status) => status < 400,
         })
         return response.request.res.responseUrl
-    } catch (error) {
+    } catch {
         return null
     }
 }
@@ -65,17 +55,18 @@ async function getFinalRedirectUrl(initialUrl: string) {
 export const linkView = {
     async bilibili(url: string, retry = false) {
         logger.level = logLevel
-        if(!url.includes('bilibili.com')) {
+        if (!url.includes('bilibili.com')) {
             // 获取最终重定向地址并处理
             const finalUrl = await getFinalRedirectUrl(url)
             logger.info(`[linkView] 获取到 bilibili 链接：${finalUrl}`)
-            if(finalUrl && !retry) {
+            if (finalUrl && !retry) {
                 return await linkView.bilibili(finalUrl, true)
             }
             return null
         }
-        const previewAPI = 'https://api.bilibili.com/x/web-interface/wbi/view?bvid='
-        const match = url.match(/bilibili.com\/video\/(BV[0-9a-zA-Z]+)/)
+        const previewAPI =
+            'https://api.bilibili.com/x/web-interface/wbi/view?bvid='
+        const match = /bilibili.com\/video\/(BV[0-9a-zA-Z]+)/.exec(url)
         if (match) {
             const bvid = match[1]
             logger.info(`[linkView] 获取到 bilibili 链接：${bvid}`)
@@ -83,7 +74,9 @@ export const linkView = {
                 const response = await axios.get(previewAPI + bvid)
                 const { data } = response
                 if (data.code === 0) {
-                    logger.info(`[linkView] 预览 bilibili 链接成功：${data.data.title}`)
+                    logger.info(
+                        `[linkView] 预览 bilibili 链接成功：${data.data.title}`,
+                    )
                     return {
                         type: 'bilibili',
                         sub_type: 'video',
@@ -93,8 +86,8 @@ export const linkView = {
                             pic: data.data.pic,
                             public: data.data.pubdate,
                             owner: data.data.owner,
-                            stat: data.data.stat
-                        }
+                            stat: data.data.stat,
+                        },
                     }
                 }
             } catch (error) {
@@ -113,15 +106,21 @@ export const linkView = {
         if (id == null) {
             const finalUrl = await getFinalRedirectUrl(url)
             logger.info(`[linkView] 获取到网易云音乐链接：${finalUrl}`)
-            if(finalUrl && !retry) {
+            if (finalUrl && !retry) {
                 return await linkView.music163(finalUrl, true)
             }
         } else {
             logger.info(`[linkView] 获取获取网易云音乐歌曲 ID：${id}`)
             const baseUrl = import.meta.env.VITE_APP_163_MUSIC_API
             try {
-                const responseDetail = await axios.get(baseUrl + '/song/detail?ids=' + id, { timeout: 10000 })
-                const responseUrl = await axios.get(baseUrl + '/song/url?id=' + id, { timeout: 10000 })
+                const responseDetail = await axios.get(
+                    baseUrl + '/song/detail?ids=' + id,
+                    { timeout: 10000 },
+                )
+                const responseUrl = await axios.get(
+                    baseUrl + '/song/url?id=' + id,
+                    { timeout: 10000 },
+                )
 
                 const getData = {
                     detail: responseDetail.data,
@@ -135,14 +134,30 @@ export const linkView = {
                         cover: jp.query(getData['detail'], '$..al.picUrl')[0],
                         info: {
                             name: jp.query(getData['detail'], '$..name')[0],
-                            author: jp.query(getData['detail'], '$..ar[*].name'),
-                            time: jp.query(getData['detail'], '$..dt')[0] / 1000,
-                            free: jp.query(getData['url'], '$..freeTrialInfo')[0] != null ? {
-                                start: jp.query(getData['url'], '$..freeTrialInfo')[0].start,
-                                end: jp.query(getData['url'], '$..freeTrialInfo')[0].end,
-                            } : null
-                        }
-                    }
+                            author: jp.query(
+                                getData['detail'],
+                                '$..ar[*].name',
+                            ),
+                            time:
+                                jp.query(getData['detail'], '$..dt')[0] / 1000,
+                            free:
+                                jp.query(
+                                    getData['url'],
+                                    '$..freeTrialInfo',
+                                )[0] != null
+                                    ? {
+                                          start: jp.query(
+                                              getData['url'],
+                                              '$..freeTrialInfo',
+                                          )[0].start,
+                                          end: jp.query(
+                                              getData['url'],
+                                              '$..freeTrialInfo',
+                                          )[0].end,
+                                      }
+                                    : null,
+                        },
+                    },
                 }
                 logger.info('[linkView] 预览网易云音乐成功')
                 return finalData
@@ -151,5 +166,5 @@ export const linkView = {
             }
         }
         return null
-    }
+    },
 }

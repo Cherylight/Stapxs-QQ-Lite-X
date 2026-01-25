@@ -39,7 +39,7 @@ export class SessionBox {
     private readonly _name: ShallowRef<Name>
     private readonly _icon: ShallowRef<string>
     private readonly _color: ShallowRef<number>
-    protected readonly _content: Set<Session> = shallowReactive(new Set())
+    readonly content: Set<Session> = shallowReactive(new Set())
     // 设置
     private readonly _alwaysTop: ShallowRef<boolean> = shallowRef(false)
 
@@ -47,7 +47,7 @@ export class SessionBox {
     private readonly _preMessage: ComputedRef<Message | undefined> = computed(
         () => {
             let latestMsg: Message | undefined = undefined
-            for (const session of this._content) {
+            for (const session of this.content) {
                 if (!session.preMessage) continue
                 if (!latestMsg && !session.preMessage.time) {
                     latestMsg = session.preMessage
@@ -70,7 +70,7 @@ export class SessionBox {
     )
     private readonly _highlightInfo: ComputedRef<string[]> = computed(() => {
         const out: string[] = []
-        for (const session of this._content) {
+        for (const session of this.content) {
             // 过滤置顶会话
             for (const info of session.highlightInfo) {
                 if (out.includes(info)) continue
@@ -81,7 +81,7 @@ export class SessionBox {
     })
     private readonly _showNotice: ComputedRef<boolean> = computed(() => {
         // 如果有置顶会话，则不显示通知
-        for (const session of this._content) {
+        for (const session of this.content) {
             if (session.alwaysTop) continue
             if (session.showNotice) return true
         }
@@ -89,12 +89,12 @@ export class SessionBox {
     })
     _newMsg: ComputedRef<number> = computed(() => {
         let out = 0
-        for (const session of this._content) out += session.newMsg
+        for (const session of this.content) out += session.newMsg
         return out
     })
     _isActive: ComputedRef<boolean> = computed(() => {
         // 如果有置顶会话，则不显示通知
-        for (const session of this._content) {
+        for (const session of this.content) {
             if (session.isActive) return true
         }
         return false
@@ -230,7 +230,7 @@ export class SessionBox {
      * 设置为已读状态
      */
     setRead(from: 'viewer' | 'sender' | 'cmd'): void {
-        for (const s of this._content) {
+        for (const s of this.content) {
             s.setRead(from)
         }
     }
@@ -238,16 +238,16 @@ export class SessionBox {
      * 卸载
      */
     unactive(): void {
-        for (const session of this._content) session.unactive()
+        for (const session of this.content) session.unactive()
     }
     /**
      * 将会话加入到收纳盒
      * @param session 放入的会话
      */
     putSession(session: Session): void {
-        if (this._content.has(session)) return
+        if (this.content.has(session)) return
         // 加入到收纳盒
-        this._content.add(session)
+        this.content.add(session)
         session.addBox(this)
 
         // 自动离开群收纳盒
@@ -261,8 +261,8 @@ export class SessionBox {
      */
     removeSession(session: Session): void {
         // 离开收纳盒
-        if (!this._content.has(session)) return
-        this._content.delete(session)
+        if (!this.content.has(session)) return
+        this.content.delete(session)
         session.leaveBox(this)
         // 更新当前收纳盒
         if (
@@ -293,7 +293,7 @@ export class SessionBox {
         // 从缓存中删除
         SessionBox.sessionBoxes.splice(id, 1)
         // 清空会话
-        for (const session of this._content) this.removeSession(session)
+        for (const session of this.content) this.removeSession(session)
         // 保存数据
         SessionBox.saveData()
     }
@@ -370,7 +370,7 @@ export class SessionBox {
     }
 
     get length(): number {
-        return this._content.size
+        return this.content.size
     }
 
     get isActive(): boolean {
@@ -386,10 +386,10 @@ export class SessionBox {
     }
 
     private sortContent(): void {
-        this._sortContentByName.value = [...this._content].sort((a, b) =>
+        this._sortContentByName.value = [...this.content].sort((a, b) =>
             a.showNamePy.localeCompare(b.showNamePy),
         )
-        this._sortContentByTime.value = [...this._content].sort((a, b) => {
+        this._sortContentByTime.value = [...this.content].sort((a, b) => {
             if (!a.preMessage?.time && b.preMessage?.time) return 1
             if (a.preMessage?.time && !b.preMessage?.time) return -1
             if (a.preMessage?.time && b.preMessage?.time) {
@@ -404,7 +404,7 @@ export class BubbleBox extends SessionBox {
     static instance: BubbleBox = new BubbleBox()
     // 这玩意里的元素都是激活的，按照里面有没有元素算就行了
     override _isActive: ComputedRef<boolean> = computed(() => {
-        return this._content.size > 0
+        return this.content.size > 0
     })
 
     protected constructor() {
@@ -423,7 +423,7 @@ export class BubbleBox extends SessionBox {
 
             // 卸载时移除
             Session.afterUnactiveHook.push((session: Session) => {
-                if (this._content.has(session)) this.removeSession(session)
+                if (this.content.has(session)) this.removeSession(session)
             })
         }, 0)
     }
@@ -433,9 +433,9 @@ export class BubbleBox extends SessionBox {
      * @param session 放入的会话
      */
     override putSession(session: Session): void {
-        if (this._content.has(session)) return
+        if (this.content.has(session)) return
         // 加入到收纳盒
-        this._content.add(session)
+        this.content.add(session)
         session.addBox(this)
     }
 
@@ -446,8 +446,8 @@ export class BubbleBox extends SessionBox {
      */
     override removeSession(session: Session): void {
         // 离开收纳盒
-        if (!this._content.has(session)) return
-        this._content.delete(session)
+        if (!this.content.has(session)) return
+        this.content.delete(session)
         session.leaveBox(this)
     }
 

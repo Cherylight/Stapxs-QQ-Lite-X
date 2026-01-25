@@ -1,14 +1,15 @@
 import axios from 'axios'
 import Store from 'electron-store'
 import log4js from 'log4js'
-import os from 'os'
-import path from 'path'
+import os from 'node:os'
+import path from 'node:path'
 
 import {
     app,
     Notification as ELNotification,
     ipcMain,
     Menu,
+    MenuItem,
     MenuItemConstructorOptions,
     shell,
     systemPreferences,
@@ -17,12 +18,12 @@ import { logLevel, touchBarInstance, win } from '../index.ts'
 import { Connector } from './connector.ts'
 import ScanNetwork from './scannetwork.ts'
 import { runCommand } from './util.ts'
-import { execSync } from 'child_process'
+import { execSync } from 'node:child_process'
 
 let connector = undefined as Connector | undefined
 const store = new Store()
 const logger = log4js.getLogger('ipc')
-let template = [] as any[]
+let template: (MenuItemConstructorOptions | MenuItem)[] = []
 
 // 消息缓存，key 为 tag
 const noticeList = {} as { [key: string]: ELNotification }
@@ -35,30 +36,42 @@ export function regIpcListener() {
         }
         connector?.connect(args.url)
     })
-    ipcMain.on('onebot:get', (_, args: {
-        url: string,
-        data: Record<string, any>,
-        header: Record<string, any>
-    }) => {
-        return Connector.httpRequest(
-            args.url,
-            args.data,
-            args.header,
-            'GET'
-        )
-    })
-    ipcMain.handle('onebot:post', async (_, args:{
-        url: string,
-        data: Record<string, any>,
-        header: Record<string, any>
-    }) => {
-        return await Connector.httpRequest(
-            args.url,
-            args.data,
-            args.header,
-            'POST'
-        )
-    })
+    ipcMain.on(
+        'onebot:get',
+        (
+            _,
+            args: {
+                url: string
+                data: Record<string, unknown>
+                header: Record<string, unknown>
+            },
+        ) => {
+            return Connector.httpRequest(
+                args.url,
+                args.data,
+                args.header,
+                'GET',
+            )
+        },
+    )
+    ipcMain.handle(
+        'onebot:post',
+        async (
+            _,
+            args: {
+                url: string
+                data: Record<string, unknown>
+                header: Record<string, unknown>
+            },
+        ) => {
+            return await Connector.httpRequest(
+                args.url,
+                args.data,
+                args.header,
+                'POST',
+            )
+        },
+    )
     // 获取系统平台
     ipcMain.handle('sys:getPlatform', () => {
         return process.platform
@@ -66,7 +79,7 @@ export function regIpcListener() {
     ipcMain.handle('sys:getRelease', () => {
         const osName = os.type() // 'Linux', 'Darwin', 'Windows_NT'
         let osVersion = os.release()
-        if(osName === 'Darwin') {
+        if (osName === 'Darwin') {
             osVersion = execSync('sw_vers -productVersion').toString().trim()
             if (osVersion.split('.').length === 2) {
                 osVersion += '.0'
@@ -93,10 +106,10 @@ export function regIpcListener() {
             const MAX_REDIRECTS = 10
             const response = await axios.get(url.toString(), {
                 maxRedirects: MAX_REDIRECTS,
-                validateStatus: (status) => status < 400
+                validateStatus: (status) => status < 400,
             })
             return response.request.res.responseUrl
-        } catch (error) {
+        } catch {
             return str
         }
     })
@@ -104,10 +117,10 @@ export function regIpcListener() {
     ipcMain.handle('sys:getHtml', async (_, link: string) => {
         try {
             const res = await axios.get(link, {
-                headers: { Accept: 'text/html' }
+                headers: { Accept: 'text/html' },
             })
             const contentType = res.headers['content-type']
-            if(contentType && contentType.includes('text/html')) {
+            if (contentType?.includes('text/html')) {
                 return res.data
             }
         } catch (error) {
@@ -225,7 +238,7 @@ export function regIpcListener() {
         if (win) {
             win.webContents.session.on('will-download', (_, item) => {
                 item.setSaveDialogOptions({
-                    defaultPath: path.join(app.getPath('downloads'), fileName)
+                    defaultPath: path.join(app.getPath('downloads'), fileName),
                 })
 
                 item.on('updated', (_, state) => {
@@ -237,7 +250,10 @@ export function regIpcListener() {
                                     loaded: item.getReceivedBytes(),
                                     total: item.getTotalBytes(),
                                 })
-                                win.setProgressBar( item.getReceivedBytes() / item.getTotalBytes())
+                                win.setProgressBar(
+                                    item.getReceivedBytes() /
+                                        item.getTotalBytes(),
+                                )
                             }
                         }
                     }
@@ -256,7 +272,7 @@ export function regIpcListener() {
         logger.level = logLevel
         logger.info('创建通知：' + data.tag + ' - ' + data.body)
         // MacOS: 刷新 TouchBar
-        if(touchBarInstance && data.base_type === 'msg') {
+        if (touchBarInstance && data.base_type === 'msg') {
             touchBarInstance.newMessage(data)
         }
 
@@ -334,13 +350,13 @@ export function regIpcListener() {
     })
     // 关闭通知
     ipcMain.on('sys:closeNotice', (_, tag) => {
-        if(noticeList[tag]) {
+        if (noticeList[tag]) {
             logger.level = logLevel
             logger.info('关闭通知：' + tag)
             noticeList[tag].close()
             delete noticeList[tag]
             // macOS: 刷新 TouchBar
-            if(touchBarInstance) {
+            if (touchBarInstance) {
                 touchBarInstance.removeMessage(tag)
             }
         }
@@ -357,13 +373,13 @@ export function regIpcListener() {
     // 关闭指定 ID 的所有通知
     ipcMain.on('sys:closeAllNotice', (_, id) => {
         Object.keys(noticeList).forEach((key) => {
-            if(key.startsWith(id)) {
+            if (key.startsWith(id)) {
                 logger.level = logLevel
                 logger.info('关闭所有通知：' + id)
                 noticeList[key].close()
                 delete noticeList[key]
                 // macOS: 刷新 TouchBar
-                if(touchBarInstance) {
+                if (touchBarInstance) {
                     touchBarInstance.removeMessage(key)
                 }
             }
@@ -381,8 +397,7 @@ export function regIpcListener() {
     })
     // 启用服务发现
     ipcMain.on('sys:findService', () => {
-        if(win)
-            new ScanNetwork(win).scanNetwork()
+        if (win) new ScanNetwork(win).scanNetwork()
     })
 
     // Windows：闪烁状态栏图标
@@ -409,7 +424,7 @@ export function regIpcListener() {
     ipcMain.handle('sys:getGnomeExt', async () => {
         try {
             const info = await runCommand(
-                'dconf dump /org/gnome/shell/extensions/ | awk -v RS=\'\' \'/\\[blur-my-shell\\/applications\\]/\'',
+                "dconf dump /org/gnome/shell/extensions/ | awk -v RS='' '/\\[blur-my-shell\\/applications\\]/'",
             )
             const str = info.stdout as string
             const data = {} as { [key: string]: string }
@@ -563,7 +578,9 @@ export function regIpcListener() {
             }
             if (menuIndex > -1) {
                 const item =
-                    itemIndex > -1? template[menuIndex].submenu[itemIndex]: template[menuIndex]
+                    itemIndex > -1
+                        ? template[menuIndex]?.submenu?.[itemIndex]
+                        : template[menuIndex]
                 switch (action) {
                     case 'label':
                         item.label = value
@@ -576,7 +593,7 @@ export function regIpcListener() {
             Menu.setApplicationMenu(Menu.buildFromTemplate(template))
         }
     })
-    function sendMenuClick(name: string, value = undefined as any) {
+    function sendMenuClick(name: string, value = undefined as unknown) {
         if (win) {
             win.focus()
             if (value) {
@@ -588,12 +605,12 @@ export function regIpcListener() {
     }
     // MacOS：touchBar 相关功能
     ipcMain.on('sys:flushOnMessage', (_, list) => {
-        if(touchBarInstance) {
+        if (touchBarInstance) {
             touchBarInstance.flushOnMessage(list)
         }
     })
     ipcMain.on('sys:flushFriendSearch', (_, list) => {
-        if(touchBarInstance) {
+        if (touchBarInstance) {
             touchBarInstance.flushFriendSearch(list)
         }
     })

@@ -5,7 +5,11 @@ import languageConfig from '@renderer/assets/l10n/_l10nconfig.json'
 import { refreshFavicon } from '../utils/favicon'
 import { GroupSession, Session } from '../model/session'
 import { BubbleBox, SessionBoxData } from '../model/box'
-import { loadWinColor, sendIdentifyData, updateWinColor } from '../utils/appUtil'
+import {
+    loadWinColor,
+    sendIdentifyData,
+    updateWinColor,
+} from '../utils/appUtil'
 import app, { i18n } from '@renderer/main'
 import { getPortableFileLang, getTrueLang } from '../utils/systemUtil'
 import { backend } from '@renderer/runtime/backend'
@@ -17,33 +21,33 @@ import { OptionField } from './option'
 export const OptionInfos = {
     //#region == System =================================
     address: {
-        default: ''
+        default: '',
     },
     pin_sessions: {
         default: [] as number[],
-        tags: ['user']
+        tags: ['user'],
     },
     auto_save_password: {
-        default: false
+        default: false,
     },
     saved_password: {
-        default: ''
+        default: '',
     },
     notice_group: {
         default: [] as number[],
-        tags: ['user']
+        tags: ['user'],
     },
     auto_connect: {
-        default: false
+        default: false,
     },
     boxes: {
         default: [] as SessionBoxData[],
-        tags: ['user']
+        tags: ['user'],
     },
     session_box_map: {
-        default: {} as {[sessionId: number]: string[]},
-        tags: ['user']
-    },                      // 存储会话被那些收纳盒收录...这俩名字起的也不行，容易混淆
+        default: {} as { [sessionId: number]: string[] },
+        tags: ['user'],
+    }, // 存储会话被那些收纳盒收录...这俩名字起的也不行，容易混淆
     //#endregion
     //#region == View ===================================
     language: {
@@ -73,8 +77,8 @@ export const OptionInfos = {
             if (htmlBody !== null) {
                 htmlBody.setAttribute('lang', getTrueLang())
             }
-            sendIdentifyData({'use_language': name})
-        }
+            sendIdentifyData({ use_language: name })
+        },
     },
     opt_dark_mode: {
         default: 'auto' as 'auto' | 'light' | 'dark',
@@ -96,7 +100,7 @@ export const OptionInfos = {
             )
             const meta = document.getElementsByName('theme-color')[0]
             if (meta) {
-                (meta as HTMLMetaElement).content = getComputedStyle(
+                ;(meta as HTMLMetaElement).content = getComputedStyle(
                     document.documentElement,
                 ).getPropertyValue('--color-main-' + id)
             }
@@ -106,17 +110,21 @@ export const OptionInfos = {
         },
         onLoad: (id: number) => {
             OptionInfos.theme_color.onChange(id)
-        }
+        },
     },
     opt_auto_win_color: {
         default: false,
         onChange: (value: boolean) => {
             if (!value) return
-            backend.addListener(undefined, 'sys:WinColorChanged', (_, params) => {
-                updateWinColor(params)
-            })
+            backend.addListener(
+                undefined,
+                'sys:WinColorChanged',
+                (_, params) => {
+                    updateWinColor(params)
+                },
+            )
             loadWinColor()
-        }
+        },
     },
     background_img: {
         default: '',
@@ -127,15 +135,15 @@ export const OptionInfos = {
         },
         onLoad: (value: string) => {
             OptionInfos.background_img.onChange(value)
-        }
+        },
     },
     background_img_blur: {
-        default: 0
+        default: 0,
     },
     opt_fast_animation: {
         default: false,
         onChange: (value: boolean) => {
-            if(value) {
+            if (value) {
                 // 创建 <style> 元素
                 const style = document.createElement('style')
                 style.textContent = `* {
@@ -146,29 +154,29 @@ export const OptionInfos = {
             } else {
                 document.getElementById('disable-transitions')?.remove()
             }
-        }
+        },
     },
     initial_scale: {
         default: 0.85,
         onChange: (value: number) => {
             const viewport = document.getElementById('viewport')
             if (viewport && value && value >= 0.5 && value <= 1.5) {
-                (viewport as any).content =
+                ;(viewport as any).content =
                     `width=device-width, initial-scale=${value}, maximum-scale=5, user-scalable=0`
             } else {
-                (viewport as any).content =
+                ;(viewport as any).content =
                     'width=device-width, initial-scale=0.85, maximum-scale=5, user-scalable=0'
             }
-        }
+        },
     },
     fs_adaptation: {
-        default: 0
+        default: 0,
     },
     opt_always_top: {
         default: false,
         onChange: (value: boolean) => {
             backend.call(undefined, 'win:alwaysTop', false, value)
-        }
+        },
     },
     merge_forward_width: {
         default: true,
@@ -180,34 +188,34 @@ export const OptionInfos = {
         },
         onLoad: (value: boolean) => {
             OptionInfos.merge_forward_width.onChange(value)
-        }
+        },
     },
     use_favicon_notice: {
         default: true,
         onChange: () => {
             refreshFavicon()
-        }
+        },
     },
     use_super_face: {
-        default: true
+        default: true,
     },
     hide_self_avatar: {
-        default: true
+        default: true,
     },
     self_msg_direction: {
-        default: 'right' as 'right' | 'left'
+        default: 'right' as 'right' | 'left',
     },
     side_bar_width: {
-        default: 400
+        default: 400,
     },
     auto_hide_side_bar: {
-        default: 'none' as 'none'|'fold'|'hide'
+        default: 'none' as 'none' | 'fold' | 'hide',
     },
     hide_chat_head: {
-        default: false
+        default: false,
     },
     hide_chat_bottom: {
-        default: false
+        default: false,
     },
     vibrancy: {
         default: false,
@@ -215,10 +223,10 @@ export const OptionInfos = {
     //#endregion
     //#region == Function ===============================
     close_notice: {
-        default: true
+        default: true,
     },
     auto_mark_read: {
-        default: 'viewer' as 'viewer' | 'sender' | 'none'
+        default: 'viewer' as 'viewer' | 'sender' | 'none',
     },
     bubble_sort_user: {
         default: true,
@@ -236,73 +244,73 @@ export const OptionInfos = {
                 }
             } else {
                 // 关闭群收纳盒
-                for (const session of BubbleBox.instance._content) {
+                for (const session of BubbleBox.instance.content) {
                     BubbleBox.instance.removeSession(session)
                 }
             }
-        }
+        },
     },
     close_respond: {
-        default: false
+        default: false,
     },
     msg_tail: {
-        default: ''
+        default: '',
     },
     group_notice_type: {
-        default: 'none' as 'none'|'inner'|'all'
+        default: 'none' as 'none' | 'inner' | 'all',
     },
     show_response_message: {
-        default: 'self' as 'none'|'self'|'all'
+        default: 'self' as 'none' | 'self' | 'all',
     },
     send_face: {
-        default: false
+        default: false,
     },
     send_key: {
-        default: 'none' as 'none'|'shift'|'ctrl'|'alt'|'meta'
+        default: 'none' as 'none' | 'shift' | 'ctrl' | 'alt' | 'meta',
     },
     close_browser: {
-        default: false
+        default: false,
     },
     close_ga: {
-        default: false
+        default: false,
     },
     open_ga_bot: {
-        default: true
+        default: true,
     },
     dont_parse_delete: {
-        default: false
+        default: false,
     },
     hide_empty_msg: {
-        default: false
+        default: false,
     },
     jump_forward: {
-        default: true
+        default: true,
     },
     default_multiselect_forward: {
-        default: false
+        default: false,
     },
     preview_notice: {
-        default: false
+        default: false,
     },
     close_ad: {
-        default: false
+        default: false,
     },
     reply_with_at: {
-        default: 'none' as 'none' | 'prefix' | 'insert'
+        default: 'none' as 'none' | 'prefix' | 'insert',
     },
     //#endregion
     //#region == Dev ====================================
     log_level: {
-        default: 'err' as 'err'|'debug'|'info'|'all'
+        default: 'err' as 'err' | 'debug' | 'info' | 'all',
     },
     proxyUrl: {
-        default: ''
+        default: '',
     },
     debug_msg: {
-        default: false
+        default: false,
     },
     dev_mode: {
-        default: false
-    }
+        default: false,
+    },
     //#endregion
 } satisfies Record<string, OptionField<any>>

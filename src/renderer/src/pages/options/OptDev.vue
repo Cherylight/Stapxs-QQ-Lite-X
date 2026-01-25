@@ -11,14 +11,21 @@
             <header>{{ $t('兼容选项') }}</header>
             <div class="tip">
                 {{
-                    $t('这儿是兼容性相关的高级选项，这些选项通常会自动识别，如果出现了不正确的情况你也可以手动调整。')
+                    $t(
+                        '这儿是兼容性相关的高级选项，这些选项通常会自动识别，如果出现了不正确的情况你也可以手动调整。',
+                    )
                 }}
             </div>
-            <div class="opt-item" :class="{changed: !OptionManager.checkDefault('proxyUrl')}">
+            <div
+                class="opt-item"
+                :class="{ changed: !OptionManager.checkDefault('proxyUrl') }"
+            >
                 <font-awesome-icon :icon="['fas', 'route']" />
                 <div>
                     <span>{{ $t('自定义跨域服务') }}</span>
-                    <span>{{ $t('如果你需要使用跨域服务，请在这里输入服务地址') }}</span>
+                    <span>{{
+                        $t('如果你需要使用跨域服务，请在这里输入服务地址')
+                    }}</span>
                 </div>
             </div>
             <div class="tip cors">
@@ -26,36 +33,54 @@
                     v-model.trim="runtimeData.sysConfig.proxyUrl"
                     class="ss-input"
                     type="text"
-                    name="proxyUrl">
-                <br>
-                <div :style="{
-                    'color': 'var(--color-red)',
-                    'height': illegalProxyUrl ? '1rem' : '0px',
-                    'font-size': illegalProxyUrl ? '1rem' : '0px',
-                    'margin-bottom': illegalProxyUrl ? '10px' : '0px',
-                    'transition': 'all 0.2s',
-                }">
+                    name="proxyUrl"
+                />
+                <br />
+                <div
+                    :style="{
+                        color: 'var(--color-red)',
+                        height: illegalProxyUrl ? '1rem' : '0px',
+                        'font-size': illegalProxyUrl ? '1rem' : '0px',
+                        'margin-bottom': illegalProxyUrl ? '10px' : '0px',
+                        transition: 'all 0.2s',
+                    }"
+                >
                     <font-awesome-icon :icon="['fas', 'xmark']" />
                     {{ $t('代理地址不包含\{url\}') }}
                 </div>
-                {{ $t('当应用需要获取腾讯的数据时，可能会被浏览器当作恶意操作阻止。为了访问这些资源，你可以使用桌面端，它自带跨域功能。') }}
-                <br>
-                {{ $t('如果你要在web端使用跨域，请填写跨域服务器地址，格式如下：') }}
-                <br>
-                <span>
-                    https://cors-proxy.example.com/proxy?url={url}
-                </span>
-                <br>
-                <br>
+                {{
+                    $t(
+                        '当应用需要获取腾讯的数据时，可能会被浏览器当作恶意操作阻止。为了访问这些资源，你可以使用桌面端，它自带跨域功能。',
+                    )
+                }}
+                <br />
+                {{
+                    $t(
+                        '如果你要在web端使用跨域，请填写跨域服务器地址，格式如下：',
+                    )
+                }}
+                <br />
+                <span> https://cors-proxy.example.com/proxy?url={url} </span>
+                <br />
+                <br />
                 {{ $t('其中{url}会被替换为实际url。') }}
-                <br>
-                {{ $t('跨域服务器你可以在网上寻找公益跨域服务器，但可能存在安全隐患。强烈建议你自己搭建跨域服务器，问问AI就能解决。') }}
-                <br>
+                <br />
+                {{
+                    $t(
+                        '跨域服务器你可以在网上寻找公益跨域服务器，但可能存在安全隐患。强烈建议你自己搭建跨域服务器，问问AI就能解决。',
+                    )
+                }}
+                <br />
                 <div>
                     <div>
                         <font-awesome-icon
                             :icon="['fas', 'fa-circle']"
-                            :style="{color: runtimeData.tags.canCors ? 'var(--color-green)' : 'var(--color-red)'}" />
+                            :style="{
+                                color: runtimeData.tags.canCors
+                                    ? 'var(--color-green)'
+                                    : 'var(--color-red)',
+                            }"
+                        />
                         <template v-if="runtimeData.tags.canCors">
                             {{ $t('测试成功') }}
                         </template>
@@ -70,15 +95,22 @@
         <div class="ss-card">
             <header>{{ $t('开发者选项') }}</header>
             <div class="opt-item">
-                <div :class="{changed: !OptionManager.checkDefault('log_level')}" />
+                <div
+                    :class="{
+                        changed: !OptionManager.checkDefault('log_level'),
+                    }"
+                />
                 <font-awesome-icon :icon="['fas', 'book']" />
                 <div>
                     <span>{{ $t('日志等级') }}</span>
                     <span>{{ $t('ReferenceError: moYu is not defined') }}</span>
                 </div>
                 <div class="select-wrapper">
-                    <select v-model="runtimeData.sysConfig.log_level"
-                        name="log_level" title="log_level">
+                    <select
+                        v-model="runtimeData.sysConfig.log_level"
+                        name="log_level"
+                        title="log_level"
+                    >
                         <option value="err">
                             {{ $t('错误') }}
                         </option>
@@ -107,12 +139,18 @@
                     type="text" name="api_log" @keyup="save">
             </div> -->
             <div class="opt-item">
-                <div :class="{changed: !OptionManager.checkDefault('debug_msg')}" />
+                <div
+                    :class="{
+                        changed: !OptionManager.checkDefault('debug_msg'),
+                    }"
+                />
                 <font-awesome-icon :icon="['fas', 'robot']" />
                 <div>
                     <span>{{ $t('禁用消息渲染') }}</span>
                     <span>
-                        <a style="cursor: pointer" @click="sendAbab">{{ $t('点击进行 CAPTCHA 验证') }}</a>
+                        <a style="cursor: pointer" @click="sendAbab">{{
+                            $t('点击进行 CAPTCHA 验证')
+                        }}</a>
                     </span>
                 </div>
                 <Switch v-model="runtimeData.sysConfig.debug_msg" />
@@ -126,8 +164,13 @@
                     <span>{{ $t('应用消息测试') }}</span>
                     <span>{{ $t('#$&*#$= ……') }}</span>
                 </div>
-                <input v-model="appmsg_text" class="ss-input"
-                    style="width: 150px" type="text" @keyup="sendTestAppmsg">
+                <input
+                    v-model="appmsg_text"
+                    class="ss-input"
+                    style="width: 150px"
+                    type="text"
+                    @keyup="sendTestAppmsg"
+                />
             </div>
             <div v-if="runtimeData.tags.dev" class="opt-item">
                 <font-awesome-icon :icon="['fas', 'window-restore']" />
@@ -155,8 +198,11 @@
                     <span>{{ $t('移除未使用的配置') }}</span>
                     <span>{{ $t('sudo rm -rf /etc') }}</span>
                 </div>
-                <button style="width: 100px; font-size: 0.8rem"
-                    class="ss-button" @click="rmNeedlessOption">
+                <button
+                    style="width: 100px; font-size: 0.8rem"
+                    class="ss-button"
+                    @click="rmNeedlessOption"
+                >
                     {{ $t('执行') }}
                 </button>
             </div>
@@ -166,8 +212,11 @@
                     <span>{{ $t('打开欢迎窗口') }}</span>
                     <span>{{ $t('Welcome to use Stapxs QQ Lite X') }}</span>
                 </div>
-                <button style="width: 100px; font-size: 0.8rem"
-                    class="ss-button" @click="openWelcomeWindow">
+                <button
+                    style="width: 100px; font-size: 0.8rem"
+                    class="ss-button"
+                    @click="openWelcomeWindow"
+                >
                     {{ $t('执行') }}
                 </button>
             </div>
@@ -177,8 +226,11 @@
                     <span>{{ $t('输出运行时') }}</span>
                     <span>{{ $t('全都吐出来！') }}</span>
                 </div>
-                <button style="width: 100px; font-size: 0.8rem"
-                    class="ss-button" @click="printRuntime">
+                <button
+                    style="width: 100px; font-size: 0.8rem"
+                    class="ss-button"
+                    @click="printRuntime"
+                >
                     {{ $t('执行') }}
                 </button>
             </div>
@@ -188,8 +240,11 @@
                     <span>{{ $t('输出调试信息') }}</span>
                     <span>{{ $t('到底用的什么版本呢 ……') }}</span>
                 </div>
-                <button style="width: 100px; font-size: 0.8rem"
-                    class="ss-button" @click="printVersionInfo">
+                <button
+                    style="width: 100px; font-size: 0.8rem"
+                    class="ss-button"
+                    @click="printVersionInfo"
+                >
                     {{ $t('执行') }}
                 </button>
             </div>
@@ -200,8 +255,11 @@
                         <span>{{ $t('重启应用') }}</span>
                         <span>{{ $t('99% 的特性都能通过重启解决！') }}</span>
                     </div>
-                    <button style="width: 100px; font-size: 0.8rem"
-                        class="ss-button" @click="restartapp">
+                    <button
+                        style="width: 100px; font-size: 0.8rem"
+                        class="ss-button"
+                        @click="restartapp"
+                    >
                         {{ $t('执行') }}
                     </button>
                 </div>
@@ -225,8 +283,11 @@
                         $t('tar zcvf config.tar.gz /localStorage')
                     }}</span>
                 </div>
-                <button style="width: 100px; font-size: 0.8rem"
-                    class="ss-button" @click="printSetUpInfo">
+                <button
+                    style="width: 100px; font-size: 0.8rem"
+                    class="ss-button"
+                    @click="printSetUpInfo"
+                >
                     {{ $t('执行') }}
                 </button>
             </div>
@@ -236,8 +297,11 @@
                     <span>{{ $t('导入设置项') }}</span>
                     <span>{{ $t('tar zxvf cache.tar.gz /localStorage') }}</span>
                 </div>
-                <button style="width: 100px; font-size: 0.8rem"
-                    class="ss-button" @click="importSetUpInfo">
+                <button
+                    style="width: 100px; font-size: 0.8rem"
+                    class="ss-button"
+                    @click="importSetUpInfo"
+                >
                     {{ $t('执行') }}
                 </button>
             </div>
@@ -247,8 +311,11 @@
                     <span>{{ $t('重置应用') }}</span>
                     <span>{{ $t('sudo rm -rf /localStorage') }}</span>
                 </div>
-                <button style="width: 100px; font-size: 0.8rem"
-                    class="ss-button" @click="resetApp">
+                <button
+                    style="width: 100px; font-size: 0.8rem"
+                    class="ss-button"
+                    @click="resetApp"
+                >
                     {{ $t('执行') }}
                 </button>
             </div>
@@ -264,13 +331,17 @@ import { runtimeData } from '@renderer/function/msg'
 import { BrowserInfo, detect } from 'detect-browser'
 import app, { uptime } from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
-import {
-    computed,
-    shallowRef
-} from 'vue'
+import { computed, shallowRef } from 'vue'
 import driver from '@renderer/function/driver'
-import { ensurePopBox, htmlPopBox, popBox } from '@renderer/function/utils/popBox'
-import { copyToClipboard, getVersion } from '@renderer/function/utils/systemUtil'
+import {
+    ensurePopBox,
+    htmlPopBox,
+    popBox,
+} from '@renderer/function/utils/popBox'
+import {
+    copyToClipboard,
+    getVersion,
+} from '@renderer/function/utils/systemUtil'
 import win from '@renderer/runtime/win'
 import WelPan from '@renderer/components/popBox/WelPan.vue'
 
@@ -296,25 +367,35 @@ function sendAbab() {
 }
 
 function printRuntime() {
-    if(backend.isMobile()) {
-        const switcher = document.getElementById('__vconsole')?.getElementsByClassName('vc-switch')[0]
+    if (backend.isMobile()) {
+        const switcher = document
+            .getElementById('__vconsole')
+            ?.getElementsByClassName('vc-switch')[0]
         if (switcher) {
-            (switcher as HTMLDivElement).click()
-        // safeArea
-        backend.call('SafeArea', 'getSafeArea', true).then((safeArea) => {
-            if (safeArea) {
-                const vcPanel = document.getElementById('__vconsole')?.getElementsByClassName('vc-panel')[0]
-                if (vcPanel) {
-                    // vc-content、vc-toolbar
-                    const vcContent = vcPanel.getElementsByClassName('vc-content')[0] as HTMLDivElement
-                    const vcToolbar = vcPanel.getElementsByClassName('vc-toolbar')[0] as HTMLDivElement
-                    if (vcContent && vcToolbar) {
-                        vcContent.style.marginBottom = safeArea.bottom + 'px'
-                        vcToolbar.style.marginBottom = safeArea.bottom + 'px'
+            ;(switcher as HTMLDivElement).click()
+            // safeArea
+            backend.call('SafeArea', 'getSafeArea', true).then((safeArea) => {
+                if (safeArea) {
+                    const vcPanel = document
+                        .getElementById('__vconsole')
+                        ?.getElementsByClassName('vc-panel')[0]
+                    if (vcPanel) {
+                        // vc-content、vc-toolbar
+                        const vcContent = vcPanel.getElementsByClassName(
+                            'vc-content',
+                        )[0] as HTMLDivElement
+                        const vcToolbar = vcPanel.getElementsByClassName(
+                            'vc-toolbar',
+                        )[0] as HTMLDivElement
+                        if (vcContent && vcToolbar) {
+                            vcContent.style.marginBottom =
+                                safeArea.bottom + 'px'
+                            vcToolbar.style.marginBottom =
+                                safeArea.bottom + 'px'
+                        }
                     }
                 }
-            }
-        })
+            })
         }
     }
     /* eslint-disable no-console */
@@ -322,7 +403,7 @@ function printRuntime() {
     console.log(runtimeData)
     console.log('=========================')
     /* eslint-enable no-console */
-    if(!backend.isMobile()) {
+    if (!backend.isMobile()) {
         backend.call(undefined, 'win:openDevTools', false)
     }
 }
@@ -332,8 +413,16 @@ async function printVersionInfo() {
 
     // 索要框架信息
     const addInfo = await backend.call('Onebot', 'opt:getSystemInfo', true)
-    if(backend.isMobile() && backend.function && 'vConsole' in backend.function && backend.function.vConsole) {
-        addInfo.vconsole = ['vConsole Version', backend.function.vConsole.version ?? 'Not loaded']
+    if (
+        backend.isMobile() &&
+        backend.function &&
+        'vConsole' in backend.function &&
+        backend.function.vConsole
+    ) {
+        addInfo.vconsole = [
+            'vConsole Version',
+            backend.function.vConsole.version ?? 'Not loaded',
+        ]
     }
 
     const browser = detect() as BrowserInfo
@@ -360,18 +449,20 @@ async function printVersionInfo() {
             case 'linux': {
                 // archlinux
                 if (backend.release.toLowerCase().indexOf('arch') > 0) {
-                    let pacmanInfo =
-                        await backend.call(undefined, 'sys:runCommand', true,
-                            'pacman -Q stapxs-qq-lite-bin',
-                        )
+                    let pacmanInfo = await backend.call(
+                        undefined,
+                        'sys:runCommand',
+                        true,
+                        'pacman -Q stapxs-qq-lite-bin',
+                    )
                     if (pacmanInfo.success)
                         systemInfo.push(['Install Type', 'aur'])
-                    else if(backend.function && 'invoke' in backend.function){
+                    else if (backend.function && 'invoke' in backend.function) {
                         // 也有可能是 stapxs-qq-lite，这是我自己打的原生包
                         pacmanInfo = await backend.function.invoke(
-                                'sys:runCommand',
-                                'pacman -Q stapxs-qq-lite',
-                            )
+                            'sys:runCommand',
+                            'pacman -Q stapxs-qq-lite',
+                        )
                         if (pacmanInfo.success)
                             systemInfo.push(['Install Type', 'pacman'])
                     }
@@ -384,7 +475,10 @@ async function printVersionInfo() {
     info += createVersionInfo(systemInfo)
 
     const applicationInfo = [
-        ['Uptime', Math.floor(((Date.now() - uptime) / 1000) * 100) / 100 + ' s'],
+        [
+            'Uptime',
+            Math.floor(((Date.now() - uptime) / 1000) * 100) / 100 + ' s',
+        ],
         ['Package Version', getVersion()],
         ['Service Work', runtimeData.tags.sw],
     ] as [key: string, value: any][]
@@ -393,15 +487,18 @@ async function printVersionInfo() {
     info += createVersionInfo(applicationInfo)
 
     const adapeterInfo = [
-        ['status', !runtimeData.nowAdapter || driver.isConnected() ? 'connected' : 'not connected'],
+        [
+            'status',
+            !runtimeData.nowAdapter || driver.isConnected()
+                ? 'connected'
+                : 'not connected',
+        ],
     ] as [key: string, value: any][]
 
-    if (!runtimeData.nowAdapter)
-        adapeterInfo.push(['info', 'Not connected'])
+    if (!runtimeData.nowAdapter) adapeterInfo.push(['info', 'Not connected'])
     else {
         const data = await runtimeData.nowAdapter.getAdapterInfo()
-        if (!data)
-            adapeterInfo.push(['info', 'Get info failed'])
+        if (!data) adapeterInfo.push(['info', 'Get info failed'])
         else {
             for (const key in data) {
                 adapeterInfo.push([key, data[key]])
@@ -420,7 +517,14 @@ async function printVersionInfo() {
         const safeArea = await backend.call('SafeArea', 'getSafeArea', true)
         if (safeArea) {
             // 按照前端习惯，这儿的 safeArea 顺序是 top, right, bottom, left
-            const safeAreaStr = safeArea.top + ', ' + safeArea.right + ', ' + safeArea.bottom + ', ' + safeArea.left
+            const safeAreaStr =
+                safeArea.top +
+                ', ' +
+                safeArea.right +
+                ', ' +
+                safeArea.bottom +
+                ', ' +
+                safeArea.left
             viewInfo.push(['Safe Area', safeAreaStr])
         }
     }
@@ -438,7 +542,7 @@ async function printVersionInfo() {
             await fetch(item[1], { method: 'GET' })
             const end = Date.now()
             networkInfo.push([item[0], end - start + ' ms'])
-        } catch (e) {
+        } catch {
             networkInfo.push([item[0], 'failed'])
         }
     }
@@ -455,11 +559,8 @@ async function printVersionInfo() {
                 noClose: true,
                 fun: () => {
                     copyToClipboard(info)
-                        .then(
-                            () => popInfo.info($t('复制成功'))
-                        ).catch(
-                            () => popInfo.error( $t('复制失败'))
-                        )
+                        .then(() => popInfo.info($t('复制成功')))
+                        .catch(() => popInfo.error($t('复制失败')))
                 },
             },
             {
@@ -475,76 +576,82 @@ function printSetUpInfo() {
     htmlPopBox(
         '<textarea style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;">' +
             json +
-            '</textarea>', {
-        svg: 'upload',
-        title: $t('导出设置项'),
-        button: [
-            {
-                text: app.config.globalProperties.$t('复制'),
-                noClose: true,
-                fun: () => {
-                    copyToClipboard(json)
-                        .then(
-                            () => popInfo.info($t('复制成功'))
-                        ).catch(
-                            () => popInfo.error( $t('复制失败'))
-                        )
+            '</textarea>',
+        {
+            svg: 'upload',
+            title: $t('导出设置项'),
+            button: [
+                {
+                    text: app.config.globalProperties.$t('复制'),
+                    noClose: true,
+                    fun: () => {
+                        copyToClipboard(json)
+                            .then(() => popInfo.info($t('复制成功')))
+                            .catch(() => popInfo.error($t('复制失败')))
+                    },
                 },
-            },
-            {
-                text: app.config.globalProperties.$t('确定'),
-                master: true,
-            },
-        ],
-    })
+                {
+                    text: app.config.globalProperties.$t('确定'),
+                    master: true,
+                },
+            ],
+        },
+    )
 }
 
 function importSetUpInfo() {
     htmlPopBox(
-        '<textarea id="importSetUpInfoTextArea" style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;"></textarea>',{
-        svg: 'download',
-        title: $t('导入设置项'),
-        button: [
-            {
-                text: app.config.globalProperties.$t('取消'),
-            },
-            {
-                text: app.config.globalProperties.$t('确定'),
-                master: true,
-                fun: async () => {
-                    const input = document.getElementById(
-                        'importSetUpInfoTextArea',
-                    ) as HTMLTextAreaElement
-                    if (input) {
-                        try {
-                            await OptionManager.loadAllFromString(input.value)
-                            location.reload()
-                        } catch (e) {
-                            popInfo.error(
-                                app.config.globalProperties.$t(
-                                    '导入设置项失败',
-                                ),
-                            )
-                        }
-                    }
+        '<textarea id="importSetUpInfoTextArea" style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;"></textarea>',
+        {
+            svg: 'download',
+            title: $t('导入设置项'),
+            button: [
+                {
+                    text: app.config.globalProperties.$t('取消'),
                 },
-            },
-        ],
-    })
+                {
+                    text: app.config.globalProperties.$t('确定'),
+                    master: true,
+                    fun: async () => {
+                        const input = document.getElementById(
+                            'importSetUpInfoTextArea',
+                        ) as HTMLTextAreaElement
+                        if (input) {
+                            try {
+                                await OptionManager.loadAllFromString(
+                                    input.value,
+                                )
+                                location.reload()
+                            } catch {
+                                popInfo.error(
+                                    app.config.globalProperties.$t(
+                                        '导入设置项失败',
+                                    ),
+                                )
+                            }
+                        }
+                    },
+                },
+            ],
+        },
+    )
 }
 
 async function resetApp() {
-    const ensure = await ensurePopBox($t(
-        '确认要重置应用吗，重置应用将会失去所有设置内容（包括设置的置顶群组），但是可能可以解决一些因为浏览器缓存导致的奇怪问题。',
-    ))
+    const ensure = await ensurePopBox(
+        $t(
+            '确认要重置应用吗，重置应用将会失去所有设置内容（包括设置的置顶群组），但是可能可以解决一些因为浏览器缓存导致的奇怪问题。',
+        ),
+    )
 
     if (!ensure) return
 
     localStorage.clear()
     const cookies = document.cookie.split(';')
     for (const cookie of cookies) {
-        document.cookie = cookie.replace(/^ +/, '')
-            .replace(/=.*/,'=;expires=' + new Date().toUTCString() + ';path=/')
+        document.cookie = cookie
+            .replace(/^ +/, '')
+            .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/')
     }
     backend.call(undefined, 'opt:clearAll', false)
     location.reload()
@@ -590,7 +697,7 @@ function rmNeedlessOption() {
 }
 function createVersionInfo(data: [key: string, value: any][]) {
     let info = ''
-    for (const [ key, value ] of data) {
+    for (const [key, value] of data) {
         info += `    ${key.padEnd(20)}-> ${value}\n`
     }
     return info

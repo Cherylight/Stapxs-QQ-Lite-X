@@ -106,7 +106,7 @@ class Request {
                 params: this.params,
                 echo: this.echo,
             } as ObRequest<any>)
-        } catch (error) {
+        } catch {
             throw new Error(
                 '创建请求JSON失败' +
                     JSON.stringify({

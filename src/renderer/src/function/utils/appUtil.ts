@@ -907,11 +907,11 @@ export function checkNotice() {
                             const button: PopBoxButton[] = [
                                 {
                                     text:
-                                        /* eslint-disable */
+                                         
                                         noticeBody.pops.length > 1 && i != noticeBody.pops.length - 1 ?
                                             app.config.globalProperties.$t('继续') :
                                             (info.button_text ? info.button_text : app.config.globalProperties.$t('确定')),
-                                        /* eslint-enable */
+                                         
                                     master: true,
                                     fun: () => {
                                         // 添加已读记录
