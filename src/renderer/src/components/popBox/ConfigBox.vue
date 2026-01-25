@@ -31,10 +31,7 @@
                     :key="icon"
                     :icon="['fas', icon]"
                     :class="{ selected: baseBox.icon === icon }"
-                    @click="
-                        baseBox.icon = icon
-                        console.log(icon)
-                    "
+                    @click="baseBox.icon = icon"
                 />
             </div>
         </div>
