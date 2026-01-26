@@ -107,7 +107,10 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
             el.addEventListener(
                 'contextmenu',
                 (event) => {
-                    if (skipMenu) return
+                    if (skipMenu) {
+                        skipMenu = false
+                        return
+                    }
                     if (prevent) event.preventDefault()
                     if (stop) event.stopPropagation()
                     const data: MenuEventData = {
