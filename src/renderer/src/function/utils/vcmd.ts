@@ -47,21 +47,6 @@ export const vUserRole: Directive<HTMLSpanElement, Role> = {
         }
     },
 }
-let skipMenu = false
-addEventListener(
-    'keydown',
-    (event) => {
-        if (event.key === 'Control') skipMenu = true
-    },
-    { capture: true },
-)
-addEventListener(
-    'keyup',
-    (event) => {
-        if (event.key === 'Control') skipMenu = false
-    },
-    { capture: true },
-)
 /**
  * 创建一个右键菜单指令
  * 用于闭包公用停留事件控制器
@@ -107,10 +92,6 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
             el.addEventListener(
                 'contextmenu',
                 (event) => {
-                    if (skipMenu) {
-                        skipMenu = false
-                        return
-                    }
                     if (prevent) event.preventDefault()
                     if (stop) event.stopPropagation()
                     const data: MenuEventData = {
