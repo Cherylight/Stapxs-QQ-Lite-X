@@ -10,80 +10,157 @@
         <BcTab>
             <div icon="fa-solid fa-face-laugh-squint">
                 <div class="system-face-bar">
+                    <template v-if="recentEmojisList.length > 0">
+                        <div class="title">
+                            <span>{{ $t('最近使用') }}</span>
+                        </div>
+                        <div class="face">
+                            <template
+                                v-for="num in recentEmojisList"
+                                :key="num"
+                            >
+                                <div>
+                                    <EmojiFace
+                                        :emoji="Emoji.get(num)"
+                                        @click="addBaseFace(num)"
+                                    />
+                                </div>
+                            </template>
+                        </div>
+                    </template>
                     <div class="title">
                         <span>{{ $t('超级表情') }}</span>
                     </div>
-                    <div class="base-face">
-                        <template v-for="num in Emoji.superList" :key="'base-face-' + num">
+                    <div class="face">
+                        <template v-for="num in Emoji.superList" :key="num">
                             <div>
-                                <EmojiFace :emoji="Emoji.get(num)" @click="addBaseFace(num)" />
+                                <EmojiFace
+                                    :emoji="Emoji.get(num)"
+                                    @click="addBaseFace(num)"
+                                />
                             </div>
                         </template>
                     </div>
                     <div class="title">
                         <span>{{ $t('小黄脸表情') }}</span>
                     </div>
-                    <div class="base-face">
-                        <template v-for="num in Emoji.normalList" :key="'base-face-' + num">
+                    <div class="face">
+                        <template v-for="num in Emoji.normalList" :key="num">
                             <div>
-                                <EmojiFace :emoji="Emoji.get(num)" @click="addBaseFace(num)" />
+                                <EmojiFace
+                                    :emoji="Emoji.get(num)"
+                                    @click="addBaseFace(num)"
+                                />
                             </div>
                         </template>
                     </div>
                     <div class="title">
                         <span>{{ $t('emoji 表情') }}</span>
                     </div>
-                    <div class="base-face">
-                        <div v-for="num in Emoji.emojiList" :key="'base-face-' + num">
-                            <EmojiFace :emoji="Emoji.get(num)" @click="addBaseFace(num)" />
+                    <div class="face">
+                        <div
+                            v-for="num in Emoji.emojiList"
+                            :key="'base-face-' + num"
+                        >
+                            <EmojiFace
+                                :emoji="Emoji.get(num)"
+                                @click="addBaseFace(num)"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
             <div icon="fa-solid fa-heart">
-                <div class="title">
-                    <span>{{ $t('收藏的表情') }}</span>
-                    <font-awesome-icon
-                        :icon="['fas', 'fa-rotate-right']"
-                        @click="reloadRoamingStamp" />
-                </div>
-                <div class="face-stickers">
-                    <template v-if="roamingState === 'no-support'">
-                        <div class="ss-card">
-                            <font-awesome-icon :icon="['fas', 'face-dizzy']" />
-                            <span>{{ $t('当前适配器不支持漫游表情') }}</span>
+                <div class="system-face-bar custom-face-bar">
+                    <template v-if="recentCustomFacesList.length > 0">
+                        <div class="title">
+                            <span>{{ $t('最近使用') }}</span>
+                        </div>
+                        <div class="face">
+                            <span
+                                v-for="(url, num) in recentCustomFacesList"
+                                :key="num"
+                                v-tooltip="customFaceTooltip(url)"
+                            >
+                                <img
+                                    loading="lazy"
+                                    :src="url"
+                                    :alt="'[' + $t('动画表情') + ']'"
+                                    @click="addImgFace(url)"
+                                />
+                            </span>
                         </div>
                     </template>
-                    <template v-else-if="roamingState === 'err'">
-                        <div class="ss-card">
-                            <font-awesome-icon :icon="['fas', 'face-dizzy']" />
-                            <span>{{ $t('加载漫游表情失败') }}</span>
-                        </div>
-                    </template>
-                    <template v-else-if="roamingState === 'loading'">
-                        <div class="ss-card">
-                            <font-awesome-icon :icon="['fas', 'spinner']" spin />
-                            <span>{{ $t('正在加载漫游表情') }}</span>
-                        </div>
-                    </template>
-                    <template v-else-if="runtimeData.stickerCache && runtimeData.stickerCache.length > 0">
-                        <span v-for="(url, index) in runtimeData.stickerCache" :key="'stickers-' + index"
-                            v-tooltip="customFaceTooltip(url)">
-                            <img
-                                v-show="url != 'end'"
-                                loading="lazy"
-                                :src="url"
-                                :alt="'[' + $t('动画表情') + ']'"
-                                @click="addImgFace(url)">
-                        </span>
-                    </template>
-                    <template v-else>
-                        <div v-show="runtimeData.stickerCache && runtimeData.stickerCache.length <= 0"
-                            class="ss-card">
-                            <font-awesome-icon :icon="['fas', 'face-dizzy']" />
-                            <span>{{ $t('一无所有') }}</span>
-                        </div>
-                    </template>
+                    <div class="title">
+                        <span>{{ $t('收藏的表情') }}</span>
+                        <font-awesome-icon
+                            :icon="['fas', 'fa-rotate-right']"
+                            @click="reloadCustomFace"
+                        />
+                    </div>
+                    <div class="face">
+                        <template v-if="roamingState === 'no-support'">
+                            <div class="ss-card">
+                                <font-awesome-icon
+                                    :icon="['fas', 'face-dizzy']"
+                                />
+                                <span>{{
+                                    $t('当前适配器不支持漫游表情')
+                                }}</span>
+                            </div>
+                        </template>
+                        <template v-else-if="roamingState === 'err'">
+                            <div class="ss-card">
+                                <font-awesome-icon
+                                    :icon="['fas', 'face-dizzy']"
+                                />
+                                <span>{{ $t('加载漫游表情失败') }}</span>
+                            </div>
+                        </template>
+                        <template v-else-if="roamingState === 'loading'">
+                            <div class="ss-card">
+                                <font-awesome-icon
+                                    :icon="['fas', 'spinner']"
+                                    spin
+                                />
+                                <span>{{ $t('正在加载漫游表情') }}</span>
+                            </div>
+                        </template>
+                        <template
+                            v-else-if="
+                                runtimeData.stickerCache &&
+                                runtimeData.stickerCache.length > 0
+                            "
+                        >
+                            <span
+                                v-for="(url, index) in runtimeData.stickerCache"
+                                :key="'stickers-' + index"
+                                v-tooltip="customFaceTooltip(url)"
+                            >
+                                <img
+                                    v-show="url != 'end'"
+                                    loading="lazy"
+                                    :src="url"
+                                    :alt="'[' + $t('动画表情') + ']'"
+                                    @click="addImgFace(url)"
+                                />
+                            </span>
+                        </template>
+                        <template v-else>
+                            <div
+                                v-show="
+                                    runtimeData.stickerCache &&
+                                    runtimeData.stickerCache.length <= 0
+                                "
+                                class="ss-card"
+                            >
+                                <font-awesome-icon
+                                    :icon="['fas', 'face-dizzy']"
+                                />
+                                <span>{{ $t('一无所有') }}</span>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </BcTab>
@@ -92,7 +169,7 @@
 
 <script setup lang="ts">
 import { runtimeData } from '@renderer/function/msg'
-import { shallowRef } from 'vue'
+import { computed, ComputedRef, ShallowRef, shallowRef } from 'vue'
 
 import Emoji from '@renderer/function/model/emoji'
 import { FaceSeg, ImgSeg, Seg, TxtSeg } from '@renderer/function/model/seg'
@@ -102,35 +179,65 @@ import { VueCompData } from '@renderer/function/elements/vueComp'
 import CustomFaceTooltip from './tooltip/CustomFaceTooltip.vue'
 
 import { vTooltip } from '@renderer/function/utils/vcmd'
+import { useLocalStorage } from '@renderer/function/utils/vuse'
 
 const emit = defineEmits<{
     sendMsg: []
 }>()
 
-const roamingState = shallowRef<
-    | 'loading'
-    | 'ok'
-    | 'err'
-    | 'no-support'
->('no-support')
+const roamingState = shallowRef<'loading' | 'ok' | 'err' | 'no-support'>(
+    'no-support',
+)
+
+function getRecentEmojiRecord<T>(storeId: string): {
+    recordList: ShallowRef<T[]>
+    showList: ComputedRef<T[]>
+} {
+    const recordList = useLocalStorage<T[]>(storeId, [])
+    const showList = computed(() => {
+        if (runtimeData.sysConfig.record_recent_emoji === 'none') {
+            return []
+        } else if (runtimeData.sysConfig.record_recent_emoji === 'order') {
+            return recordList.value.slice(0, 30)
+        } else {
+            const timesMap = new Map<T, number>()
+            for (const id of recordList.value) {
+                timesMap.set(id, (timesMap.get(id) || 0) + 1)
+            }
+            return Array.from(timesMap.entries())
+                .sort((a, b) => b[1] - a[1])
+                .map((entry) => entry[0])
+                .slice(0, 30)
+        }
+    })
+
+    return {
+        recordList,
+        showList,
+    }
+}
+
+const { recordList: recentEmojisId, showList: recentEmojisList } =
+    getRecentEmojiRecord<number>('recent-emojis-id')
+const { recordList: recentCustomFacesId, showList: recentCustomFacesList } =
+    getRecentEmojiRecord<string>('recent-custom-faces-id')
 
 // 初次加载漫游表情
-initRoamingStamp()
+initCustomFace()
 
-
-async function initRoamingStamp() {
+async function initCustomFace() {
     if (runtimeData.stickerCache) return
 
-    await loadRoamingStamp()
+    await loadCustomFace()
 }
-async function reloadRoamingStamp() {
+async function reloadCustomFace() {
     if (roamingState.value === 'loading') return
     runtimeData.stickerCache = undefined
 
-    await loadRoamingStamp()
+    await loadCustomFace()
 }
 
-async function loadRoamingStamp() {
+async function loadCustomFace() {
     if (roamingState.value === 'loading') return
     roamingState.value = 'loading'
     if (!runtimeData.nowAdapter?.getCustomFace) {
@@ -152,15 +259,17 @@ function addSpecialSeg(seg: Seg) {
     runtimeData.nowChat?.inputMsg.addSq(seg)
 }
 function addBaseFace(id: number) {
-    if (id < 5000)
-        addSpecialSeg(new FaceSeg(id))
-    else
-        addSpecialSeg(new TxtSeg(Emoji.get(id)!.value))
+    // 记录最近使用的表情
+    recordRecentEmoji(recentEmojisId, id)
+    if (id < 5000) addSpecialSeg(new FaceSeg(id))
+    else addSpecialSeg(new TxtSeg(Emoji.get(id)!.value))
 }
 function addImgFace(url: string) {
+    // 记录最近使用的表情
+    recordRecentEmoji(recentCustomFacesId, url)
     addSpecialSeg(new ImgSeg(url, true))
     // 直接发送表情
-    if(runtimeData.sysConfig.send_face) {
+    if (runtimeData.sysConfig.send_face) {
         emit('sendMsg')
     }
 }
@@ -168,7 +277,35 @@ function addImgFace(url: string) {
 function customFaceTooltip(url: string): VueCompData<typeof CustomFaceTooltip> {
     return {
         comp: CustomFaceTooltip,
-        props: { url }
+        props: { url },
     }
+}
+
+function recordRecentEmoji<T>(recordList: ShallowRef<T[]>, id: T) {
+    if (runtimeData.sysConfig.record_recent_emoji === 'none') return
+    let limit: number
+    switch (runtimeData.sysConfig.record_recent_emoji) {
+        case 'order':
+            limit = 30
+            break
+        case '100times':
+            limit = 100
+            break
+        case '500times':
+            limit = 500
+            break
+    }
+    const list = recordList.value
+    if (runtimeData.sysConfig.record_recent_emoji === 'order') {
+        const index = list.indexOf(id)
+        if (index !== -1) {
+            list.splice(index, 1)
+        }
+    }
+    list.unshift(id)
+    if (list.length > limit) {
+        list.pop()
+    }
+    recordList.value = list
 }
 </script>

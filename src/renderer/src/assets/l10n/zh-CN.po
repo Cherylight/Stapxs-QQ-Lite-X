@@ -2339,3 +2339,13 @@ msgstr ""
 
 msgid "插入"
 msgstr ""
+
+msgid "输入选项"
+msgstr ""
+
+msgid "缓存最近使用表情"
+msgstr ""
+
+msgid "终于不用翻表情了"
+msgstr ""
+

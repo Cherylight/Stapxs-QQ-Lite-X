@@ -298,6 +298,9 @@ export const OptionInfos = {
     reply_with_at: {
         default: 'none' as 'none' | 'prefix' | 'insert',
     },
+    record_recent_emoji: {
+        default: '100times' as 'none' | 'order' | '100times' | '500times',
+    },
     //#endregion
     //#region == Dev ====================================
     log_level: {
