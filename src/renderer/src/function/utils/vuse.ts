@@ -20,6 +20,7 @@ import {
 } from 'vue'
 import { MenuEventData } from '../elements/information'
 import { pastTimeFormat } from './systemUtil'
+import { backend } from '@renderer/runtime/backend'
 
 /**
  * 用来封装一个停留事件的处理, 支持传递额外上下文
@@ -323,6 +324,24 @@ export function useKeyboard(
     })
 }
 
+function localStorageGetItem(key: string): string | null {
+    if (backend.type === 'electron') {
+        return backend.callSync('opt:get', key)
+    } else {
+        // eslint-disable-next-line no-restricted-globals
+        return localStorage.getItem(key)
+    }
+}
+
+function localStorageSetItem(key: string, value: string): void {
+    if (backend.type === 'electron') {
+        backend.callSync('opt:store', { key, value })
+    } else {
+        // eslint-disable-next-line no-restricted-globals
+        localStorage.setItem(key, value)
+    }
+}
+
 /**
  * 使用 localStorage
  * @param key 保存的键值
@@ -336,12 +355,12 @@ export function useLocalStorage<T>(key: string, defaultValue: T): Ref<T> {
     const serializer = (data: T) => {
         return JSON.stringify({ value: data })
     }
-    const storageData = localStorage.getItem(key)
+    const storageData = localStorageGetItem(key)
     const data = ref<T>(storageData ? parser(storageData) : defaultValue)
     watch(
         data,
         (newValue) => {
-            localStorage.setItem(key, serializer(newValue))
+            localStorageSetItem(key, serializer(newValue))
         },
         { deep: true },
     )

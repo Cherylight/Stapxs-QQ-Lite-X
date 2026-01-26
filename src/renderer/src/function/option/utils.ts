@@ -20,6 +20,7 @@ export async function loadAllOptions(
     if ('electron' === backend.type) {
         json = backend.callSync('opt:get', 'options')
     } else {
+        // eslint-disable-next-line no-restricted-globals
         json = localStorage.getItem('options')
     }
     if (!json) {
@@ -49,6 +50,7 @@ export async function saveAllOptions(data: Record<string, any>): Promise<void> {
             value: json,
         })
     } else {
+        // eslint-disable-next-line no-restricted-globals
         localStorage.setItem('options', json)
     }
 }

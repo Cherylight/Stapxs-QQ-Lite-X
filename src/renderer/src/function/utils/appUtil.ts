@@ -8,7 +8,7 @@ import { KeyboardInfo } from '@capacitor/keyboard'
 import { logger, popInfo } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import { hslToRgb, rgbToHsl } from '@renderer/function/utils/systemUtil'
-import { defineAsyncComponent, h, markRaw, toRaw } from 'vue'
+import { defineAsyncComponent, h, markRaw } from 'vue'
 import { GroupSession, Session, UserSession } from '../model/session'
 import { Notify } from '../notify'
 import { changeSession, sendMsgRaw } from './msgUtil'
@@ -658,11 +658,11 @@ import { SessionBox } from '../model/box'
 import { Message } from '../model/message'
 import { ProxyUrl } from '../model/proxyUrl'
 import { htmlPopBox, popBox, PopBoxButton } from './popBox'
-import UpdatePan from '@renderer/components/popBox/UpdatePan.vue'
 import WelPan from '@renderer/components/popBox/WelPan.vue'
 import { ReplySeg, TxtSeg } from '../model/seg'
 import win from '@renderer/runtime/win'
 import SvgMedal from '@renderer/components/svg/SvgMedal.vue'
+import { useLocalStorage } from './vuse'
 /**
  * 初始化快速连接信息
  * @param address 地址
@@ -721,7 +721,10 @@ function stableVersionCheck() {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function showUpdateLog(data: any) {
     const appVersion = appInfo.version // 当前版本
-    const cacheVersion = localStorage.getItem('version') // 缓存版本
+    const cacheVersion = useLocalStorage<undefined | string>(
+        'version',
+        undefined,
+    ) // 缓存版本
     // 这儿有两种情况：
     //    如果当前版本小于获取到的版本就是有更新
     //    如果缓存版本小于获取到的版本但是当前版本等于获取到的版本就是更新完成首次启动
@@ -729,87 +732,87 @@ function showUpdateLog(data: any) {
 
     if (semver.lt(appVersion, latestVersion)) {
         // 有更新
-        showReleaseLog(data, false)
+        // showReleaseLog(data, false)
     }
     if (
-        cacheVersion &&
+        cacheVersion.value &&
         semver.eq(appVersion, latestVersion) &&
-        semver.lt(cacheVersion, latestVersion)
+        semver.lt(cacheVersion.value, latestVersion)
     ) {
         // 更新完成首次启动
-        showReleaseLog(data, true)
+        // showReleaseLog(data, true)
     }
 }
-function showReleaseLog(data: any, isUpdated: boolean) {
-    const { $t } = app.config.globalProperties
-    let msg = data.body
-    // 处理 title，取开头到下一个 “\r\n” 之间的内容
-    const title = msg.split('\r\n')[0].substring(1)
-    // 处理 msg，取 “## 更新内容” 到下一个 “##” 之间的内容
-    const start = msg.indexOf('## 更新内容\r\n')
-    if (start != -1) {
-        msg = msg.substring(start + 9)
-        const end = msg.indexOf('##')
-        if (end != -1) {
-            msg = msg.substring(0, end)
-        }
-    }
-    msg = title + '\r\n' + msg
-    const info = {
-        version:
-            (isUpdated ? localStorage.getItem('version') + ' -> ' : '') +
-            data.tag_name.substring(1),
-        date: data.published_at,
-        user: {
-            name: data.author.login,
-            avatar: data.author.avatar_url,
-            url: data.author.html_url,
-        },
-        message: msg,
-        updated: isUpdated,
-    }
-    const buttonGoUpdate = !backend.isWeb()
-        ? [
-              {
-                  text: $t('知道了'),
-              },
-              {
-                  text: $t('下载更新…'),
-                  master: true,
-                  noClose: true,
-                  fun: () => openLink(data.html_url, true),
-              },
-          ]
-        : [
-              {
-                  text: $t('查看…'),
-                  noClose: true,
-                  fun: () => openLink(data.html_url),
-              },
-              {
-                  text: $t('刷新页面'),
-                  master: true,
-                  fun: () => location.reload(),
-              },
-          ]
-    popBox({
-        comp: UpdatePan,
-        props: toRaw(info),
-        button: isUpdated
-            ? [
-                  {
-                      text: $t('查看…'),
-                      noClose: true,
-                      fun: () => openLink(data.html_url, true),
-                  },
-                  {
-                      text: $t('知道了'),
-                      master: true,
-                  },
-              ]
-            : buttonGoUpdate,
-    })
-}
+// function showReleaseLog(data: any, isUpdated: boolean) {
+//     const { $t } = app.config.globalProperties
+//     let msg = data.body
+//     // 处理 title，取开头到下一个 “\r\n” 之间的内容
+//     const title = msg.split('\r\n')[0].substring(1)
+//     // 处理 msg，取 “## 更新内容” 到下一个 “##” 之间的内容
+//     const start = msg.indexOf('## 更新内容\r\n')
+//     if (start != -1) {
+//         msg = msg.substring(start + 9)
+//         const end = msg.indexOf('##')
+//         if (end != -1) {
+//             msg = msg.substring(0, end)
+//         }
+//     }
+//     msg = title + '\r\n' + msg
+//     const info = {
+//         version:
+//             (isUpdated ? localStorage.getItem('version') + ' -> ' : '') +
+//             data.tag_name.substring(1),
+//         date: data.published_at,
+//         user: {
+//             name: data.author.login,
+//             avatar: data.author.avatar_url,
+//             url: data.author.html_url,
+//         },
+//         message: msg,
+//         updated: isUpdated,
+//     }
+//     const buttonGoUpdate = !backend.isWeb()
+//         ? [
+//               {
+//                   text: $t('知道了'),
+//               },
+//               {
+//                   text: $t('下载更新…'),
+//                   master: true,
+//                   noClose: true,
+//                   fun: () => openLink(data.html_url, true),
+//               },
+//           ]
+//         : [
+//               {
+//                   text: $t('查看…'),
+//                   noClose: true,
+//                   fun: () => openLink(data.html_url),
+//               },
+//               {
+//                   text: $t('刷新页面'),
+//                   master: true,
+//                   fun: () => location.reload(),
+//               },
+//           ]
+//     popBox({
+//         comp: UpdatePan,
+//         props: toRaw(info),
+//         button: isUpdated
+//             ? [
+//                   {
+//                       text: $t('查看…'),
+//                       noClose: true,
+//                       fun: () => openLink(data.html_url, true),
+//                   },
+//                   {
+//                       text: $t('知道了'),
+//                       master: true,
+//                   },
+//               ]
+//             : buttonGoUpdate,
+//     })
+// }
 function showTestLog(data: GhCommits) {
     const { $t } = app.config.globalProperties
     const pages = () =>
@@ -878,35 +881,34 @@ const openCheckList: ((times: number) => boolean)[] = []
  */
 export function checkOpenTimes() {
     if (import.meta.env.DEV) return // 开发环境不显示
-    const times = +(localStorage.getItem('times') ?? 0)
+    const times = useLocalStorage('times', 0)
     for (const func of openCheckList) {
-        if (func(times)) break
+        if (func(times.value)) break
     }
-    localStorage.setItem('times', (times + 1).toString())
+    times.value += 1
 }
 
 // 使用引导
 openCheckList.push((_: number) => {
-    const guide = localStorage.getItem('guide')
+    const guide = useLocalStorage('guide', 0)
     const guideVersion = 1
-    if (guide === guideVersion.toString()) return false
+    if (guide.value === guideVersion) return false
 
     // 首次打开，显示首次打开引导信息
     popBox({
         comp: WelPan,
         allowAutoClose: false,
     })
-    localStorage.setItem('guide', guideVersion.toString())
+    guide.value = guideVersion
     return true
 })
 
 // 50次ad
 openCheckList.push((times: number) => {
     const { $t } = app.config.globalProperties
-    const getTimes = Number(times) + 1
-    localStorage.setItem('times', getTimes.toString())
+    const openTimes = times + 1
     if (runtimeData.sysConfig.close_ad) return false
-    if (getTimes % 50 != 0) return false
+    if (openTimes % 50 != 0) return false
 
     const pages = () =>
         h(
@@ -919,7 +921,7 @@ openCheckList.push((times: number) => {
                 h(
                     'span',
                     $t('好耶！Stapxs QQ Lite X 已经被打开 {times} 次了！', {
-                        times: getTimes,
+                        times: openTimes,
                     }),
                 ),
                 h('span', $t('真的不去点个 star 吗 ……')),
@@ -963,11 +965,7 @@ export function checkNotice() {
         .then((response) => response.json())
         .then((data) => {
             // 获取已显示过的公告 ID
-            let noticeShow = [] as number[]
-            const showId = localStorage.getItem('notice_show')
-            if (showId) {
-                noticeShow = showId.split(',').map((id: string) => parseInt(id))
-            }
+            const noticeShow = useLocalStorage<number[]>('notice_show', [])
             // 解析公告列表
             data.forEach((notice: any) => {
                 if (
@@ -977,7 +975,7 @@ export function checkNotice() {
                 ) {
                     const noticeBody = notice as NoticeBodyV3
                     // 当前时间戳（毫秒）
-                    const now = new Date().getTime()
+                    const now = Date.now()
                     noticeBody.show_date.forEach((dateInterval: number[]) => {
                         if (dateInterval.length == 2) {
                             // 判断是否在时间区间内
@@ -993,7 +991,7 @@ export function checkNotice() {
                         noticeBody.is_important == true ||
                         (noticeBody.is_show &&
                             noticeBody.id &&
-                            noticeShow.indexOf(noticeBody.id) < 0)
+                            !noticeShow.value.includes(noticeBody.id))
                     ) {
                         // 加载公告弹窗列表
                         for (let i = 0; i < noticeBody.pops.length; i++) {
@@ -1017,16 +1015,16 @@ export function checkNotice() {
                                     fun: () => {
                                         // 添加已读记录
                                         if (
-                                            noticeShow.indexOf(noticeBody.id) <
-                                                0 &&
+                                            !noticeShow.value.includes(
+                                                noticeBody.id,
+                                            ) &&
                                             !noticeBody.is_important
                                         ) {
-                                            noticeShow.push(noticeBody.id)
+                                            noticeShow.value = [
+                                                ...noticeShow.value,
+                                                noticeBody.id,
+                                            ]
                                         }
-                                        localStorage.setItem(
-                                            'notice_show',
-                                            noticeShow.toString(),
-                                        )
                                     },
                                 },
                             ]

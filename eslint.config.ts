@@ -82,6 +82,24 @@ export default defineConfigWithVueTs(
                     ],
                 },
             ],
+            // 禁止使用 localStorage
+            'no-restricted-globals': [
+                'error',
+                {
+                    name: 'localStorage',
+                    message:
+                        '禁止使用 localStorage。请使用 useLocalStorage 替代。',
+                },
+            ],
+            'no-restricted-properties': [
+                'error',
+                {
+                    object: 'window',
+                    property: 'localStorage',
+                    message:
+                        '禁止使用 localStorage。请使用 useLocalStorage 替代。',
+                },
+            ],
             // 允许while true
             'no-constant-condition': ['error', { checkLoops: false }],
             indent: ['warn', 4, { SwitchCase: 1 }],
