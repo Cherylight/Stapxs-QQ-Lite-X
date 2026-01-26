@@ -169,7 +169,7 @@
 
 <script setup lang="ts">
 import { runtimeData } from '@renderer/function/msg'
-import { computed, ComputedRef, ShallowRef, shallowRef } from 'vue'
+import { computed, ComputedRef, Ref, shallowRef } from 'vue'
 
 import Emoji from '@renderer/function/model/emoji'
 import { FaceSeg, ImgSeg, Seg, TxtSeg } from '@renderer/function/model/seg'
@@ -190,7 +190,7 @@ const roamingState = shallowRef<'loading' | 'ok' | 'err' | 'no-support'>(
 )
 
 function getRecentEmojiRecord<T>(storeId: string): {
-    recordList: ShallowRef<T[]>
+    recordList: Ref<T[]>
     showList: ComputedRef<T[]>
 } {
     const recordList = useLocalStorage<T[]>(storeId, [])
@@ -281,7 +281,7 @@ function customFaceTooltip(url: string): VueCompData<typeof CustomFaceTooltip> {
     }
 }
 
-function recordRecentEmoji<T>(recordList: ShallowRef<T[]>, id: T) {
+function recordRecentEmoji<T>(recordList: Ref<T[]>, id: T) {
     if (runtimeData.sysConfig.record_recent_emoji === 'none') return
     let limit: number
     switch (runtimeData.sysConfig.record_recent_emoji) {
