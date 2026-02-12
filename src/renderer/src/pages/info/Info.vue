@@ -9,18 +9,24 @@
     <div class="chat-info-pan">
         <div :class="'chat-info-base ' + chat.type">
             <div>
-                <img :src="chat.face" :alt="chat.showName">
+                <img :src="chat.face" :alt="chat.showName" />
                 <div>
                     <a>{{ chat.showName }}</a>
                     <span>{{ chat.id }}</span>
                 </div>
-                <div style="display: flex;align-items: center;justify-content: center;cursor: pointer;"
-                    @click="copyText(chat.id)">
+                <div
+                    style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                    "
+                    @click="copyText(chat.id)"
+                >
                     <font-awesome-icon :icon="['fas', 'copy']" />
                 </div>
             </div>
-            <div v-if="chat.type === 'group'"
-                v-show="false">
+            <div v-if="chat.type === 'group'" v-show="false">
                 <!-- <header>
                     <span>{{ $t('介绍') }}</span>
                 </header>
@@ -48,25 +54,35 @@
                 <header>
                     <span>{{ $t('签名') }}</span>
                 </header>
-                <span>{{ userInfo.longNick ? userInfo.longNick : $t("这个人很懒什么都没有写～") }}</span>
+                <span>{{
+                    userInfo.longNick
+                        ? userInfo.longNick
+                        : $t('这个人很懒什么都没有写～')
+                }}</span>
                 <header>
                     <span>{{ $t('其他信息') }}</span>
                 </header>
                 <div class="outher">
-                    <span v-if="userInfo.birthday_year">{{ $t('生日') }}:
+                    <span v-if="userInfo.birthday_year"
+                        >{{ $t('生日') }}:
                         <span>
-                            {{ Intl.DateTimeFormat(getTrueLang(), {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                            }).format(new Date(
-                                `${userInfo.birthday_year}-${
-                                    userInfo.birthday_month}-${
-                                    userInfo.birthday_day}`,
-                            )) }}
+                            {{
+                                Intl.DateTimeFormat(getTrueLang(), {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                }).format(
+                                    new Date(
+                                        `${userInfo.birthday_year}-${
+                                            userInfo.birthday_month
+                                        }-${userInfo.birthday_day}`,
+                                    ),
+                                )
+                            }}
                         </span>
                     </span>
-                    <span v-if="userInfo.country">{{ $t('地区') }}:
+                    <span v-if="userInfo.country"
+                        >{{ $t('地区') }}:
                         <span>
                             <template v-if="userInfo.country">
                                 {{ userInfo.country }}
@@ -88,8 +104,7 @@
                 </template> -->
             </div>
         </div>
-        <BcTab v-if="chat instanceof GroupSession"
-            class="chat-info-tab">
+        <BcTab v-if="chat instanceof GroupSession" class="chat-info-tab">
             <div :name="$t('成员')">
                 <div class="chat-info-tab-member">
                     <template v-if="chat.memsLoaded">
@@ -97,27 +112,61 @@
                             <input
                                 v-search="userSearchInfo!"
                                 class="search-view"
-                                :placeholder="$t('搜索 ……')">
-                            <button
-                                :title="$t('刷新')"
-                                @click="refreshUsers">
-                                <font-awesome-icon :icon="['fas', 'rotate-right']" />
+                                :placeholder="$t('搜索 ……')"
+                            />
+                            <button :title="$t('刷新')" @click="refreshUsers">
+                                <font-awesome-icon
+                                    :icon="['fas', 'rotate-right']"
+                                />
                             </button>
                         </header>
-                        <div v-if="(userSearchInfo!.isSearch ? userSearchInfo!.query : chat.memberList).length > 0">
-                            <div v-for="member in userSearchInfo!.isSearch ? userSearchInfo!.query : chat.memberList"
-                                :key="'chatinfomlist-' + member.user_id" class="edit">
-                                <img alt="nk" loading="lazy"
-                                    :src="member.face">
+                        <div
+                            v-if="
+                                (userSearchInfo!.isSearch
+                                    ? userSearchInfo!.query
+                                    : chat.memberList
+                                ).length > 0
+                            "
+                        >
+                            <div
+                                v-for="member in userSearchInfo!.isSearch
+                                    ? userSearchInfo!.query
+                                    : chat.memberList"
+                                :key="'chatinfomlist-' + member.user_id"
+                                class="edit"
+                            >
+                                <img
+                                    alt="nk"
+                                    loading="lazy"
+                                    :src="member.face"
+                                />
                                 <div>
-                                    <a @click="startChat(member)">{{ member.name }}</a>
-                                    <font-awesome-icon v-if="member.role === 'owner'" :icon="['fas', 'crown']" />
-                                    <font-awesome-icon v-if="member.role === 'admin'" :icon="['fas', 'star']" />
+                                    <a @click="startChat(member)">{{
+                                        member.name
+                                    }}</a>
+                                    <font-awesome-icon
+                                        v-if="member.role === 'owner'"
+                                        :icon="['fas', 'crown']"
+                                    />
+                                    <font-awesome-icon
+                                        v-if="member.role === 'admin'"
+                                        :icon="['fas', 'star']"
+                                    />
                                 </div>
                                 <!-- 在手机端戳 id 就能触发 -->
-                                <span @click="clickMember(member)">{{ member.user_id }}</span>
-                                <font-awesome-icon v-if="canEditMember(member.role)" :icon="['fas', 'wrench']" @click="clickMember(member)" />
-                                <font-awesome-icon v-else :icon="['fas', 'copy']" @click="clickMember(member)" />
+                                <span @click="clickMember(member)">{{
+                                    member.user_id
+                                }}</span>
+                                <font-awesome-icon
+                                    v-if="canEditMember(member.role)"
+                                    :icon="['fas', 'wrench']"
+                                    @click="clickMember(member)"
+                                />
+                                <font-awesome-icon
+                                    v-else
+                                    :icon="['fas', 'copy']"
+                                    @click="clickMember(member)"
+                                />
                             </div>
                         </div>
                         <div v-else class="null">
@@ -125,7 +174,7 @@
                             {{ $t('空空如也') }}
                         </div>
                     </template>
-                    <div v-else class="loading" style="opacity: 0.9;">
+                    <div v-else class="loading" style="opacity: 0.9">
                         <font-awesome-icon :icon="['fas', 'spinner']" />
                         {{ $t('加载中') }}
                     </div>
@@ -138,26 +187,37 @@
                             <input
                                 v-search="annSearchInfo!"
                                 class="search-view"
-                                :placeholder="$t('搜索 ……')">
-                            <button
-                                :title="$t('刷新')"
-                                @click="refreshAnns">
-                                <font-awesome-icon :icon="['fas', 'rotate-right']" />
+                                :placeholder="$t('搜索 ……')"
+                            />
+                            <button :title="$t('刷新')" @click="refreshAnns">
+                                <font-awesome-icon
+                                    :icon="['fas', 'rotate-right']"
+                                />
                             </button>
                         </header>
-                        <div v-if="(annSearchInfo!.isSearch ? annSearchInfo!.query : chat.anns).length > 0">
+                        <div
+                            v-if="
+                                (annSearchInfo!.isSearch
+                                    ? annSearchInfo!.query
+                                    : chat.anns
+                                ).length > 0
+                            "
+                        >
                             <BulletinBody
-                                v-for="(item, index) in annSearchInfo!.isSearch ? annSearchInfo!.query : chat.anns"
+                                v-for="(item, index) in annSearchInfo!.isSearch
+                                    ? annSearchInfo!.query
+                                    : chat.anns"
                                 :key="'bulletins-' + index"
                                 :data="item"
-                                :index="index" />
+                                :index="index"
+                            />
                         </div>
                         <div v-else class="null">
                             <font-awesome-icon :icon="['fas', 'inbox']" />
                             {{ $t('空空如也') }}
                         </div>
                     </template>
-                    <div v-else class="loading" style="opacity: 0.9;">
+                    <div v-else class="loading" style="opacity: 0.9">
                         <font-awesome-icon :icon="['fas', 'spinner']" />
                         {{ $t('加载中') }}
                     </div>
@@ -168,23 +228,33 @@
             </div>
             <div :name="$t('设置')">
                 <div style="padding: 0 20px">
-                    <OptInfo :type="'group'" :chat="chat"
-                        @update_member_card="updateMemberCard" />
+                    <OptInfo
+                        :type="'group'"
+                        :chat="chat"
+                        @update_member_card="updateMemberCard"
+                    />
                 </div>
             </div>
         </BcTab>
-        <div v-if="configMember && chat instanceof GroupSession" class="ss-card user-config show">
+        <div
+            v-if="configMember && chat instanceof GroupSession"
+            class="ss-card user-config show"
+        >
             <div>
-                <img alt="nk" :src="configMember.face">
+                <img alt="nk" :src="configMember.face" />
                 <div>
                     <a>{{ configMember.name }}</a>
                     <span>{{ configMember.user_id }}</span>
                 </div>
                 <font-awesome-icon
-                    style="margin-right: 20px;"
+                    style="margin-right: 20px"
                     :icon="['fas', 'copy']"
-                    @click="copyText(configMember.user_id)" />
-                <font-awesome-icon :icon="['fas', 'angle-down']" @click="configMember = undefined" />
+                    @click="copyText(configMember.user_id)"
+                />
+                <font-awesome-icon
+                    :icon="['fas', 'angle-down']"
+                    @click="configMember = undefined"
+                />
             </div>
             <div>
                 <header>{{ $t('成员信息') }}</header>
@@ -192,29 +262,36 @@
                     <font-awesome-icon :icon="['fas', 'clipboard-list']" />
                     <div>
                         <span>{{ $t('成员昵称') }}</span>
-                        <span>{{
-                            $t('啊吧啊吧……')
-                        }}</span>
+                        <span>{{ $t('啊吧啊吧……') }}</span>
                     </div>
-                    <input v-model.trim="configCard"
+                    <input
+                        v-model.trim="configCard"
                         style="width: 50%"
                         class="ss-input"
                         type="text"
-                        @change="updateMemberCard(configMember as Member, configCard)">
+                        @change="
+                            updateMemberCard(configMember as Member, configCard)
+                        "
+                    />
                 </div>
                 <div v-if="chat.getMe().role === 'owner'" class="opt-item">
                     <font-awesome-icon :icon="['fas', 'clipboard-list']" />
                     <div>
                         <span>{{ $t('成员头衔') }}</span>
-                        <span>{{
-                            $t('猪咪猪咪')
-                        }}</span>
+                        <span>{{ $t('猪咪猪咪') }}</span>
                     </div>
-                    <input v-model.trim="configTitle"
+                    <input
+                        v-model.trim="configTitle"
                         style="width: 50%"
                         class="ss-input"
                         type="text"
-                        @change="updateMemberTitle(configMember as Member, configTitle)">
+                        @change="
+                            updateMemberTitle(
+                                configMember as Member,
+                                configTitle,
+                            )
+                        "
+                    />
                 </div>
                 <template v-if="canEditMember(configMember.role)">
                     <header>{{ $t('操作') }}</header>
@@ -226,14 +303,20 @@
                                 $t('要让小猫咪不许说话几分钟呢？')
                             }}</span>
                         </div>
-                        <input v-model.number="configBanMin"
+                        <input
+                            v-model.number="configBanMin"
                             style="width: 50%"
                             class="ss-input"
                             type="text"
-                            @change="banMember(configMember as Member, configBanMin)">
+                            @change="
+                                banMember(configMember as Member, configBanMin)
+                            "
+                        />
                     </div>
-                    <button class="ss-button"
-                        @click="removeUser(configMember as Member)">
+                    <button
+                        class="ss-button"
+                        @click="removeUser(configMember as Member)"
+                    >
                         {{ $t('移出群聊') }}
                     </button>
                 </template>
@@ -251,12 +334,20 @@ import OptInfo from '@renderer/pages/options/OptInfo.vue'
 import { Role } from '@renderer/function/adapter/enmu'
 import { popInfo } from '@renderer/function/base'
 import { Ann } from '@renderer/function/model/ann'
-import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import {
+    GroupSession,
+    Session,
+    UserSession,
+} from '@renderer/function/model/session'
 import { Member, User } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
 import { changeSession, qqLevelToEmoji } from '@renderer/function/utils/msgUtil'
 import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
-import { copyToClipboard, delay, getTrueLang } from '@renderer/function/utils/systemUtil'
+import {
+    copyToClipboard,
+    delay,
+    getTrueLang,
+} from '@renderer/function/utils/systemUtil'
 import { vSearch } from '@renderer/function/utils/vcmd'
 import {
     nextTick,
@@ -273,22 +364,27 @@ const { chat } = defineProps<{
 const emit = defineEmits<{
     close: []
 }>()
-const userInfo: ShallowRef<User | undefined> = (
+const userInfo: ShallowRef<User | undefined> =
     chat instanceof UserSession ? chat.useUserInfo() : shallowRef(undefined)
-)
 
 //#region == 注册查询 =================================================
-const userSearchInfo =  chat instanceof GroupSession ? shallowReactive({
-    originList: chat.memberList,
-    query: shallowReactive([] as Member[]),
-    isSearch: false,
-}) : undefined
+const userSearchInfo =
+    chat instanceof GroupSession
+        ? shallowReactive({
+              originList: chat.memberList,
+              query: shallowReactive([] as Member[]),
+              isSearch: false,
+          })
+        : undefined
 
-const annSearchInfo =  chat instanceof GroupSession ? shallowReactive({
-    originList: [] as Ann[],
-    query: shallowReactive([] as Ann[]),
-    isSearch: false,
-}) : undefined
+const annSearchInfo =
+    chat instanceof GroupSession
+        ? shallowReactive({
+              originList: [] as Ann[],
+              query: shallowReactive([] as Ann[]),
+              isSearch: false,
+          })
+        : undefined
 
 watchEffect(() => {
     if (!(chat instanceof GroupSession)) return
@@ -310,7 +406,7 @@ if (chat instanceof GroupSession) {
 }
 //#endregion
 
-function $t(key: string, option: {[key: string]: string}={}) {
+function $t(key: string, option: { [key: string]: string } = {}) {
     return app.config.globalProperties.$t(key, option)
 }
 
@@ -318,7 +414,9 @@ function $t(key: string, option: {[key: string]: string}={}) {
  * 移出群聊
  */
 async function removeUser(mem: Member) {
-    const ensure = await ensurePopBox($t('真的要将 {user} 移出群聊吗', { user: mem.name }))
+    const ensure = await ensurePopBox(
+        $t('真的要将 {user} 移出群聊吗', { user: mem.name }),
+    )
 
     if (!ensure) return
 
@@ -334,11 +432,8 @@ async function removeUser(mem: Member) {
 
 function copyText(text: string | number) {
     copyToClipboard(String(text))
-        .then(
-            () => popInfo.info($t('复制成功'))
-        ).catch(
-            () => popInfo.error($t('复制失败'))
-        )
+        .then(() => popInfo.info($t('复制成功')))
+        .catch(() => popInfo.error($t('复制失败')))
 }
 
 async function banMember(mem: Member, banTime: number) {
@@ -355,7 +450,11 @@ async function banMember(mem: Member, banTime: number) {
             return
         }
 
-        await runtimeData.nowAdapter.banMember(chat as GroupSession, mem, banTime * 60)
+        await runtimeData.nowAdapter.banMember(
+            chat as GroupSession,
+            mem,
+            banTime * 60,
+        )
     }
 }
 
@@ -370,7 +469,11 @@ async function updateMemberCard(mem: Member, newValue: string) {
         popInfo.info($t('当前适配器不支持修改群昵称'))
         return
     }
-    await runtimeData.nowAdapter.setMemberCard(chat as GroupSession, mem, newValue)
+    await runtimeData.nowAdapter.setMemberCard(
+        chat as GroupSession,
+        mem,
+        newValue,
+    )
 
     await checkSetMemInfoResult()
 }
@@ -388,7 +491,11 @@ async function updateMemberTitle(mem: Member, value: string) {
         popInfo.info($t('当前适配器不支持修改群头衔'))
         return
     }
-    await runtimeData.nowAdapter.setMemberTitle(chat as GroupSession, mem, value)
+    await runtimeData.nowAdapter.setMemberTitle(
+        chat as GroupSession,
+        mem,
+        value,
+    )
 
     await checkSetMemInfoResult()
 }
@@ -412,8 +519,7 @@ function startChat(mem: Member) {
     let session: Session | undefined = mem?.user
 
     // 没了创建一个临时聊天
-    if (!session)
-        session = Session.getSession('temp', mem.user_id, chat.id)
+    if (!session) session = Session.getSession('temp', mem.user_id, chat.id)
 
     // 激活会话
     if (!session.activate) session.activate()
@@ -431,7 +537,7 @@ function openMoreConfig(mem: Member) {
 }
 
 function clickMember(mem: Member) {
-    if(canEditMember(mem.role)) {
+    if (canEditMember(mem.role)) {
         openMoreConfig(mem)
     } else {
         copyText(mem.user_id)
@@ -465,6 +571,6 @@ async function refreshAnns(): Promise<void> {
 }
 
 defineExpose({
-    openMoreConfig
+    openMoreConfig,
 })
 </script>
