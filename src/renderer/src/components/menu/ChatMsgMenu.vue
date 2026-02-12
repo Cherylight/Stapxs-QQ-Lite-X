@@ -1,23 +1,32 @@
 <template>
     <div data-animation-name="chat-menu">
-        <div v-if="session instanceof GroupSession"
+        <div
+            v-if="session instanceof GroupSession"
             v-show="!runtimeData.sysConfig.close_respond"
             class="ss-card respond"
             :class="{
-                'open': unfoldResponse
-            }">
-            <div @wheel="
-                !unfoldResponse ?
-                    ($event.currentTarget as HTMLElement).scrollLeft += $event.deltaY
-                    : ''
-            ">
+                open: unfoldResponse,
+            }"
+        >
+            <div
+                @wheel="
+                    !unfoldResponse
+                        ? (($event.currentTarget as HTMLElement).scrollLeft +=
+                              $event.deltaY)
+                        : ''
+                "
+            >
                 <EmojiFace
                     v-for="num in Emoji.responseId"
                     :key="'respond-' + num"
                     :emoji="Emoji.get(num)"
-                    @click="changeRespond(String(num), msg)" />
+                    @click="changeRespond(String(num), msg)"
+                />
             </div>
-            <font-awesome-icon :icon="['fas', 'angle-up']" @click="unfoldResponse = true" />
+            <font-awesome-icon
+                :icon="['fas', 'angle-up']"
+                @click="unfoldResponse = true"
+            />
         </div>
         <span id="anchor" @click.stop />
         <div class="ss-card msg-menu-body">
@@ -46,7 +55,9 @@
                 <a>{{ $t('复制选中文本') }}</a>
             </div>
             <div v-if="menuDisplay.copyImg" @click="copyImg">
-                <div><font-awesome-icon :icon="['fas', 'object-ungroup']" /></div>
+                <div>
+                    <font-awesome-icon :icon="['fas', 'object-ungroup']" />
+                </div>
                 <a>{{ $t('复制图片') }}</a>
             </div>
             <div v-if="menuDisplay.downloadImg != false" @click="downloadImg">
@@ -58,11 +69,18 @@
                 <a>{{ $t('撤回') }}</a>
             </div>
             <div v-if="menuDisplay.delete" @click="deleteMsg">
-                <div><font-awesome-icon :icon="['fas', 'fa-trash']" style="color: var(--color-red)" /></div>
+                <div>
+                    <font-awesome-icon
+                        :icon="['fas', 'fa-trash']"
+                        style="color: var(--color-red)"
+                    />
+                </div>
                 <a>{{ $t('删除') }}</a>
             </div>
             <div v-if="menuDisplay.dev" @click="consoleLogMsg">
-                <div><font-awesome-icon :icon="['fas', 'screwdriver-wrench']" /></div>
+                <div>
+                    <font-awesome-icon :icon="['fas', 'screwdriver-wrench']" />
+                </div>
                 <a>{{ $t('调试信息') }}</a>
             </div>
         </div>
@@ -83,6 +101,7 @@ import { copyToClipboard } from '@renderer/function/utils/systemUtil'
 import app from '@renderer/main'
 import { shallowReactive, shallowRef } from 'vue'
 import EmojiFace from '../EmojiFace.vue'
+import { ensurePopBox } from '@renderer/function/utils/popBox'
 
 //#region == 变量声明 ==================================================
 
@@ -94,8 +113,8 @@ const {
     replyMsgFunc,
     intoMultiselectFunc,
 } = defineProps<{
-    session?: Session,
-    msg: Msg,
+    session?: Session
+    msg: Msg
     eventData: MenuEventData
     changeRespondFunc?: (id: string, msg: Msg) => void
     replyMsgFunc?: (msg: Msg) => void
@@ -210,9 +229,7 @@ function changeRespond(id: string, msg: Msg) {
 function forwardSelf() {
     sendMsgRaw(
         session!,
-        msg.message.map(
-            item=>item.copy()
-        ),
+        msg.message.map((item) => item.copy()),
     )
     emit('close')
 }
@@ -246,11 +263,8 @@ function intoMultipleSelect() {
  */
 function copyMsg() {
     copyToClipboard(msg.plaintext())
-        .then(
-            () => popInfo.info($t('复制成功'))
-        ).catch(
-            () => popInfo.error($t('复制失败'))
-        )
+        .then(() => popInfo.info($t('复制成功')))
+        .catch(() => popInfo.error($t('复制失败')))
 
     emit('close')
 }
@@ -261,11 +275,8 @@ function copySelectMsg() {
     if (selectCache.value === '') return
 
     copyToClipboard(selectCache.value)
-        .then(
-            () => popInfo.info($t('复制成功'))
-        ).catch(
-            () => popInfo.error($t('复制失败'))
-        )
+        .then(() => popInfo.info($t('复制成功')))
+        .catch(() => popInfo.error($t('复制失败')))
 
     emit('close')
 }
@@ -279,10 +290,7 @@ async function copyImg() {
     emit('close')
 
     // 类型白名单
-    const typeWhiteList = [
-        'image/png',
-        'image/svg+xml',
-    ]
+    const typeWhiteList = ['image/png', 'image/svg+xml']
 
     // 获取图片数据
     const response = await fetch(imgUrl.value)
@@ -306,8 +314,8 @@ async function copyImg() {
         ctx?.drawImage(img, 0, 0)
 
         // 转换为 PNG blob
-        blob = await new Promise(resolve => {
-            canvas.toBlob((blob)=>{
+        blob = await new Promise((resolve) => {
+            canvas.toBlob((blob) => {
                 resolve(blob as Blob)
             }, 'image/png')
         })
@@ -318,14 +326,21 @@ async function copyImg() {
     try {
         await copyToClipboard([item])
         popInfo.info($t('复制成功'))
-    }catch {/**/}
+    } catch {
+        /**/
+    }
 }
 /**
  * 下载选中的图片
  */
 function downloadImg() {
     emit('close')
-    downloadFile(imgUrl.value, 'img.png', () => undefined, () => undefined)
+    downloadFile(
+        imgUrl.value,
+        'img.png',
+        () => undefined,
+        () => undefined,
+    )
 }
 /**
  * 撤回消息
@@ -345,14 +360,15 @@ async function recallMsg() {
  * 删除消息
  */
 async function deleteMsg() {
-    session!.removeMsg(msg)
-
     emit('close')
+
+    const $t = app.config.globalProperties.$t
+    if (!(await ensurePopBox($t('要删除这条消息吗？')))) return
+    session!.removeMsg(msg)
 }
 function consoleLogMsg() {
     // eslint-disable-next-line no-console
     console.log(msg)
 }
 //#endregion
-
 </script>
