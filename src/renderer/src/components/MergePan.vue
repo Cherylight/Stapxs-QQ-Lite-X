@@ -1,29 +1,52 @@
 <template>
     <Transition name="merge-pan">
-        <Teleport v-if="runtimeData.mergeMsgStack.length > 0 " to="body">
+        <Teleport v-if="runtimeData.mergeMsgStack.length > 0" to="body">
             <div
                 v-move="chatMoveOptions"
                 class="merge-pan"
-                @v-move-right="closeMergeMsg">
+                @v-move-right="closeMergeMsg"
+            >
                 <div @click="closeMergeMsg" />
                 <div ref="mergePan" class="ss-card">
                     <div>
-                        <font-awesome-icon style="margin-top: 5px" :icon="['fas', 'message']" />
+                        <font-awesome-icon
+                            style="margin-top: 5px"
+                            :icon="['fas', 'message']"
+                        />
                         <span>{{ $t('合并消息') }}</span>
-                        <font-awesome-icon :icon="['fas', runtimeData.mergeMsgStack.length > 1 ? 'angle-left' : 'xmark']" @click="exitMergeMsg" />
+                        <font-awesome-icon
+                            :icon="[
+                                'fas',
+                                runtimeData.mergeMsgStack.length > 1
+                                    ? 'angle-left'
+                                    : 'xmark',
+                            ]"
+                            @click="exitMergeMsg"
+                        />
                     </div>
                     <div>
                         <Transition
-                            :name="addMode ? 'merge-node-add' : 'merge-node-remove'"
+                            :name="
+                                addMode ? 'merge-node-add' : 'merge-node-remove'
+                            "
                             mode="out-in"
-                            @leave="if(addMode){saveScrollPosition();}"
-                            @enter="if(!addMode){restoreScrollPosition();}">
-                            <div v-if="nowData === undefined && runtimeData.mergeMsgStack.length === 0"
-                                class="merge-node">
+                            @leave="addMode ? saveScrollPosition() : ''"
+                            @enter="!addMode ? restoreScrollPosition() : ''"
+                        >
+                            <div
+                                v-if="
+                                    nowData === undefined &&
+                                    runtimeData.mergeMsgStack.length === 0
+                                "
+                                class="merge-node"
+                            >
                                 <!-- 无内容 -->
                             </div>
-                            <div v-else-if="!nowData?.content" :class=" 'loading show'"
-                                class="merge-node">
+                            <div
+                                v-else-if="!nowData?.content"
+                                :class="'loading show'"
+                                class="merge-node"
+                            >
                                 <font-awesome-icon :icon="['fas', 'spinner']" />
                                 <span>{{ $t('加载中') }}</span>
                             </div>
@@ -35,9 +58,12 @@
                                     :msgs="nowData.content as Message[]"
                                     :show-msg-menu="showMsgMenu"
                                     :special-self="false"
-                                    :direction="vw * 100 > 450 ? 'right' : 'left'"
+                                    :direction="
+                                        vw * 100 > 450 ? 'right' : 'left'
+                                    "
                                     :ex-info="[]"
-                                    class="merge-node" />
+                                    class="merge-node"
+                                />
                             </KeepAlive>
                         </Transition>
                     </div>
@@ -45,37 +71,60 @@
                     <Transition name="select-tag">
                         <div v-if="isMultiselectMode" class="select-tag">
                             <div v-if="msgBarEl!.multiCanForward()">
-                                <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-xmark']" @click="
-                                    popInfo.error( msgBarEl!.multiCanForward());
-                                " />
+                                <font-awesome-icon
+                                    style="color: var(--color-red)"
+                                    :icon="['fas', 'fa-xmark']"
+                                    @click="
+                                        popInfo.error(
+                                            msgBarEl!.multiCanForward(),
+                                        )
+                                    "
+                                />
                                 <span>{{ $t('合并转发') }}</span>
                             </div>
                             <div v-else>
-                                <font-awesome-icon :icon="['fas', 'fa-share-from-square']" @click="sendMergeForward" />
+                                <font-awesome-icon
+                                    :icon="['fas', 'fa-share-from-square']"
+                                    @click="sendMergeForward"
+                                />
                                 <span>{{ $t('合并转发') }}</span>
                             </div>
                             <div v-if="msgBarEl!.multiCanForward()">
-                                <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-xmark']" @click="
-                                    popInfo.error( msgBarEl!.multiCanForward());
-                                " />
+                                <font-awesome-icon
+                                    style="color: var(--color-red)"
+                                    :icon="['fas', 'fa-xmark']"
+                                    @click="
+                                        popInfo.error(
+                                            msgBarEl!.multiCanForward(),
+                                        )
+                                    "
+                                />
                                 <span>{{ $t('逐条转发') }}</span>
                             </div>
                             <div v-else>
-                                <font-awesome-icon :icon="['fas', 'fa-arrows-turn-right']" @click="sendSingleForward" />
+                                <font-awesome-icon
+                                    :icon="['fas', 'fa-arrows-turn-right']"
+                                    @click="sendSingleForward"
+                                />
                                 <span>{{ $t('逐条转发') }}</span>
                             </div>
                             <div>
-                                <font-awesome-icon :icon="['fas', 'scissors']" />
+                                <font-awesome-icon
+                                    :icon="['fas', 'scissors']"
+                                />
                                 <span>{{ $t('截图') }}</span>
                             </div>
                             <div>
-                                <font-awesome-icon :icon="['fas', 'copy']" @click="copyMsgs" />
+                                <font-awesome-icon
+                                    :icon="['fas', 'copy']"
+                                    @click="copyMsgs"
+                                />
                                 <span>{{ $t('复制') }}</span>
                             </div>
                             <div>
-                                <span @click="
-                                    closeMultiselect();
-                                ">{{ msgBarEl!.getMultiselectListLength() }}</span>
+                                <span @click="closeMultiselect()">{{
+                                    msgBarEl!.getMultiselectListLength()
+                                }}</span>
                                 <span>{{ $t('取消') }}</span>
                             </div>
                         </div>
@@ -97,7 +146,10 @@ import { ForwardSeg } from '@renderer/function/model/seg'
 import { runtimeData } from '@renderer/function/msg'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
 import { mergeForward, singleForward } from '@renderer/function/utils/msgUtil'
-import { copyToClipboard, getViewTime } from '@renderer/function/utils/systemUtil'
+import {
+    copyToClipboard,
+    getViewTime,
+} from '@renderer/function/utils/systemUtil'
 import { vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import { useViewportUnits } from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
@@ -148,7 +200,7 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
         minMove: {
             value: 33,
             type: '%',
-        }
+        },
     },
 }
 
@@ -156,12 +208,12 @@ watch(
     () => runtimeData.mergeMsgStack.length,
     (newLength, oldLength) => {
         // 最后一个保留下来做展开关闭动画
-        if(stack.length !== 0) nowData.value = stack.at(-1)
+        if (stack.length !== 0) nowData.value = stack.at(-1)
 
         // 判断是增加还是减少
         if (newLength > oldLength) addMode.value = true
         else if (newLength < oldLength) addMode.value = false
-    }
+    },
 )
 
 function $t(value: string) {
@@ -173,7 +225,7 @@ function $t(value: string) {
  * 退出一层合并转发弹窗
  */
 function exitMergeMsg() {
-    stack.length --
+    stack.length--
 }
 /**
  * 关闭合并转发弹窗
@@ -200,9 +252,9 @@ function isMergeOpen() {
  */
 function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
     const intoMultiselect = (msg: Msg) => {
-		msgBarEl.value?.startMultiselect()
-		isMultiselectMode.value = true
-		msgBarEl.value?.forceAddToMultiselectList(msg)
+        msgBarEl.value?.startMultiselect()
+        isMultiselectMode.value = true
+        msgBarEl.value?.forceAddToMultiselectList(msg)
     }
     const menu = openContextMenu(
         { x: data.x, y: data.y },
@@ -212,8 +264,8 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
                 msg: msg,
                 eventData: data,
                 intoMultiselectFunc: intoMultiselect,
-            }
-        }
+            },
+        },
     )
     return menu.finish
 }
@@ -223,7 +275,7 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
 /**
  * 合并转发
  */
-function sendMergeForward(){
+function sendMergeForward() {
     if (!msgBarEl.value) return
     const msgList = msgBarEl.value.getMultiselectList()
     if (msgList.length === 0) return
@@ -235,7 +287,7 @@ function sendMergeForward(){
 /**
  * 逐条转发
  */
-function sendSingleForward(){
+function sendSingleForward() {
     if (!msgBarEl.value) return
     const msgList = msgBarEl.value.getMultiselectList()
     if (msgList.length === 0) return
@@ -270,27 +322,23 @@ function copyMsgs() {
             }
         }
         if (time) {
-            msg += item.sender.name +
-            ' ' +
-            time.getHours() +
-            ':' +
-            time.getMinutes() +
-            ':' +
-            time.getSeconds() +
-            '\n' +
-            item.plaintext() +
-            '\n\n'
-        }
-        else msg += item.preMsg + '\n\n'
-
+            msg +=
+                item.sender.name +
+                ' ' +
+                time.getHours() +
+                ':' +
+                time.getMinutes() +
+                ':' +
+                time.getSeconds() +
+                '\n' +
+                item.plaintext() +
+                '\n\n'
+        } else msg += item.preMsg + '\n\n'
     })
     msg = msg.trim()
     copyToClipboard(msg)
-        .then(
-            () => popInfo.info($t('复制成功'))
-        ).catch(
-            () => popInfo.error($t('复制失败'))
-        )
+        .then(() => popInfo.info($t('复制成功')))
+        .catch(() => popInfo.error($t('复制失败')))
 }
 function closeMultiselect() {
     if (!msgBarEl.value) return
@@ -314,7 +362,7 @@ function restoreScrollPosition() {
     const position = positionCache.pop()
     if (!msgBarEl.value || position === undefined) return
     nextTick(() => {
-        (msgBarEl.value as any as HTMLDivElement).scrollTop = position
+        ;(msgBarEl.value as any as HTMLDivElement).scrollTop = position
     })
 }
 //#endregion

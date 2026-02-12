@@ -14,7 +14,8 @@
 -->
 
 <template>
-    <div ref="chat-pan"
+    <div
+        ref="chat-pan"
         v-move="chatMoveOptions"
         :class="{
             'chat-pan': true,
@@ -23,14 +24,19 @@
             '--bottom-height': bottomHeight + 'px',
             '--head-height': headHeight + 'px',
         }"
-        @v-move-right.prevent="exitWin()">
+        @v-move-right.prevent="exitWin()"
+    >
         <!-- 聊天基本信息 -->
         <ChatHead :session="chat" />
 
         <!-- 消息显示区 -->
-        <div id="msgPan" ref="msgPan" class="chat"
+        <div
+            id="msgPan"
+            ref="msgPan"
+            class="chat"
             style="scroll-behavior: smooth"
-            @scroll="chatScroll">
+            @scroll="chatScroll"
+        >
             <!-- 前缀 -->
             <!-- 通常 -->
             <CustomHr v-if="chat.loadHistoryState === 'loading'">
@@ -48,18 +54,23 @@
                 :msgs="chat.messageList"
                 :show-msg-menu="showMsgMenu"
                 :show-user-menu="showUserMenu"
-                :show-self-avatar="runtimeData.sysConfig.hide_self_avatar === false"
+                :show-self-avatar="
+                    runtimeData.sysConfig.hide_self_avatar === false
+                "
                 :self-direction="runtimeData.sysConfig.self_msg_direction"
                 @image-loaded="imgLoadedScroll"
                 @left-move="replyMsg"
-                @sender-double-click="(user)=>sendPoke(user)"
-                @emoji-click="changeRespond" />
+                @sender-double-click="(user) => sendPoke(user)"
+                @emoji-click="changeRespond"
+            />
         </div>
 
         <!-- 滚动到底部悬浮标志 -->
-        <div v-hide="!tags.showBottomButton"
+        <div
+            v-hide="!tags.showBottomButton"
             class="new-msg"
-            @click="scrollBottom(true)">
+            @click="scrollBottom(true)"
+        >
             <div class="ss-card">
                 <font-awesome-icon :icon="['fas', 'comment']" />
                 <span v-if="chat.newMsg > 0">{{ chat.newMsg }}</span>
@@ -70,23 +81,33 @@
         <Transition name="select-tag">
             <div v-if="tags.isMultiselectMode" class="select-tag ss-card">
                 <div v-if="msgBar!.multiCanForward()">
-                    <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-xmark']" @click="
-                        popInfo.error( msgBar!.multiCanForward());
-                    " />
+                    <font-awesome-icon
+                        style="color: var(--color-red)"
+                        :icon="['fas', 'fa-xmark']"
+                        @click="popInfo.error(msgBar!.multiCanForward())"
+                    />
                     <span>{{ $t('合并转发') }}</span>
                 </div>
                 <div v-else>
-                    <font-awesome-icon :icon="['fas', 'fa-share-from-square']" @click="sendMergeForward" />
+                    <font-awesome-icon
+                        :icon="['fas', 'fa-share-from-square']"
+                        @click="sendMergeForward"
+                    />
                     <span>{{ $t('合并转发') }}</span>
                 </div>
                 <div v-if="msgBar!.multiCanForward()">
-                    <font-awesome-icon style="color: var(--color-red)" :icon="['fas', 'fa-xmark']" @click="
-                        popInfo.error( msgBar!.multiCanForward());
-                    " />
+                    <font-awesome-icon
+                        style="color: var(--color-red)"
+                        :icon="['fas', 'fa-xmark']"
+                        @click="popInfo.error(msgBar!.multiCanForward())"
+                    />
                     <span>{{ $t('逐条转发') }}</span>
                 </div>
                 <div v-else>
-                    <font-awesome-icon :icon="['fas', 'fa-arrows-turn-right']" @click="sendSingleForward" />
+                    <font-awesome-icon
+                        :icon="['fas', 'fa-arrows-turn-right']"
+                        @click="sendSingleForward"
+                    />
                     <span>{{ $t('逐条转发') }}</span>
                 </div>
                 <div>
@@ -94,29 +115,44 @@
                     <span>{{ $t('截图') }}</span>
                 </div>
                 <div>
-                    <font-awesome-icon :icon="['fas', 'trash-can']" @click="delMsgs" />
+                    <font-awesome-icon
+                        :icon="['fas', 'trash-can']"
+                        @click="delMsgs"
+                    />
                     <span>{{ $t('删除') }}</span>
                 </div>
                 <div>
-                    <font-awesome-icon :icon="['fas', 'copy']" @click="copyMsgs" />
+                    <font-awesome-icon
+                        :icon="['fas', 'copy']"
+                        @click="copyMsgs"
+                    />
                     <span>{{ $t('复制') }}</span>
                 </div>
                 <div>
-                    <span @click="
-                        msgBar!.cancelMultiselect();
-                        tags.isMultiselectMode=false
-                    ">{{ msgBar!.getMultiselectListLength() }}</span>
+                    <font-awesome-icon
+                        :icon="['fas', 'xmark']"
+                        @click="recallMsgs"
+                    />
+                    <span>{{ $t('撤回') }}</span>
+                </div>
+                <div>
+                    <span @click="closeMultiselect()">{{
+                        msgBar!.getMultiselectListLength()
+                    }}</span>
                     <span>{{ $t('取消') }}</span>
                 </div>
             </div>
         </Transition>
 
         <!-- 底部区域 -->
-        <ChatBottom ref="bottom" v-model="inputMsg"
+        <ChatBottom
+            ref="bottom"
+            v-model="inputMsg"
             :session="chat"
             :focus-hide="tags.isMultiselectMode"
             @send-poke="sendPoke"
-            @scroll-bottom="scrollBottom" />
+            @scroll-bottom="scrollBottom"
+        />
 
         <!-- 合并转发消息预览器 -->
         <MergePan ref="mergePan" />
@@ -133,13 +169,15 @@ import MergePan from '@renderer/components/MergePan.vue'
 import MsgBar from '@renderer/components/MsgBar.vue'
 
 import { logger, popInfo } from '@renderer/function/base'
-import {
-    MenuEventData,
-} from '@renderer/function/elements/information'
+import { MenuEventData } from '@renderer/function/elements/information'
 import { InputMsg } from '@renderer/function/model/inputMsg'
 import { Msg } from '@renderer/function/model/msg'
 import { AtSeg } from '@renderer/function/model/seg'
-import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import {
+    GroupSession,
+    Session,
+    UserSession,
+} from '@renderer/function/model/session'
 import { IUser, Member } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
 import { shouldAutoFocus } from '@renderer/function/utils/appUtil'
@@ -154,7 +192,11 @@ import {
     getViewTime,
 } from '@renderer/function/utils/systemUtil'
 import { vHide, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
-import { useFrame, useKeyboard, useViewportUnits } from '@renderer/function/utils/vuse'
+import {
+    useFrame,
+    useKeyboard,
+    useViewportUnits,
+} from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
 import {
@@ -164,11 +206,11 @@ import {
     useTemplateRef,
     watch,
     shallowRef,
-    markRaw
+    markRaw,
 } from 'vue'
 //#region == 常量声明 ====================================================================
-const { chat } = defineProps<{chat: Session}>()
-const inputMsg = defineModel<InputMsg>({required: true})
+const { chat } = defineProps<{ chat: Session }>()
+const inputMsg = defineModel<InputMsg>({ required: true })
 const headHeight = shallowRef(0)
 const bottomHeight = shallowRef(0)
 
@@ -187,21 +229,20 @@ const tagsDefault = {
     showBottomButton: false,
     isMultiselectMode: false,
 }
-const tags = shallowReactive({...tagsDefault})
+const tags = shallowReactive({ ...tagsDefault })
 //#endregion
 
 //#region == 初始化 ======================================================================
 onMounted(init)
 
 // Capacitor：系统返回操作（Android）
-if(backend.type == 'capacitor' &&
-    backend.platform === 'android') {
+if (backend.type == 'capacitor' && backend.platform === 'android') {
     backend.addListener('App', 'backButton', () => {
         exitWin()
     })
 }
 // 新消息滚动到底部
-Session.beforeNewMessageHook.push(async (session, _msg)=>{
+Session.beforeNewMessageHook.push(async (session, _msg) => {
     if (session !== chat) return
 
     const pan = msgPan.value
@@ -214,7 +255,7 @@ Session.beforeNewMessageHook.push(async (session, _msg)=>{
     // 如果距离底部大于20vh，则不自动滚动
     if (distanceToBottom > 20 * vh) return
 
-    nextTick(()=>{
+    nextTick(() => {
         // 等待渲染完成
         setTimeout(() => {
             scrollBottom(true)
@@ -223,7 +264,7 @@ Session.beforeNewMessageHook.push(async (session, _msg)=>{
 })
 
 // 更新顶部高度
-useFrame(()=>{
+useFrame(() => {
     const headBottom = document.getElementById('chat-head-bottom')
     if (!headBottom) return
     const headRect = headBottom.getBoundingClientRect()
@@ -232,7 +273,7 @@ useFrame(()=>{
     headHeight.value = height
 })
 // 更新底部高度
-useFrame(()=>{
+useFrame(() => {
     const bottomTop = document.getElementById('chat-bottom-top')
     if (!bottomTop) return
     const bottomRect = bottomTop.getBoundingClientRect()
@@ -243,18 +284,21 @@ useFrame(()=>{
 })
 
 // ctrl+w 关闭聊天框
-useKeyboard('ctrl+w', ()=>{
+useKeyboard('ctrl+w', () => {
     exitWin()
     return true
 })
 //#endregion
 
 //#region == 侦测器 ======================================================================
-watch(()=>chat?.id,init)
+watch(() => chat?.id, init)
 // Web：系统返回操作
-watch(() => runtimeData.watch.backTimes, () => {
-    exitWin()
-})
+watch(
+    () => runtimeData.watch.backTimes,
+    () => {
+        exitWin()
+    },
+)
 //#endregion
 
 //#region == 函数 ========================================================================
@@ -280,18 +324,16 @@ function init() {
 function chatScroll(event: Event) {
     const body = event.target as HTMLDivElement
     // 顶部
-    if (body.scrollTop === 0 && chat.messageList.length > 0)
-        loadHistory()
+    if (body.scrollTop === 0 && chat.messageList.length > 0) loadHistory()
 
     // 底部
-    if ((body.scrollTop + body.clientHeight + 10) >= body.scrollHeight) {
+    if (body.scrollTop + body.clientHeight + 10 >= body.scrollHeight) {
         chat.setRead('viewer')
         tags.showBottomButton = false
     }
     // 显示回到底部
     if (
-        body.scrollTop <
-            body.scrollHeight - body.clientHeight * 2 &&
+        body.scrollTop < body.scrollHeight - body.clientHeight * 2 &&
         tags.showBottomButton !== true
     ) {
         tags.showBottomButton = true
@@ -309,7 +351,7 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
     const intoMultiselect = (msg: Msg) => {
         msgBar.value?.startMultiselect()
         tags.isMultiselectMode = true
-		msgBar.value?.forceAddToMultiselectList(msg)
+        msgBar.value?.forceAddToMultiselectList(msg)
     }
     const menu = openContextMenu(
         { x: data.x, y: data.y },
@@ -322,8 +364,8 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
                 changeRespondFunc: changeRespond,
                 replyMsgFunc: replyMsg,
                 intoMultiselectFunc: intoMultiselect,
-            }
-        }
+            },
+        },
     )
     return menu.finish
 }
@@ -335,12 +377,12 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
  * @returns 显示菜单的 Promise, 关闭菜单后完成委托
  */
 function showUserMenu(data: MenuEventData, user: IUser) {
-	const setAtFunc = (member: Member) => {
-		chat.inputMsg.addSq(new AtSeg(member.user_id))
-		chatBottom.value?.toMainInput()
-	}
+    const setAtFunc = (member: Member) => {
+        chat.inputMsg.addSq(new AtSeg(member.user_id))
+        chatBottom.value?.toMainInput()
+    }
 
-	const menu = openContextMenu(
+    const menu = openContextMenu(
         { x: data.x, y: data.y },
         {
             comp: markRaw(ChatUserMenu),
@@ -349,10 +391,10 @@ function showUserMenu(data: MenuEventData, user: IUser) {
                 user: user,
                 sendPokeFunc: sendPoke,
                 setAtFunc: setAtFunc as (user: IUser) => void,
-            }
-        }
-	)
-	return menu.finish
+            },
+        },
+    )
+    return menu.finish
 }
 
 /**
@@ -378,30 +420,29 @@ async function changeRespond(id: string, msg: Msg) {
         return
     }
 
-    const hasSend = msg?.emojis[id]?.includes(runtimeData.loginInfo.uin) ?? false
+    const hasSend =
+        msg?.emojis[id]?.includes(runtimeData.loginInfo.uin) ?? false
 
     // lgr 贴表情不会根据是否已经有了做判断,而且我拿不到 emoji_id,不知道也没有已经贴上去了
     // 所以采用这个逻辑,添加成功按贴表情成功处理,否则尝试移除表情
 
-    const re = await runtimeData.nowAdapter.setResponse(
-        msg, id, !hasSend,
-    )
+    const re = await runtimeData.nowAdapter.setResponse(msg, id, !hasSend)
 
     if (!re) return
     msg.setEmoji(id, runtimeData.loginInfo.uin, !hasSend)
 }
 //#endregion
 
-    // TODO: 虚拟列表优化
-    // // 清屏重新加载消息列表（超过 n 条消息、回到底部按钮不显示）
-    // // PS：也就是说只在消息底部时才会触发，以防止你是在看历史消息攒满了刷掉
-    // if (
-    //     list.length > 200 &&
-    //     !tags.nowGetHistroy &&
-    //     !tags.showBottomButton
-    // ) {
-    //     loadHistory(false)
-    // }
+// TODO: 虚拟列表优化
+// // 清屏重新加载消息列表（超过 n 条消息、回到底部按钮不显示）
+// // PS：也就是说只在消息底部时才会触发，以防止你是在看历史消息攒满了刷掉
+// if (
+//     list.length > 200 &&
+//     !tags.nowGetHistroy &&
+//     !tags.showBottomButton
+// ) {
+//     loadHistory(false)
+// }
 
 /**
  * 发送戳一戳
@@ -423,10 +464,7 @@ async function sendGroupPoke(target: IUser) {
         return
     }
 
-    await runtimeData.nowAdapter.sendGroupPoke(
-        chat as GroupSession,
-        target,
-    )
+    await runtimeData.nowAdapter.sendGroupPoke(chat as GroupSession, target)
 }
 async function sendPrivatePoke() {
     if (!runtimeData.nowAdapter?.sendPrivatePoke) {
@@ -434,15 +472,13 @@ async function sendPrivatePoke() {
         return
     }
 
-    await runtimeData.nowAdapter.sendPrivatePoke(
-        chat as UserSession,
-    )
+    await runtimeData.nowAdapter.sendPrivatePoke(chat as UserSession)
 }
 //#region == 多选菜单相关 ==================================================
 /**
  * 合并转发
  */
-function sendMergeForward(){
+function sendMergeForward() {
     if (!msgBar.value) return
     const msgList = msgBar.value.getMultiselectList()
     if (msgList.length === 0) return
@@ -454,7 +490,7 @@ function sendMergeForward(){
 /**
  * 逐条转发
  */
-function sendSingleForward(){
+function sendSingleForward() {
     if (!msgBar.value) return
     const msgList = msgBar.value.getMultiselectList()
     if (msgList.length === 0) return
@@ -501,27 +537,40 @@ function copyMsgs() {
             }
         }
         if (time) {
-            msg += item.sender.name +
-            ' ' +
-            time.getHours() +
-            ':' +
-            time.getMinutes() +
-            ':' +
-            time.getSeconds() +
-            '\n' +
-            item.plaintext() +
-            '\n\n'
-        }
-        else msg += item.preMsg + '\n\n'
-
+            msg +=
+                item.sender.name +
+                ' ' +
+                time.getHours() +
+                ':' +
+                time.getMinutes() +
+                ':' +
+                time.getSeconds() +
+                '\n' +
+                item.plaintext() +
+                '\n\n'
+        } else msg += item.preMsg + '\n\n'
     })
     msg = msg.trim()
     copyToClipboard(msg)
-        .then(
-            () => popInfo.info($t('复制成功'))
-        ).catch(
-            () => popInfo.error($t('复制失败'))
-        )
+        .then(() => popInfo.info($t('复制成功')))
+        .catch(() => popInfo.error($t('复制失败')))
+}
+/**
+ * 批量撤回消息
+ */
+async function recallMsgs() {
+    if (!msgBar.value) return
+    if (!runtimeData.nowAdapter?.recallMsg) {
+        popInfo.error($t('当前适配器不支持撤回消息'))
+        return
+    }
+    const msgList = msgBar.value.getMultiselectList()
+    const tasks: Promise<true | undefined>[] = []
+    for (const msg of msgList) {
+        tasks.push(runtimeData.nowAdapter.recallMsg(msg))
+    }
+    closeMultiselect()
+    await Promise.all(tasks)
 }
 function closeMultiselect() {
     if (!msgBar.value) return
@@ -541,8 +590,7 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
         const pan = chatPan.value
         if (!pan) return
         const chat = pan.getElementsByClassName('chat')[0] as HTMLDivElement
-        if(chat)
-            chat.style.overflowY = 'hidden'
+        if (chat) chat.style.overflowY = 'hidden'
     },
     moveHook: (_, move: number) => {
         // 移动距离 css
@@ -554,7 +602,7 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
         // 复原css
         const pan = chatPan.value
         const chat = pan?.getElementsByClassName('chat')[0] as HTMLDivElement
-        if(chat) {
+        if (chat) {
             chat.style.overflowY = 'scroll'
         }
         const target = getTargetWin()
@@ -577,7 +625,7 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
         minMove: {
             value: 33,
             type: '%',
-        }
+        },
     },
 }
 //#endregion
@@ -587,7 +635,7 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
 function getTargetWin(): HTMLDivElement | undefined {
     const pan = chatPan.value
     if (!pan) return
-    if(mergePan.value?.isMergeOpen()) {
+    if (mergePan.value?.isMergeOpen()) {
         // 合并转发面板返回
         return pan.getElementsByClassName('merge-pan')[0] as HTMLDivElement
     } else {
@@ -599,13 +647,15 @@ function getTargetWin(): HTMLDivElement | undefined {
  * 退出一层窗口
  */
 function exitWin() {
-    if(mergePan.value?.isMergeOpen()) {
+    if (mergePan.value?.isMergeOpen()) {
         // 合并转发栏
         mergePan.value?.closeMergeMsg()
         setTimeout(() => {
             const pan = chatPan.value
-            const mergePan = pan?.getElementsByClassName('merge-pan')[0] as HTMLDivElement
-            if(mergePan) {
+            const mergePan = pan?.getElementsByClassName(
+                'merge-pan',
+            )[0] as HTMLDivElement
+            if (mergePan) {
                 mergePan.style.transform = ''
             }
         }, 500)
@@ -622,7 +672,7 @@ function exitWin() {
 async function loadHistory() {
     if (chat.loadHistoryState !== 'normal') return
 
-    if (!await chat.loadHistory()) return
+    if (!(await chat.loadHistory())) return
 }
 
 Session.afterLoadHistoryHook.push((_arg1, _arg2, _arg3) => {
@@ -631,11 +681,10 @@ Session.afterLoadHistoryHook.push((_arg1, _arg2, _arg3) => {
     const oldScrollHeight = pan.scrollHeight
 
     nextTick(() => {
-        logger.debug(`滚动前高度：${oldScrollHeight}，当前高度：${pan.scrollHeight}，滚动位置：${pan.scrollHeight - oldScrollHeight}`)
-        scrollTo(
-            pan.scrollTop + pan.scrollHeight - oldScrollHeight,
-            false
+        logger.debug(
+            `滚动前高度：${oldScrollHeight}，当前高度：${pan.scrollHeight}，滚动位置：${pan.scrollHeight - oldScrollHeight}`,
         )
+        scrollTo(pan.scrollTop + pan.scrollHeight - oldScrollHeight, false)
     })
 })
 //#endregion
@@ -667,7 +716,7 @@ function imgLoadedScroll(height: number) {
     const pan = msgPan.value
     if (!pan) return
 
-    if(chat.messageList.length <= 20 && !tags.showBottomButton) {
+    if (chat.messageList.length <= 20 && !tags.showBottomButton) {
         scrollBottom()
     } else {
         // 纠正滚动位置
