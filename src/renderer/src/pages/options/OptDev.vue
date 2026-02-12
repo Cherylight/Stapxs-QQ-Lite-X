@@ -646,6 +646,7 @@ async function resetApp() {
 
     if (!ensure) return
 
+    // eslint-disable-next-line no-restricted-globals
     localStorage.clear()
     const cookies = document.cookie.split(';')
     for (const cookie of cookies) {
