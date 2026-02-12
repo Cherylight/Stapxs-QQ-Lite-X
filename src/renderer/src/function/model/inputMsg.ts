@@ -11,21 +11,24 @@ import { AtSeg, ImgSeg, ReplySeg, Seg, TxtSeg } from './seg'
 import { autoMarkRaw } from './utils'
 import app from '@renderer/main'
 import { runtimeData } from '../msg'
+import { Session } from './session'
 
 @autoMarkRaw
 export class InputMsg {
     private readonly _reply = shallowRef<Msg | undefined>()
     private readonly _content = shallowRef<string>('')
-    private readonly _isVoid = computed<boolean>(()=>{
+    private readonly _isVoid = computed<boolean>(() => {
         if (this.reply) return false
         return this.content.trim().length === 0
     })
-    private readonly _sqList = computed(()=>{
+    private readonly _sqList = computed(() => {
         const reg = /\[SQ:\d+\]/gm
         return this.content.match(reg) || []
     })
     readonly sqCache = shallowReactive<Seg[]>([])
     readonly imgCache = shallowReactive<Map<number, string>>(new Map())
+
+    constructor(readonly session: Session) {}
 
     /**
      * 设置当前回复消息
@@ -33,7 +36,10 @@ export class InputMsg {
      */
     setReply(msg: Msg) {
         this._reply.value = msg
-        if (runtimeData.sysConfig.reply_with_at === 'insert' && msg.sender?.user_id) {
+        if (
+            runtimeData.sysConfig.reply_with_at === 'insert' &&
+            msg.sender?.user_id
+        ) {
             this.addSq(new AtSeg(msg.sender.user_id))
         }
     }
@@ -50,15 +56,19 @@ export class InputMsg {
     addSq(seg: Seg): number {
         const id = this.sqCache.length
         this.sqCache.push(seg)
-        const inputDom = document.getElementById('main-input') as HTMLTextAreaElement
+        const inputDom = document.getElementById(
+            'main-input',
+        ) as HTMLTextAreaElement | null
         if (
-            inputDom &&
-            inputDom.value === this.content &&
+            inputDom?.value === this.content &&
             inputDom.selectionStart !== null &&
             inputDom.selectionStart < this.content.length
         ) {
             const first = this.content.substring(0, inputDom.selectionStart)
-            const last = this.content.substring(inputDom.selectionStart, this.content.length)
+            const last = this.content.substring(
+                inputDom.selectionStart,
+                this.content.length,
+            )
             this.content = first + '[SQ:' + id + ']' + last
         } else {
             this.content += `[SQ:${id}]`
@@ -95,10 +105,10 @@ export class InputMsg {
         for (const [key, base64data] of this.imgCache) {
             this.sqCache[key] = new ImgSeg(
                 'base64://' +
-                base64data.substring(
-                    base64data.indexOf('base64,') + 7,
-                    base64data.length
-                )
+                    base64data.substring(
+                        base64data.indexOf('base64,') + 7,
+                        base64data.length,
+                    ),
             )
         }
         // 解析消息
@@ -106,16 +116,16 @@ export class InputMsg {
         // 插入引用
         if (this.reply?.message_id) {
             const front: Seg[] = [new ReplySeg(this.reply.message_id)]
-            if (runtimeData.sysConfig.reply_with_at === 'prefix' && this.reply.sender?.user_id)
+            if (
+                runtimeData.sysConfig.reply_with_at === 'prefix' &&
+                this.reply.sender?.user_id
+            )
                 front.push(new AtSeg(this.reply.sender.user_id))
             back = [...front, ...back]
         }
         // 插入小尾巴
         if (runtimeData.sysConfig.msg_tail) {
-            const tail = (runtimeData.sysConfig.msg_tail).replaceAll(
-                '\\n',
-                '\n',
-            )
+            const tail = runtimeData.sysConfig.msg_tail.replaceAll('\\n', '\n')
             if (tail && tail != '') {
                 for (let i = back.length - 1; i >= 0; i--) {
                     const seg = back[i]
@@ -134,6 +144,21 @@ export class InputMsg {
         this.sqCache.length = 0
         this.imgCache.clear()
         this.rmReply()
+    }
+
+    reeditFromMsg(msg: Msg): void {
+        this.clear()
+        for (const seg of msg.message) {
+            // TODO 支持图片
+            if (seg instanceof ReplySeg) {
+                const replyMsg = this.session.getMsgById(seg.id)
+                if (replyMsg) this.setReply(replyMsg)
+            } else if (seg instanceof TxtSeg) {
+                this.content += seg.text
+            } else {
+                this.addSq(seg)
+            }
+        }
     }
 
     /**
@@ -205,7 +230,7 @@ export class InputMsg {
                         break
                     }
                     sqId += currentChr
-                    currentIdx ++
+                    currentIdx++
                 }
                 const segId = Number(sqId)
                 const seg = this.sqCache.at(segId)
@@ -228,7 +253,7 @@ export class InputMsg {
 
             // 文本处理
             cacheTxt += chr
-            idx ++
+            idx++
         }
 
         if (cacheTxt.length > 0) {

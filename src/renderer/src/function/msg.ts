@@ -18,13 +18,8 @@ import app from '@renderer/main'
 
 import Umami from '@stapxs/umami-logger-typescript'
 
-import {
-    reloadUsers,
-} from '@renderer/function/utils/appUtil'
-import {
-    getCm,
-    randomNum,
-} from '@renderer/function/utils/systemUtil'
+import { reloadUsers } from '@renderer/function/utils/appUtil'
+import { getCm, randomNum } from '@renderer/function/utils/systemUtil'
 import { backend } from '@renderer/runtime/backend'
 import {
     // eslint-disable-next-line no-restricted-imports
@@ -33,9 +28,7 @@ import {
     watchEffect,
 } from 'vue'
 import { logger, popInfo } from './base'
-import {
-    RunTimeDataElem,
-} from './elements/information'
+import { RunTimeDataElem } from './elements/information'
 import { Msg, SelfMsg } from './model/msg'
 import { ProxyUrl } from './model/proxyUrl'
 import { Session } from './model/session'
@@ -43,6 +36,7 @@ import { Notify } from './notify'
 import { htmlPopBox } from './utils/popBox'
 import { FileSender } from './utils/fileSender'
 import { AppConfig } from './option/option'
+import { RecallEvent } from './model/event'
 
 // ==============================================================
 const noticeFunctions = {
@@ -93,13 +87,18 @@ const noticeFunctions = {
         const { $t } = app.config.globalProperties
         const session = Session.getSessionById(msg.user_id)
         if (!session) return
-        session.appendInfo =  $t('对方正在输入……')
+        session.appendInfo = $t('对方正在输入……')
         // TODO: 计时器移除
         setTimeout(() => {
             session.appendInfo = undefined
         }, 10000)
     },
-} as { [key: string]: (name: string, msg: { [key: string]: any }) => void | Promise<void> }
+} as {
+    [key: string]: (
+        name: string,
+        msg: { [key: string]: any },
+    ) => void | Promise<void>
+}
 
 const msgFunctions = {
     /**
@@ -116,13 +115,14 @@ const msgFunctions = {
 }
 
 // ==========================================
-export function recallMsg(session: Session, msgId: string) {
+export function recallMsg(event: RecallEvent) {
+    const session = event.session
     // 寻找消息
     let matchMsg: undefined | Msg
     let matchMsgId: undefined | number
-    for (const [ id, msg ] of session.messageList.entries()) {
+    for (const [id, msg] of session.messageList.entries()) {
         if (!(msg instanceof Msg)) continue
-        if (msg.message_id === String(msgId)) {
+        if (msg.message_id === String(event.recallId)) {
             matchMsg = msg
             matchMsgId = id
             break
@@ -131,6 +131,11 @@ export function recallMsg(session: Session, msgId: string) {
     if (!matchMsg || !matchMsgId) {
         logger.error(null, '没有找到这条被撤回的消息 ……')
         return
+    }
+
+    // 收录被撤回的消息，方便重新编辑
+    if (matchMsg.sender.user_id === runtimeData.loginInfo.uin) {
+        event.message.originMsg = matchMsg
     }
 
     // 添加提示,移除消息
@@ -142,10 +147,11 @@ export function recallMsg(session: Session, msgId: string) {
 
 let qed_try_times = 0
 export async function newMsg(msg: Msg) {
-
     // 消息基础信息 ============================================
-    if (!msg.session) return logger.error(null, '消息没有 session 信息，无法处理消息')
-    if (!msg.message_id) return logger.error(null, '消息没有 message_id 信息，无法处理消息')
+    if (!msg.session)
+        return logger.error(null, '消息没有 session 信息，无法处理消息')
+    if (!msg.message_id)
+        return logger.error(null, '消息没有 message_id 信息，无法处理消息')
     const loginId = runtimeData.loginInfo.uin
     const sender = msg.sender.user_id
 
@@ -163,15 +169,12 @@ export async function newMsg(msg: Msg) {
     const num = randomNum(0, 10000)
     qed_try_times++
     if (num >= 4500 && num <= 5500) {
-        logger.info(
-            num.toString() + '，这只是个神秘的数字...',
-        )
+        logger.info(num.toString() + '，这只是个神秘的数字...')
     }
-    if (num === 495) {  // QED怎么能和芙兰无关？(◣_◢)吃我一发 QED [495年的波纹]
+    if (num === 495) {
+        // QED怎么能和芙兰无关？(◣_◢)吃我一发 QED [495年的波纹]
         htmlPopBox(qed, {
-            button: [
-                { text: '确定(O)' },
-            ],
+            button: [{ text: '确定(O)' }],
         })
         Umami.trackEvent('show_qed', { times: qed_try_times })
     }
@@ -201,20 +204,20 @@ function updateSysInfo(
 
 const baseRuntime = {
     connectInfo: shallowReactive({ address: undefined, token: undefined }),
-    loginInfo: {} as unknown as {nickname: string, uin: number},
+    loginInfo: {} as unknown as { nickname: string; uin: number },
     sysConfig: reactive({}) as AppConfig,
     tags: shallowReactive({
         firstLoad: false,
         darkMode: false,
         canCors: false,
         vibrancy: false,
-        noLogin: true,  // 一次都没有登陆
+        noLogin: true, // 一次都没有登陆
         dev: false,
     }),
     watch: shallowReactive({
         backTimes: 0,
     }),
-    defaultColorMode: 'light' as 'light' | 'dark',  // 系统颜色模式
+    defaultColorMode: 'light' as 'light' | 'dark', // 系统颜色模式
     systemNoticesList: undefined,
     mergeMsgStack: [],
     cm: getCm(),
@@ -231,7 +234,9 @@ export function resetRuntime(resetAll = false) {
     if (resetAll) {
         runtimeData.selfInfo = undefined
         runtimeData.systemNoticesList = shallowReactive([])
-        runtimeData.loginInfo = shallowReactive({} as unknown as {nickname: string, uin: number})
+        runtimeData.loginInfo = shallowReactive(
+            {} as unknown as { nickname: string; uin: number },
+        )
     }
 }
 
@@ -239,7 +244,7 @@ export function resetRuntime(resetAll = false) {
 let testId = 0
 const testUrl = 'https://q1.qlogo.cn/g?b=qq&s=0&nk=0'
 setTimeout(() => {
-    watchEffect(()=>{
+    watchEffect(() => {
         testId++
         const thisId = testId
         runtimeData.tags.canCors = false
@@ -250,26 +255,24 @@ setTimeout(() => {
         }
         // 没有代理直接返回
         if (url === testUrl) return
-        fetch(url, { method: 'HEAD' }).then(res=>{
-                if (testId > thisId) return
-                runtimeData.tags.canCors = res.ok
-            })
+        fetch(url, { method: 'HEAD' }).then((res) => {
+            if (testId > thisId) return
+            runtimeData.tags.canCors = res.ok
+        })
     })
-},0)
+}, 0)
 
 // 系统颜色模式检测
 const media = globalThis.matchMedia('(prefers-color-scheme: dark)')
 runtimeData.defaultColorMode = media.matches ? 'dark' : 'light'
-media.addEventListener('change', (e)=>{
+media.addEventListener('change', (e) => {
     runtimeData.defaultColorMode = e.matches ? 'dark' : 'light'
 })
 
 // 开发模式
 function checkInitMode() {
-    if (runtimeData.sysConfig.dev_mode)
-        runtimeData.tags.dev = true
-    else
-        runtimeData.tags.dev = import.meta.env.DEV
+    if (runtimeData.sysConfig.dev_mode) runtimeData.tags.dev = true
+    else runtimeData.tags.dev = import.meta.env.DEV
 }
 watchEffect(checkInitMode)
 checkInitMode()

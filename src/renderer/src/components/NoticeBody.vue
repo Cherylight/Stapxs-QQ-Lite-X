@@ -30,6 +30,19 @@
                     <NoticeUser :user="data.user" />
                     <span>{{ $t('的消息') }}</span>
                 </template>
+                <template v-if="data.originMsg">
+                    <a
+                        v-tooltip="{
+                            comp: MsgPrevTooltip,
+                            props: { msgs: [data.originMsg] },
+                        }"
+                        @click="
+                            data.session.inputMsg.reeditFromMsg(data.originMsg)
+                        "
+                    >
+                        {{ $t('重新编辑') }}
+                    </a>
+                </template>
             </template>
             <!-- 禁言 -->
             <template v-else-if="data instanceof BanNotice">
@@ -48,7 +61,7 @@
             <!-- 戳一戳 -->
             <template v-else-if="data instanceof PokeNotice">
                 <NoticeUser :user="data.user" />
-                <img :src="data.ico" :alt="data.action">
+                <img :src="data.ico" :alt="data.action" />
                 <span>{{ data.action }}</span>
                 <NoticeUser :user="data.target" />
                 <span>{{ data.suffix }}</span>
@@ -86,9 +99,14 @@
                 <span>{{ $t('回应了') }}</span>
                 <NoticeUser :user="data.user" />
                 <span>{{ $t('的') }}</span>
-                <a v-tooltip="{comp: MsgPrevTooltip, props: {msgs: [data.msg]}}"
+                <a
+                    v-tooltip="{
+                        comp: MsgPrevTooltip,
+                        props: { msgs: [data.msg] },
+                    }"
                     class="cursor-pointer"
-                    @click="scrollToMsg(data.msg)">
+                    @click="scrollToMsg(data.msg)"
+                >
                     {{ $t('消息') }}
                 </a>
                 <span>:</span>
@@ -102,7 +120,9 @@
                 <span>{{ $t('这条消息迷失在虚空里了') }}</span>
             </template>
             <!-- 时间 -->
-            <template v-else-if="data instanceof TimeNotice && data.time != undefined">
+            <template
+                v-else-if="data instanceof TimeNotice && data.time != undefined"
+            >
                 <span>{{ pastTime }}</span>
             </template>
             <!-- 通知 -->
@@ -127,7 +147,7 @@ import {
     PokeNotice,
     RecallNotice,
     ResponseNotice,
-    TimeNotice
+    TimeNotice,
 } from '@renderer/function/model/notice'
 import { scrollToMsg } from '@renderer/function/utils/appUtil'
 import { vTooltip } from '@renderer/function/utils/vcmd'

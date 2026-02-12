@@ -17,7 +17,7 @@ import type {
     RecallEventData,
     ResponseEventData,
     SenderData,
-    SessionData
+    SessionData,
 } from '../adapter/interface'
 import { runtimeData } from '../msg'
 import Emoji from './emoji'
@@ -48,7 +48,7 @@ export abstract class ReceivedNotice extends Notice {
     override session: Session
     users: IUser[] = []
 
-    constructor(data: {session: SessionData, time: number}) {
+    constructor(data: { session: SessionData; time: number }) {
         super(data)
         this.session = Session.getSession(data.session)
     }
@@ -64,6 +64,10 @@ export class RecallNotice extends ReceivedNotice {
     user: IUser
     operator: IUser
     suffix: string
+    /**
+     * 被撤回的消息，用于重新编辑
+     */
+    originMsg?: Msg
 
     constructor(data: RecallEventData) {
         super(data)
@@ -143,7 +147,8 @@ export class BanNotice extends ReceivedNotice {
 
     override get preMsg(): string {
         const { $t } = app.config.globalProperties
-        if (this.toMe) return this.operator.name + $t('禁言了') + $t('你') + this.fTime
+        if (this.toMe)
+            return this.operator.name + $t('禁言了') + $t('你') + this.fTime
         return this.operator.name + $t('禁言了') + this.user.name + this.fTime
     }
 }
@@ -250,7 +255,7 @@ export class JoinNotice extends ReceivedNotice {
      * 刷新自身数据
      * 因为刚加群时没他的信息
      */
-    refreshUserData(){
+    refreshUserData() {
         this.user = this.getUser(this.user_info)
         this.users.push(this.user)
     }
@@ -258,10 +263,8 @@ export class JoinNotice extends ReceivedNotice {
     override get preMsg(): string {
         const { $t } = app.config.globalProperties
         let out = ''
-        if (this.operator)
-            out += this.operator.name + $t('通过了')
-        if (this.inviter)
-            out += this.inviter.name + $t('邀请')
+        if (this.operator) out += this.operator.name + $t('通过了')
+        if (this.inviter) out += this.inviter.name + $t('邀请')
         out += this.user.name + $t('加入了群聊')
         return out
     }
@@ -294,7 +297,10 @@ export class LeaveNotice extends ReceivedNotice {
 
     override get preMsg(): string {
         const { $t } = app.config.globalProperties
-        if (this.kick) return this.operator.name + $t('将') + this.user.name + $t('移出群聊')
+        if (this.kick)
+            return (
+                this.operator.name + $t('将') + this.user.name + $t('移出群聊')
+            )
         return this.user.name + $t('离开了群聊')
     }
 }
@@ -327,23 +333,17 @@ export class ResponseNotice extends ReceivedNotice {
     override get preMsg(): string {
         const { $t } = app.config.globalProperties
         let out = ''
-        if (this.operator.user_id === runtimeData.loginInfo.uin)
-            out += $t('你')
-        else
-            out += this.operator.name
+        if (this.operator.user_id === runtimeData.loginInfo.uin) out += $t('你')
+        else out += this.operator.name
 
         out += $t('回应了')
 
-        if (this.user.user_id === runtimeData.loginInfo.uin)
-            out += $t('你')
-        else
-            out += this.user.name
+        if (this.user.user_id === runtimeData.loginInfo.uin) out += $t('你')
+        else out += this.user.name
         out += $t('的消息:')
         const emoji = Emoji.get(this.emojiId)
-        if (emoji?.type === 'emoji')
-            out += `${emoji.value}`
-        else
-            out += '[' + $t('表情') + ']'
+        if (emoji?.type === 'emoji') out += `${emoji.value}`
+        else out += '[' + $t('表情') + ']'
         return out
     }
 }
@@ -393,7 +393,6 @@ export abstract class SystemNotice extends Notice {
 
 export class TimeNotice extends SystemNotice {
     override readonly type: string = 'time'
-
 }
 
 export class DeleteNotice extends SystemNotice {

@@ -9,18 +9,27 @@
  *               用于处理收到的事件，分发向钩子
  */
 
+import { EventData, EventType } from './adapter/interface'
 import {
-    EventData,
-    EventType
-} from './adapter/interface'
-import { BanEvent, BanLiftEvent, Event, JoinEvent, LeaveEvent, MsgEvent, PokeEvent, RecallEvent, ResponseEvent } from './model/event'
+    BanEvent,
+    BanLiftEvent,
+    Event,
+    JoinEvent,
+    LeaveEvent,
+    MsgEvent,
+    PokeEvent,
+    RecallEvent,
+    ResponseEvent,
+} from './model/event'
 import { Session } from './model/session'
 import { newMsg, recallMsg, runtimeData } from './msg'
 
-type EventHook<T extends Event> = ((event: T) => void | Promise<void>)
+type EventHook<T extends Event> = (event: T) => void | Promise<void>
 const eventHooks: Map<EventType, EventHook<any>[]> = new Map()
 
-function eventHandle<T extends Event>(...args: [EventType, ...EventType[], EventHook<T>]): void {
+function eventHandle<T extends Event>(
+    ...args: [EventType, ...EventType[], EventHook<T>]
+): void {
     const handle = args.pop() as EventHook<T>
     const types = args as EventType[]
     for (const t of types) {
@@ -49,7 +58,6 @@ export async function handleEvent(eventData: EventData): Promise<void> {
     }
 }
 
-
 // 处理新消息
 eventHandle('msg', (event: MsgEvent) => {
     newMsg(event.message)
@@ -58,7 +66,7 @@ eventHandle('msg', (event: MsgEvent) => {
 
 // 撤回消息
 eventHandle('recall', (event: RecallEvent) => {
-    recallMsg(event.session, event.recallId)
+    recallMsg(event)
     event.session.addMessage(event.message)
 })
 
@@ -100,18 +108,21 @@ eventHandle('response', async (event: ResponseEvent) => {
     // 显示消息回应
     if (!event.add) return
     switch (runtimeData.sysConfig.show_response_message) {
-    case 'none':
-        return
-    case 'self':
-        if (
-            event.operator.user_id !== runtimeData.selfInfo?.user_id &&
-            event.msg.sender.user_id !== runtimeData.selfInfo?.user_id
-        ) return
-        break
-    case 'all':
-        break
-    default:
-        throw new Error(`未知的 show_response_message 设置项: ${runtimeData.sysConfig.show_response_message}`)
+        case 'none':
+            return
+        case 'self':
+            if (
+                event.operator.user_id !== runtimeData.selfInfo?.user_id &&
+                event.msg.sender.user_id !== runtimeData.selfInfo?.user_id
+            )
+                return
+            break
+        case 'all':
+            break
+        default:
+            throw new Error(
+                `未知的 show_response_message 设置项: ${runtimeData.sysConfig.show_response_message}`,
+            )
     }
     event.session.addMessage(event.message)
 })

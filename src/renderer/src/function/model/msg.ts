@@ -48,7 +48,7 @@ export class Msg extends Message {
     /**
      * 消息发送者
      */
-    _sender = shallowRef<IUser>()
+    private readonly _sender = shallowRef<IUser>()
     /**
      * 是否提及了自己
      */
