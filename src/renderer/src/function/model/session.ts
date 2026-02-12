@@ -1138,6 +1138,15 @@ export class GroupSession extends Session {
 
         this.essenceMsgs.length = 0
         this.essenceMsgs.push(...data.map((item) => new EssenceMsg(item, this)))
+
+        // 拼接图片
+        let tail: Img | undefined
+        for (const msg of this.essenceMsgs) {
+            if (!msg.imgList) continue
+            tail?.concatNext(msg.imgList.at(0)!)
+            tail = msg.imgList.at(-1)
+        }
+
         this.essenceMsgLoaded = true
         this.essenceMsgsLoadLocker = false
     }
