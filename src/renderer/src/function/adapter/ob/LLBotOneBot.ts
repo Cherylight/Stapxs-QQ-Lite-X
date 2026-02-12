@@ -1,8 +1,18 @@
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
 import { Msg } from '@renderer/function/model/msg'
 import { Resource } from '@renderer/function/model/resource'
-import { FileSeg, ForwardSeg, ImgSeg, MdSeg, MfaceSeg } from '@renderer/function/model/seg'
-import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import {
+    FileSeg,
+    ForwardSeg,
+    ImgSeg,
+    MdSeg,
+    MfaceSeg,
+} from '@renderer/function/model/seg'
+import {
+    GroupSession,
+    Session,
+    UserSession,
+} from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
 import {
     EssenceData,
@@ -20,7 +30,7 @@ import {
     MsgData,
     PokeEventData,
     ResponseEventData,
-    UserData
+    UserData,
 } from '../interface'
 import { api, OneBotAdapter } from './adapter'
 import { createSender, fileToBase64, getGender, ObConnector } from './utils'
@@ -52,11 +62,11 @@ import type {
     ObMessageEvent,
     ObMsg,
     ObSendMsg,
-    RkeyType
+    RkeyType,
 } from './type'
 
-export default class LLTwoBotOneBot extends OneBotAdapter {
-    override name = 'LLTwoBot OneBot'
+export default class LLBTOneBot extends OneBotAdapter {
+    override name = 'LuckyLillia OneBot'
     override version = '0.0.1'
     constructor(connector: ObConnector, botInfo?: ObGetVersionInfo) {
         super()
@@ -80,7 +90,8 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         this.segSerializer['file'] = this.fileSerializer.bind(this)
 
         this.eventProcessers['message_sent'] = this.messageSentEvent.bind(this)
-        this.noticeEventProcessers['group_msg_emoji_like'] = this.groupMsgEmojiLikeEvent.bind(this)
+        this.noticeEventProcessers['group_msg_emoji_like'] =
+            this.groupMsgEmojiLikeEvent.bind(this)
         this.remarkCache = undefined
     }
 
@@ -89,7 +100,10 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
     private remarkCache: undefined | Map<number, string>
     @api
     override async getFriendList(_?: boolean): Promise<FriendData[]> {
-        const data: LltbObGetFriendsWithCategory = await this.connector.send('get_friends_with_category', {})
+        const data: LltbObGetFriendsWithCategory = await this.connector.send(
+            'get_friends_with_category',
+            {},
+        )
         const out: FriendData[] = []
         this.remarkCache = new Map<number, string>()
         for (const category of data.data) {
@@ -110,9 +124,12 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
     override async getUserInfo(userId: number, _?: boolean): Promise<UserData> {
         if (!this.remarkCache) await this.getFriendList()
         // 获取用户信息
-        const data: LltbObGetStrangerInfo = await this.connector.send('get_stranger_info', {
-            user_id: userId,
-        })
+        const data: LltbObGetStrangerInfo = await this.connector.send(
+            'get_stranger_info',
+            {
+                user_id: userId,
+            },
+        )
         const user = data.data
         if (!this.friendListCache) await this.getFriendList()
         return {
@@ -126,9 +143,12 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             city: user.city === '' ? undefined : user.city,
             regTime: user.reg_time,
             qqLevel: user.level,
-            birthday_year: user.birthday_year === 0 ? undefined : user.birthday_year,
-            birthday_month: user.birthday_month === 0 ? undefined : user.birthday_month,
-            birthday_day: user.birthday_day === 0 ? undefined : user.birthday_day,
+            birthday_year:
+                user.birthday_year === 0 ? undefined : user.birthday_year,
+            birthday_month:
+                user.birthday_month === 0 ? undefined : user.birthday_month,
+            birthday_day:
+                user.birthday_day === 0 ? undefined : user.birthday_day,
             age: user.age,
             sex: getGender(user.sex),
         }
@@ -138,15 +158,22 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
      * @param group
      */
     @api
-    async getGroupAnnouncement(group: GroupSession): Promise<GroupAnnouncementData[]> {
+    async getGroupAnnouncement(
+        group: GroupSession,
+    ): Promise<GroupAnnouncementData[]> {
         // 获取群公告信息
-        const data: LltbObGetGroupNotice = await this.connector.send('_get_group_notice', {
-            group_id: group.id
-        })
+        const data: LltbObGetGroupNotice = await this.connector.send(
+            '_get_group_notice',
+            {
+                group_id: group.id,
+            },
+        )
 
-        const out = data.data.map(item => ({
+        const out = data.data.map((item) => ({
             content: item.message.text,
-            img: item.message.images.at(0) ? `https://p.qlogo.cn/gdynamic/${item.message.images.at(0)!.id}/0/`: undefined,
+            img: item.message.images.at(0)
+                ? `https://p.qlogo.cn/gdynamic/${item.message.images.at(0)!.id}/0/`
+                : undefined,
             time: item.publish_time,
             sender: item.sender_id,
         }))
@@ -154,23 +181,34 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
     }
     @api
     async getGroupEssence(group: GroupSession): Promise<EssenceData[]> {
-        const data: LltbObGetEssenceMsgList = await this.connector.send('get_essence_msg_list', {
-            group_id: group.id
-        })
+        const data: LltbObGetEssenceMsgList = await this.connector.send(
+            'get_essence_msg_list',
+            {
+                group_id: group.id,
+            },
+        )
 
         const out: Promise<EssenceData>[] = []
         for (const item of data.data) {
-            out.push((async () => {
-                const msg = await this.getMsg(group, String(item.message_id))
-                if (!msg) throw new Error('获取精华消息内容失败')
-                return {
-                    sender: createSender(item.sender_id, item.sender_nick),
-                    sender_time: item.operator_time,
-                    operator: createSender(item.operator_id, item.operator_nick),
-                    operator_time: item.operator_time,
-                    content: msg.message as EssenceSeg[]
-                }
-            })())
+            out.push(
+                (async () => {
+                    const msg = await this.getMsg(
+                        group,
+                        String(item.message_id),
+                    )
+                    if (!msg) throw new Error('获取精华消息内容失败')
+                    return {
+                        sender: createSender(item.sender_id, item.sender_nick),
+                        sender_time: item.operator_time,
+                        operator: createSender(
+                            item.operator_id,
+                            item.operator_nick,
+                        ),
+                        operator_time: item.operator_time,
+                        content: msg.message as EssenceSeg[],
+                    }
+                })(),
+            )
         }
 
         return await Promise.all(out)
@@ -178,7 +216,10 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
 
     @api
     async getCustomFace(): Promise<string[] | undefined> {
-        const data: LltbObFetchCustomFace = await this.connector.send('fetch_custom_face', {})
+        const data: LltbObFetchCustomFace = await this.connector.send(
+            'fetch_custom_face',
+            {},
+        )
 
         return data.data
     }
@@ -190,7 +231,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
      * @param msg 目标消息
      */
     @api
-    async setMsgReaded(_: Session, msg: Msg): Promise<true|undefined> {
+    async setMsgReaded(_: Session, msg: Msg): Promise<true | undefined> {
         await this.connector.send('mark_msg_as_read', {
             message_id: msg.message_id!,
         })
@@ -202,7 +243,10 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         if (!this.isForward(msg)) return await super.sendMsg(msg)
 
         // 合并转发
-        const message = await this.forwardSegSerializer(msg.message[0] as ForwardSeg, true)
+        const message = await this.forwardSegSerializer(
+            msg.message[0] as ForwardSeg,
+            true,
+        )
         let data: ObSendMsg
         if (msg.session instanceof UserSession) {
             data = await this.connector.send('send_private_forward_msg', {
@@ -217,21 +261,23 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         } else {
             throw new Error('OneBot 不支持发送临时会话消息')
         }
-        if (!data.data.message_id) throw new Error('发送消息失败，返回值无message_id')
+        if (!data.data.message_id)
+            throw new Error('发送消息失败，返回值无message_id')
 
         return data.data.message_id.toString()
     }
 
     @api
-    async getHistoryMsg(session: Session, count: number, start?: Msg): Promise<MsgData[] | undefined> {
+    async getHistoryMsg(
+        session: Session,
+        count: number,
+        start?: Msg,
+    ): Promise<MsgData[] | undefined> {
         let type: 'user' | 'group'
 
-        if (session instanceof UserSession)
-            type = 'user'
-        else if (session instanceof GroupSession)
-            type = 'group'
-        else
-            throw new Error('不支持临时会话')
+        if (session instanceof UserSession) type = 'user'
+        else if (session instanceof GroupSession) type = 'group'
+        else throw new Error('不支持临时会话')
 
         let data: LltbObGetMsgHistory
 
@@ -252,15 +298,18 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         const messages = data.data.messages
 
         if (start) messages.pop() // 去掉第一条，避免重复
-        const out: Promise<MsgData>[] = messages.map(msg => {
-            if(msg.user_id) msg.user_id = session.id
+        const out: Promise<MsgData>[] = messages.map((msg) => {
+            if (msg.user_id) msg.user_id = session.id
             return this.parseMsg(msg)
         })
 
         return await Promise.all(out)
     }
     @api
-    async sendGroupPoke(session: GroupSession, target: Member): Promise<true | undefined> {
+    async sendGroupPoke(
+        session: GroupSession,
+        target: Member,
+    ): Promise<true | undefined> {
         await this.connector.send('group_poke', {
             group_id: session.id,
             user_id: target.user_id,
@@ -275,7 +324,11 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         return true
     }
     @api
-    async setResponse(msg: Msg, emojiId: string, add?: boolean): Promise<true | undefined> {
+    async setResponse(
+        msg: Msg,
+        emojiId: string,
+        add?: boolean,
+    ): Promise<true | undefined> {
         add ??= true
         if (add) {
             await this.connector.send('set_msg_emoji_like', {
@@ -291,18 +344,26 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         return true
     }
     @api
-    override async getForwardMsg(forwardId: string, msg?: LltbObMsg): Promise<ForwardNodeData[]> {
-        const { data }: LltbObGetForwardMsg = await this.connector.send('get_forward_msg', {
-            id: forwardId,
-        })
-        return await Promise.all(data.messages.map(node => this.lltbNodeParser(node, msg)))
+    override async getForwardMsg(
+        forwardId: string,
+        msg?: LltbObMsg,
+    ): Promise<ForwardNodeData[]> {
+        const { data }: LltbObGetForwardMsg = await this.connector.send(
+            'get_forward_msg',
+            {
+                id: forwardId,
+            },
+        )
+        return await Promise.all(
+            data.messages.map((node) => this.lltbNodeParser(node, msg)),
+        )
     }
     /**
      * 获取资源url
      * @param id 资源id
      */
     @api
-    async getResource(id: string): Promise<string|undefined> {
+    async getResource(id: string): Promise<string | undefined> {
         const [type, url] = id.split('|||') as [RkeyType, string]
         const rkey = await this.getRkey(type)
         if (!rkey) return url
@@ -328,27 +389,39 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
     //#region == 文件相关 ======================
     @api
     async getGroupFile(group: GroupSession): Promise<FilesData> {
-        const data: LltbObGetGroupFiles = await this.connector.send('get_group_root_files', {
-            group_id: group.id,
-        })
+        const data: LltbObGetGroupFiles = await this.connector.send(
+            'get_group_root_files',
+            {
+                group_id: group.id,
+            },
+        )
         return this.parseFileData(data)
     }
 
     @api
-    async getGroupFolderFile(group: GroupSession, folderId: string): Promise<FilesData | undefined> {
-        const data: LltbObGetGroupFiles = await this.connector.send('get_group_files_by_folder', {
-            group_id: group.id,
-            folder_id: folderId,
-        })
+    async getGroupFolderFile(
+        group: GroupSession,
+        folderId: string,
+    ): Promise<FilesData | undefined> {
+        const data: LltbObGetGroupFiles = await this.connector.send(
+            'get_group_files_by_folder',
+            {
+                group_id: group.id,
+                folder_id: folderId,
+            },
+        )
         return this.parseFileData(data)
     }
 
     @api
     async getGroupFileUrl(file: GroupFile): Promise<string | undefined> {
-        const data: LltbObGetGroupFileUrl = await this.connector.send('get_group_file_url', {
-            group_id: file.group.id,
-            file_id: file.id,
-        })
+        const data: LltbObGetGroupFileUrl = await this.connector.send(
+            'get_group_file_url',
+            {
+                group_id: file.group.id,
+                file_id: file.id,
+            },
+        )
 
         return data.data.url
     }
@@ -359,13 +432,20 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
      * @param fold
      */
     @api
-    async sendGroupFile(group: GroupSession, file: File, fold?: GroupFileFolder): Promise<string|undefined> {
-        const data: LltbObUploadGroupFile = await this.connector.send('upload_group_file', {
-            group_id: group.id,
-            file: `base64://${await fileToBase64(file)}`,
-            name: file.name,
-            folder_id: fold?.id,
-        })
+    async sendGroupFile(
+        group: GroupSession,
+        file: File,
+        fold?: GroupFileFolder,
+    ): Promise<string | undefined> {
+        const data: LltbObUploadGroupFile = await this.connector.send(
+            'upload_group_file',
+            {
+                group_id: group.id,
+                file: `base64://${await fileToBase64(file)}`,
+                name: file.name,
+                folder_id: fold?.id,
+            },
+        )
         return data.data.file_id
     }
     /**
@@ -374,12 +454,18 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
      * @param file
      */
     @api
-    async sendPrivateFile(session: UserSession, file: File): Promise<string|undefined> {
-        const data: LltbObUploadPrivateFile = await this.connector.send('upload_private_file', {
-            user_id: session.id,
-            file: `base64://${await fileToBase64(file)}`,
-            name: file.name,
-        })
+    async sendPrivateFile(
+        session: UserSession,
+        file: File,
+    ): Promise<string | undefined> {
+        const data: LltbObUploadPrivateFile = await this.connector.send(
+            'upload_private_file',
+            {
+                user_id: session.id,
+                file: `base64://${await fileToBase64(file)}`,
+                name: file.name,
+            },
+        )
         return data.data.file_id
     }
     /**
@@ -388,11 +474,17 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
      * @param folderName
      */
     @api
-    async createFileFolder(group: GroupSession, folderName: string): Promise<string|undefined> {
-        const data: LltbObCreateGroupFileFolder = await this.connector.send('create_group_file_folder', {
-            group_id: group.id,
-            name: folderName,
-        })
+    async createFileFolder(
+        group: GroupSession,
+        folderName: string,
+    ): Promise<string | undefined> {
+        const data: LltbObCreateGroupFileFolder = await this.connector.send(
+            'create_group_file_folder',
+            {
+                group_id: group.id,
+                name: folderName,
+            },
+        )
         return data.data.folder_id
     }
     /**
@@ -400,7 +492,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
      * @param file
      */
     @api
-    async deleteGroupFile(file: GroupFile): Promise<true|undefined> {
+    async deleteGroupFile(file: GroupFile): Promise<true | undefined> {
         await this.connector.send('delete_group_file', {
             group_id: file.group.id,
             file_id: file.id,
@@ -412,7 +504,9 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
      * @param folder
      */
     @api
-    async deleteGroupFileFolder(folder: GroupFileFolder): Promise<true|undefined> {
+    async deleteGroupFileFolder(
+        folder: GroupFileFolder,
+    ): Promise<true | undefined> {
         await this.connector.send('delete_group_folder', {
             group_id: folder.group.id,
             folder_id: folder.id,
@@ -430,7 +524,10 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
      * @param newName
      */
     @api
-    async renameGroupFileFolder(folder: GroupFileFolder, newName: string): Promise<true|undefined> {
+    async renameGroupFileFolder(
+        folder: GroupFileFolder,
+        newName: string,
+    ): Promise<true | undefined> {
         await this.connector.send('rename_group_file_folder', {
             group_id: folder.group.id,
             folder_id: folder.id,
@@ -454,7 +551,10 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             content: data.data.content,
         }
     }
-    override async imageParser(data: LltbObImageSeg, msg?: ObMsg): Promise<ImgSegData> {
+    override async imageParser(
+        data: LltbObImageSeg,
+        msg?: ObMsg,
+    ): Promise<ImgSegData> {
         let type: RkeyType
 
         if (!msg) type = 'UNKNOWN'
@@ -487,7 +587,10 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             file_id: data.data.file_id,
         }
     }
-    async lltbNodeParser(data: LltbObForwardNode, msg?: LltbObMsg): Promise<ForwardNodeData> {
+    async lltbNodeParser(
+        data: LltbObForwardNode,
+        msg?: LltbObMsg,
+    ): Promise<ForwardNodeData> {
         return {
             sender: {
                 nickname: data.sender.nickname,
@@ -504,7 +607,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             type: 'markdown',
             data: {
                 content: seg.content,
-            }
+            },
         }
     }
     override async imageSerializer(seg: ImgSeg): Promise<LltbObImageSeg> {
@@ -519,7 +622,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
                 type: undefined as any,
                 thumb: undefined as any,
                 name: undefined as any,
-            }
+            },
         }
     }
     async mfaceSerializer(seg: MfaceSeg): Promise<LltbObMfaceSeg> {
@@ -531,7 +634,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
                 key: seg.key,
                 emoji_id: seg.id,
                 emoji_package_id: seg.packageId,
-            }
+            },
         }
     }
     async fileSerializer(seg: FileSeg): Promise<LltbObFileSeg> {
@@ -546,37 +649,45 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
                 name: seg.name,
                 path: undefined as any,
                 thumb: undefined as any,
-            }
+            },
         }
     }
     async forwardSegSerializer(seg: ForwardSeg): Promise<ObForwardNodeSeg[]>
-    async forwardSegSerializer(seg: ForwardSeg, head: true): Promise<ObForwardSeg>
-    async forwardSegSerializer(seg: ForwardSeg, head?: true): Promise<ObForwardNodeSeg[] | ObForwardSeg> {
+    async forwardSegSerializer(
+        seg: ForwardSeg,
+        head: true,
+    ): Promise<ObForwardSeg>
+    async forwardSegSerializer(
+        seg: ForwardSeg,
+        head?: true,
+    ): Promise<ObForwardNodeSeg[] | ObForwardSeg> {
         if (!head) {
             if (!seg.id) throw new Error('递归转发消息必须有 id')
             return {
                 type: 'forward',
                 data: {
                     id: seg.id,
-                }
+                },
             }
         }
 
-        const serializer = async (msg: Msg)=>{
+        const serializer = async (msg: Msg) => {
             if (!this.isForward(msg)) return await this.serializeMsg(msg)
             else return this.forwardSegSerializer(msg.message[0] as ForwardSeg)
         }
         const msgs = seg.content
-        const messagesList = await Promise.all(msgs.map(msg => serializer(msg)))
+        const messagesList = await Promise.all(
+            msgs.map((msg) => serializer(msg)),
+        )
         const out: ObForwardNodeSeg[] = []
-        for (let i = 0;i < messagesList.length;i++) {
+        for (let i = 0; i < messagesList.length; i++) {
             out.push({
                 type: 'node',
                 data: {
                     nickname: msgs[i].sender.name,
                     user_id: msgs[i].sender.user_id.toString(),
                     content: messagesList[i],
-                }
+                },
             })
         }
         return out
@@ -593,7 +704,9 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         re.time = event.time
         return re
     }
-    async groupMsgEmojiLikeEvent(event: LltbObGroupMsgEmojiLikeEvent): Promise<ResponseEventData> {
+    async groupMsgEmojiLikeEvent(
+        event: LltbObGroupMsgEmojiLikeEvent,
+    ): Promise<ResponseEventData> {
         return {
             type: 'response',
             session: {
@@ -607,7 +720,9 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             time: event.time,
         }
     }
-    async messageSentEvent(event: LltbObMessageSendEvent): Promise<MessageEventData> {
+    async messageSentEvent(
+        event: LltbObMessageSendEvent,
+    ): Promise<MessageEventData> {
         let data: ObMessageEvent
         if (event.message_type === 'private') {
             data = {
@@ -625,9 +740,9 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
                     nickname: event.sender.nickname,
                     sex: 'female',
                     age: 0,
-                }
+                },
             }
-        }else {
+        } else {
             data = {
                 time: event.time,
                 self_id: event.self_id,
@@ -649,10 +764,10 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
                     level: '',
                     role: event.sender.role,
                     title: '',
-                }
+                },
             }
         }
-        (data as any).message_seq = event.message_seq
+        ;(data as any).message_seq = event.message_seq
         return await this.messageEvent(data)
     }
     //#endregion
@@ -675,7 +790,7 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
 
     private parseFileData(data: LltbObGetGroupFiles): FilesData {
         return {
-            files: data.data.files.map(file => ({
+            files: data.data.files.map((file) => ({
                 file_id: file.file_id,
                 file_name: file.file_name,
                 size: file.file_size,
@@ -685,14 +800,14 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
                 uploader_name: file.uploader_name,
                 uploader_id: file.uploader,
             })),
-            folders: data.data.folders.map(folder => ({
+            folders: data.data.folders.map((folder) => ({
                 folder_id: folder.folder_id,
                 folder_name: folder.folder_name,
                 count: folder.total_file_count,
                 create_time: folder.create_time,
                 creator_name: folder.creator_name,
                 creator_id: folder.creator,
-            }))
+            })),
         }
     }
 
@@ -706,27 +821,32 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
         return this.msgSeqCache.get(key)
     }
 
-    private rkeyCache: {[key in RkeyType]: {value: string, time: number} | null} = {
-        'PRIVATE': null,
-        'GROUP': null,
-        'UNKNOWN': null
+    private rkeyCache: {
+        [key in RkeyType]: { value: string; time: number } | null
+    } = {
+        PRIVATE: null,
+        GROUP: null,
+        UNKNOWN: null,
     }
     @api
     /**
      * 获取图片rkey
      */
-    private async getRkey(type: RkeyType): Promise<string|undefined> {
+    private async getRkey(type: RkeyType): Promise<string | undefined> {
         if (type === 'UNKNOWN') return undefined
         const cache = this.rkeyCache[type]
-        if (cache && (Date.now() - cache.time) < 5 * 60 * 1000)
-            return cache.value
+        if (cache && Date.now() - cache.time < 5 * 60 * 1000) return cache.value
         const data = await this.connector.send('get_rkey', {})
-        const rkey = type === 'GROUP' ? data.data.group_key : data.data.private_key
+        const rkey =
+            type === 'GROUP' ? data.data.group_key : data.data.private_key
         this.rkeyCache[type] = { value: rkey, time: Date.now() }
         return rkey
     }
 
-    private async createResource(url: string, type: RkeyType): Promise<Resource> {
+    private async createResource(
+        url: string,
+        type: RkeyType,
+    ): Promise<Resource> {
         let baseUrl: string
         // console.log('createResource', url, rkey)
         try {
@@ -735,7 +855,9 @@ export default class LLTwoBotOneBot extends OneBotAdapter {
             baseUrl = u.toString()
         } catch {
             // 回退方案：使用正则在不能用 URL 的情况下处理
-            baseUrl = url.replace(/([?&])rkey=[^&]*(&?)/, (_, sep, tail) => tail ? sep : '')
+            baseUrl = url.replace(/([?&])rkey=[^&]*(&?)/, (_, sep, tail) =>
+                tail ? sep : '',
+            )
         }
         const id = `${type}|||${baseUrl}`
         let resUrl: string

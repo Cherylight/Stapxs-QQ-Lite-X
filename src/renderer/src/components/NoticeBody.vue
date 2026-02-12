@@ -30,19 +30,16 @@
                     <NoticeUser :user="data.user" />
                     <span>{{ $t('的消息') }}</span>
                 </template>
-                <template v-if="data.originMsg">
-                    <a
-                        v-tooltip="{
-                            comp: MsgPrevTooltip,
-                            props: { msgs: [data.originMsg] },
-                        }"
-                        @click="
-                            data.session.inputMsg.reeditFromMsg(data.originMsg)
-                        "
-                    >
-                        {{ $t('重新编辑') }}
-                    </a>
-                </template>
+                <a
+                    v-if="data.originMsg"
+                    v-tooltip="{
+                        comp: MsgPrevTooltip,
+                        props: { msgs: [data.originMsg] },
+                    }"
+                    @click="data.session.inputMsg.reeditFromMsg(data.originMsg)"
+                >
+                    {{ $t('重新编辑') }}
+                </a>
             </template>
             <!-- 禁言 -->
             <template v-else-if="data instanceof BanNotice">

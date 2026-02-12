@@ -12,7 +12,7 @@ type data = Record<string, boolean | number | string | null | data | data[]>
  * Ob的Ws请求格式
  * @see https://github.com/botuniverse/onebot-11/blob/master/communication/ws.md#api-%E6%8E%A5%E5%8F%A3
  */
-export interface ObRequest<T extends data>{
+export interface ObRequest<T extends data> {
     action: string
     echo: string
     params?: T
@@ -179,11 +179,15 @@ export type ObGetStrangerInfo = ObResponse<{
  * 获取好友列表
  * @see https://github.com/botuniverse/onebot-11/blob/master/api/public.md#get_friend_list-获取好友列表
  */
-export type ObGetFriendList = ObResponse<[{
-    user_id: number,
-    nickname: string,
-    remark: string,
-}]>
+export type ObGetFriendList = ObResponse<
+    [
+        {
+            user_id: number
+            nickname: string
+            remark: string
+        },
+    ]
+>
 
 /**
  * 获取群信息
@@ -200,12 +204,16 @@ export type ObGetGroupInfo = ObResponse<{
  * 获取群列表
  * @see https://github.com/botuniverse/onebot-11/blob/master/api/public.md#get_group_list-获取群列表
  */
-export type ObGetGroupList = ObResponse<[{
-    group_id: number,
-    group_name: string,
-    member_count: number,
-    max_member_count: number,
-}]>
+export type ObGetGroupList = ObResponse<
+    [
+        {
+            group_id: number
+            group_name: string
+            member_count: number
+            max_member_count: number
+        },
+    ]
+>
 
 /**
  * 获取群成员信息
@@ -383,34 +391,35 @@ export interface ObEvent {
 }
 //#endregion
 
-
 export interface ObPrivateSender {
-    user_id: number 	// 发送者 QQ 号
-    nickname: string 	// 昵称
-    sex: 'male' |       // 性别
-         'female' |
-         'unknown'
-    age: number 	    // 年龄
+    user_id: number // 发送者 QQ 号
+    nickname: string // 昵称
+    sex:
+        | 'male' // 性别
+        | 'female'
+        | 'unknown'
+    age: number // 年龄
 }
 
 export interface ObGroupSender {
-    user_id: number 	// 发送者 QQ 号
-    nickname: string 	// 昵称
-    card: string 	    // 群名片／备注
-    sex: 'male' |       // 性别
-         'female' |
-         'unknown'
-    age: number 	    // 年龄
-    area: string 	    // 地区
-    level: string 	    // 成员等级
-    role: string 	    // 角色，owner 或 admin 或 member
-    title: string 	    // 专属头衔
+    user_id: number // 发送者 QQ 号
+    nickname: string // 昵称
+    card: string // 群名片／备注
+    sex:
+        | 'male' // 性别
+        | 'female'
+        | 'unknown'
+    age: number // 年龄
+    area: string // 地区
+    level: string // 成员等级
+    role: string // 角色，owner 或 admin 或 member
+    title: string // 专属头衔
 }
 
 export interface ObAnonymousSender {
-    id: string          // 匿名 ID
-    name: string        // 匿名名称
-    flag: string        // 匿名标志
+    id: string // 匿名 ID
+    name: string // 匿名名称
+    flag: string // 匿名标志
 }
 
 export interface ObMsg {
@@ -420,7 +429,7 @@ export interface ObMsg {
     message_id: number
     real_id: number
     sender: ObPrivateSender | ObGroupSender | ObAnonymousSender
-    message: ObSeg <string, any> []
+    message: ObSeg<string, any>[]
     user_id?: number // 仅在群消息中存在，表示发送者的 QQ 号
     group_id?: number // 仅在群消息中存在，表示所在的群号
 }
@@ -431,138 +440,175 @@ export interface ObSeg<T extends string, D> {
     data: D
 }
 
-export type ObTextSeg = ObSeg<'text', {
-    text: string
-}>
-export type ObImgSeg = ObSeg<'image', {
-    file: string
-    url: string
-}>
-export type ObFaceSeg = ObSeg<'face', {
-    id: string
-}>
-export type ObAtSeg = ObSeg<'at', {
-    qq: string
-}>
-export type ObVideoSeg = ObSeg<'video', {
-    file: string
-    url: string
-}>
-export type ObForwardSeg = ObSeg<'forward', {
-    id: string
-}>
-export type ObForwardNodeSeg = ObSeg<'node', {
-    user_id: string
-    nickname: string
-    content: ObSeg[]
-}>
-export type ObReplySeg = ObSeg<'reply', {
-    id: string
-}>
-export type ObPokeSeg = ObSeg<'poke', {
-    type: string,
-    id: string
-}>
-export type ObXmlSeg = ObSeg<'xml', {
-    data: string
-}>
-export type ObJsonSeg = ObSeg<'json', {
-    data: string
-}>
+export type ObTextSeg = ObSeg<
+    'text',
+    {
+        text: string
+    }
+>
+export type ObImgSeg = ObSeg<
+    'image',
+    {
+        file: string
+        url: string
+    }
+>
+export type ObFaceSeg = ObSeg<
+    'face',
+    {
+        id: string
+    }
+>
+export type ObAtSeg = ObSeg<
+    'at',
+    {
+        qq: string
+    }
+>
+export type ObVideoSeg = ObSeg<
+    'video',
+    {
+        file: string
+        url: string
+    }
+>
+export type ObForwardSeg = ObSeg<
+    'forward',
+    {
+        id: string
+    }
+>
+export type ObForwardNodeSeg = ObSeg<
+    'node',
+    {
+        user_id: string
+        nickname: string
+        content: ObSeg[]
+    }
+>
+export type ObReplySeg = ObSeg<
+    'reply',
+    {
+        id: string
+    }
+>
+export type ObPokeSeg = ObSeg<
+    'poke',
+    {
+        type: string
+        id: string
+    }
+>
+export type ObXmlSeg = ObSeg<
+    'xml',
+    {
+        data: string
+    }
+>
+export type ObJsonSeg = ObSeg<
+    'json',
+    {
+        data: string
+    }
+>
 //#endregion
 
 //#region == 事件 ==============================================
-export interface ObEvent{
-    time: number,           // 事件发生时间戳
-    self_id: number,        // 事件发送者的 QQ 号
-    post_type: 'message' |  // 事件类型
-               'notice' |
-               'request' |
-               'meta_event'
-
+export interface ObEvent {
+    time: number // 事件发生时间戳
+    self_id: number // 事件发送者的 QQ 号
+    post_type:
+        | 'message' // 事件类型
+        | 'notice'
+        | 'request'
+        | 'meta_event'
 }
 export interface ObGroupMessageEvent extends ObEvent {
     post_type: 'message'
-    message_type: 'group'               // 消息类型
-    sub_type: 'normal' |                // 子类型
-              'anonymous' |
-              'notice'
-    message_id: number                  // 消息 ID
-    user_id: number                     // 发送者 QQ 号
-    group_id: number                    // 群号
-    message: ObSeg<string, any>[]       // 消息内容
-    raw_message: string                 // 原始消息文本
-    sender: ObGroupSender |             // 发送者信息
-            ObAnonymousSender
+    message_type: 'group' // 消息类型
+    sub_type:
+        | 'normal' // 子类型
+        | 'anonymous'
+        | 'notice'
+    message_id: number // 消息 ID
+    user_id: number // 发送者 QQ 号
+    group_id: number // 群号
+    message: ObSeg<string, any>[] // 消息内容
+    raw_message: string // 原始消息文本
+    sender:
+        | ObGroupSender // 发送者信息
+        | ObAnonymousSender
 }
 export interface ObPrivateMessageEvent extends ObEvent {
     post_type: 'message'
-    message_type: 'private'             // 消息类型
-    sub_type: 'friend' |                // 子类型
-              'normal' |
-              'other'
-    message_id: number                  // 消息 ID
-    user_id: number                     // 对话方 QQ 号
-    group_id?: number                   // 群号
-    message: ObSeg<string,any>[]        // 消息内容
-    raw_message: string                 // 原始消息文本
-    sender: ObPrivateSender             // 发送者信息
+    message_type: 'private' // 消息类型
+    sub_type:
+        | 'friend' // 子类型
+        | 'normal'
+        | 'other'
+    message_id: number // 消息 ID
+    user_id: number // 对话方 QQ 号
+    group_id?: number // 群号
+    message: ObSeg<string, any>[] // 消息内容
+    raw_message: string // 原始消息文本
+    sender: ObPrivateSender // 发送者信息
 }
 export type ObMessageEvent = ObGroupMessageEvent | ObPrivateMessageEvent
 export interface ObHeartEvent extends ObEvent {
     post_type: 'meta_event'
-    meta_event_type: 'heartbeat'        // 元事件类型
-    interval: number                    // 心跳间隔
+    meta_event_type: 'heartbeat' // 元事件类型
+    interval: number // 心跳间隔
 }
 export interface ObNoticeEvent extends ObEvent {
     post_type: 'notice'
-    notice_type: string | 'notify'      // 通知类型一并塞进去吧...
-    sub_type?: string                   // 子类型
-    group_id?: number                   // 群号（可能不存在）
-    user_id?: number                    // 用户 QQ 号（可能不存在）
+    notice_type: string | 'notify' // 通知类型一并塞进去吧...
+    sub_type?: string // 子类型
+    group_id?: number // 群号（可能不存在）
+    user_id?: number // 用户 QQ 号（可能不存在）
 }
 export interface ObGroupIncreaseEvent extends ObNoticeEvent {
-    notice_type: 'group_increase'       // 群成员增加事件
-    sub_type: 'approve' | 'invite'      // 子类型
-    group_id: number                    // 群号
-    user_id: number                     // 新成员 QQ 号
-    operator_id: number                 // 操作人 QQ 号
+    notice_type: 'group_increase' // 群成员增加事件
+    sub_type: 'approve' | 'invite' // 子类型
+    group_id: number // 群号
+    user_id: number // 新成员 QQ 号
+    operator_id: number // 操作人 QQ 号
 }
 export interface ObGroupDecreaseEvent extends ObNoticeEvent {
-    notice_type: 'group_decrease'       // 群成员减少事件
-    sub_type: 'leave' |                 // 子类型
-              'kick' |
-              'kick_me'
-    group_id: number                    // 群号
-    user_id: number                     // 成员 QQ 号
-    operator_id: number                 // 操作人 QQ 号（可能不存在）
+    notice_type: 'group_decrease' // 群成员减少事件
+    sub_type:
+        | 'leave' // 子类型
+        | 'kick'
+        | 'kick_me'
+    group_id: number // 群号
+    user_id: number // 成员 QQ 号
+    operator_id: number // 操作人 QQ 号（可能不存在）
 }
 export interface ObGroupBanEvent extends ObNoticeEvent {
-    notice_type: 'group_ban'            // 群禁言事件
-    sub_type: 'ban' | 'lift_ban'        // 子类型
-    group_id: number                    // 群号
-    operator_id: number                 // 操作人 QQ 号（可能不存在）
-    user_id: number                     // 被禁言成员 QQ 号
-    duration: number                    // 禁言时长，单位秒
+    notice_type: 'group_ban' // 群禁言事件
+    sub_type: 'ban' | 'lift_ban' // 子类型
+    group_id: number // 群号
+    operator_id: number // 操作人 QQ 号（可能不存在）
+    user_id: number // 被禁言成员 QQ 号
+    duration: number // 禁言时长，单位秒
 }
 export interface ObGroupRecallEvent extends ObNoticeEvent {
-    notice_type: 'group_recall'         // 群消息撤回事件
-    group_id: number                    // 群号
-    user_id: number                     // 撤回者 QQ 号
-    operator_id: number                 // 操作人 QQ 号
-    message_id: number                  // 被撤回消息 ID
+    notice_type: 'group_recall' // 群消息撤回事件
+    group_id: number // 群号
+    user_id: number // 撤回者 QQ 号
+    operator_id: number // 操作人 QQ 号
+    message_id: number // 被撤回消息 ID
 }
 export interface ObFriendRecallEvent extends ObNoticeEvent {
-    notice_type: 'friend_recall'        // 好友消息撤回事件
-    user_id: number                     // 撤回者 QQ 号
-    message_id: number                  // 被撤回消息 ID
+    notice_type: 'friend_recall' // 好友消息撤回事件
+    user_id: number // 撤回者 QQ 号
+    message_id: number // 被撤回消息 ID
 }
 export interface ObPokeEvent extends ObNoticeEvent {
-    notice_type: 'notify'               // 戳一戳事件
-    sub_type: 'poke'                    // 子类型
-    group_id: number                    // 群号
-    user_id: number                     // 戳一戳者 QQ 号
-    target_id: number                   // 被戳者 QQ 号
+    notice_type: 'notify' // 戳一戳事件
+    sub_type: 'poke' // 子类型
+    group_id: number // 群号
+    user_id: number // 戳一戳者 QQ 号
+    target_id: number // 被戳者 QQ 号
 }
 //#endregion
 export type RkeyType = 'PRIVATE' | 'GROUP' | 'UNKNOWN'
@@ -574,16 +620,18 @@ export type LgrObGetVersionInfo = ObResponse<{
     protocol_version: string
     nt_protocol: string
 }>
-export type LgrObGetFriendList = ObResponse<{
-    user_id: number
-    nickname: string
-    remark: string
-    q_id: string
-    group: {
-        group_id: number
-        group_name: string
-    }
-}[]>
+export type LgrObGetFriendList = ObResponse<
+    {
+        user_id: number
+        nickname: string
+        remark: string
+        q_id: string
+        group: {
+            group_id: number
+            group_name: string
+        }
+    }[]
+>
 export type LgrObGetStongerInfo = ObResponse<{
     user_id: number
     avatar: string
@@ -593,13 +641,15 @@ export type LgrObGetStongerInfo = ObResponse<{
     sex: 'male' | 'female' | 'unknown'
     age: number
     level: number
-    status: {           // 状态
+    status: {
+        // 状态
         status_id: number
         face_id: number
         message: string
     }
     RegisterTime: string
-    Business?: {        // QQ会员
+    Business?: {
+        // QQ会员
         type: number
         name: string
         level: number
@@ -608,26 +658,28 @@ export type LgrObGetStongerInfo = ObResponse<{
         isyear: number
     }[]
 }>
-export type LgrObGetGroupNotices = ObResponse<{
-    notice_id: string
-    sender_id: number
-    publish_time: number
-    message: {
-        text: string
-        images: {
-            id: string,
-            width: number,
-            height: number,
-        }[]
-    }
-}[]>
+export type LgrObGetGroupNotices = ObResponse<
+    {
+        notice_id: string
+        sender_id: number
+        publish_time: number
+        message: {
+            text: string
+            images: {
+                id: string
+                width: number
+                height: number
+            }[]
+        }
+    }[]
+>
 export type LgrObGetGroupFileRoot = ObResponse<{
     files: LgrGroupFileData[]
     folders: LgrGroupFolderData[]
 }>
-export type LgrObGetFileUrl = ObResponse<{url:string}>
+export type LgrObGetFileUrl = ObResponse<{ url: string }>
 
-export interface LgrGroupFileData{
+export interface LgrGroupFileData {
     group_id: number
     file_id: string
     file_name: string
@@ -673,60 +725,74 @@ export type LgrObGetMsg = ObResponse<{
     message: ObSeg<string, any>[]
 }>
 
-export type LgrObMdSeg = ObSeg<'markdown', {
-    content: string
-}>
-export type LgrObImgSeg = ObSeg<'image', {
-    file: string
-    url: string
-    subType?: number
-    summary?: string
-    filename?: string
-}>
-export type LgrObMfaceSeg = ObSeg<'mface', {
-    url: string
-    summary: string
-    emoji_package_id: number
-    emoji_id: string
-    key: string
-}>
-export type LgrObFileSeg = ObSeg<'file', {
-    url: string
-    file_name: string
-    file_hash: number
-    file_id: string
-}>
+export type LgrObMdSeg = ObSeg<
+    'markdown',
+    {
+        content: string
+    }
+>
+export type LgrObImgSeg = ObSeg<
+    'image',
+    {
+        file: string
+        url: string
+        subType?: number
+        summary?: string
+        filename?: string
+    }
+>
+export type LgrObMfaceSeg = ObSeg<
+    'mface',
+    {
+        url: string
+        summary: string
+        emoji_package_id: number
+        emoji_id: string
+        key: string
+    }
+>
+export type LgrObFileSeg = ObSeg<
+    'file',
+    {
+        url: string
+        file_name: string
+        file_hash: number
+        file_id: string
+    }
+>
 export type LgrObGetCustomFace = ObResponse<string[]>
 
 export interface LgrObPokeEvent extends ObPokeEvent {
-    action: string              // 戳一戳动作
-    suffix: string              // 戳一戳后缀
-    action_img_url: string      // 戳一戳动作图片
+    action: string // 戳一戳动作
+    suffix: string // 戳一戳后缀
+    action_img_url: string // 戳一戳动作图片
 }
 //#endregion
 
 //#region == NAPCAT =============================================
-export type NcObGetFriendsWithCategory = ObResponse<{
-    categoryId: number
-    categorySortId: number
-    categoryName: string
-    categoryMbCount: number
-    onlineCount: number
-    buddyList: {
-        birthday_year: number
-        birthday_month: number
-        birthday_day: number
-        user_id: number
-        age: number
-        phone_num: string
-        email: string
-        category_id: number
-        nickname: string
-        remark: string
-        sex: 'unknown' | 'male' | 'female'
-        level: number
+export type NcObGetFriendsWithCategory = ObResponse<
+    {
+        categoryId: number
+        categorySortId: number
+        categoryName: string
+        categoryMbCount: number
+        onlineCount: number
+        buddyList: {
+            birthday_year: number
+            birthday_month: number
+            birthday_day: number
+            user_id: number
+            age: number
+            phone_num: string
+            email: string
+            category_id: number
+            nickname: string
+            remark: string
+            sex: 'unknown' | 'male' | 'female'
+            level: number
+        }[]
     }[]
-}[]>
+>
 
 export type NcObGetStrangerInfo = ObResponse<{
     user_id: number
@@ -752,30 +818,34 @@ export type NcObGetStrangerInfo = ObResponse<{
     birthday_month: number
     birthday_day: number
 }>
-export type NcObGetGroupNotices = ObResponse<{
-    notice_id: string
-    sender_id: number
-    publish_time: number
-    message: {
-        text: string
-        image: {
-            id: string,
-            width: number,
-            height: number,
-        }[]
-    }
-}[]>
-export type NcObGetEssenceMsgList = ObResponse<{
-    msg_seq: number
-    msg_random: number
-    sender_id: number
-    sender_nick: string
-    operator_id: number
-    operator_nick: string
-    message_id: number
-    operator_time: number
-    content: ObSeg<string, any>[]
-}[]>
+export type NcObGetGroupNotices = ObResponse<
+    {
+        notice_id: string
+        sender_id: number
+        publish_time: number
+        message: {
+            text: string
+            image: {
+                id: string
+                width: number
+                height: number
+            }[]
+        }
+    }[]
+>
+export type NcObGetEssenceMsgList = ObResponse<
+    {
+        msg_seq: number
+        msg_random: number
+        sender_id: number
+        sender_nick: string
+        operator_id: number
+        operator_nick: string
+        message_id: number
+        operator_time: number
+        content: ObSeg<string, any>[]
+    }[]
+>
 export type NcObFetchCustomFace = ObResponse<string[]>
 export type NcObGetHistoryMsg = ObResponse<{
     messages: ObMsg[]
@@ -789,7 +859,7 @@ export type NcObGetGroupFile = ObResponse<{
     folders: NcGroupFolderData[]
 }>
 
-export interface NcGroupFileData{
+export interface NcGroupFileData {
     group_id: number
     file_id: string
     file_name: string
@@ -814,39 +884,52 @@ export interface NcGroupFolderData {
     creator_name: string
     total_file_count: number
 }
-export type NcObGetFileUrl = ObResponse<{url:string}>
+export type NcObGetFileUrl = ObResponse<{ url: string }>
 
-export type NcObMdSeg = ObSeg<'markdown', {
-    content: string
-}>
-export type NcObImgSeg = ObSeg<'image', {
-    file: string
-    url: string
-    sub_type: number
-    summary: string
-    file_size: number,
-} | {
-    file: string
-    url: string
-    summary: string
-    key: string
-    emoji_id: string
-    emoji_package_id: number
-}>
-export type NcObMfaceSeg = ObSeg<'mface', {
-    file: string
-    url: string
-    summary: string
-    key: string
-    emoji_id: string
-    emoji_package_id: number
-}>
-export type NcObFileSeg = ObSeg<'file', {
-    file: string
-    file_id: string
-    file_size: number
-    url: string
-}>
+export type NcObMdSeg = ObSeg<
+    'markdown',
+    {
+        content: string
+    }
+>
+export type NcObImgSeg = ObSeg<
+    'image',
+    | {
+          file: string
+          url: string
+          sub_type: number
+          summary: string
+          file_size: number
+      }
+    | {
+          file: string
+          url: string
+          summary: string
+          key: string
+          emoji_id: string
+          emoji_package_id: number
+      }
+>
+export type NcObMfaceSeg = ObSeg<
+    'mface',
+    {
+        file: string
+        url: string
+        summary: string
+        key: string
+        emoji_id: string
+        emoji_package_id: number
+    }
+>
+export type NcObFileSeg = ObSeg<
+    'file',
+    {
+        file: string
+        file_id: string
+        file_size: number
+        url: string
+    }
+>
 interface NcForwardData {
     user_id: string
     sender: {
@@ -856,28 +939,33 @@ interface NcForwardData {
     }
     message: ObSeg[]
 }
-export type NcObForwardSeg = ObSeg<'forward', {
-    id: string
-    content?: NcForwardData[]
-}>
+export type NcObForwardSeg = ObSeg<
+    'forward',
+    {
+        id: string
+        content?: NcForwardData[]
+    }
+>
 export type NcObGetForwardMsg = ObResponse<{
     messages: NcForwardData[]
 }>
 export interface NcObPokeEvent extends ObPokeEvent {
     raw_info: [
-        {uid: string},
-        {src: string},
-        {txt: string},
-        {uid: string},
-        {txt: string}
+        { uid: string },
+        { src: string },
+        { txt: string },
+        { uid: string },
+        { txt: string },
     ]
 }
 export interface NcObGroupMsgEmojiLikeEvent extends ObNoticeEvent {
     notice_type: 'group_msg_emoji_like'
-    likes: [{
-        emoji_id: string
-        count: 1
-    }],
+    likes: [
+        {
+            emoji_id: string
+            count: 1
+        },
+    ]
     user_id: number
     group_id: number
     message_id: number
@@ -910,12 +998,14 @@ export interface NcObGroupMessageSendEvent extends NcObAbsMessageSendEvent {
         role: string
     }
 }
-export type NcObMessageSendEvent = NcObPrivateMessageSendEvent | NcObGroupMessageSendEvent
+export type NcObMessageSendEvent =
+    | NcObPrivateMessageSendEvent
+    | NcObGroupMessageSendEvent
 export type NcObUploadGroupFile = ObResponse<{
-    file_id: string,
+    file_id: string
 }>
 export type NcObUploadPrivateFile = ObResponse<{
-    file_id: string,
+    file_id: string
 }>
 export type NcObCreateGroupFileFolder = ObResponse<{
     groupItem: {
@@ -924,20 +1014,22 @@ export type NcObCreateGroupFileFolder = ObResponse<{
         }
     }
 }>
-export type NcObGetRkey = ObResponse<[
-    {
-        rkey: string,
-        ttl: string,
-        time: number,
-        type: 10
-    },
-    {
-        rkey: string,
-        ttl: string,
-        time: number,
-        type: 20
-    }
-]>
+export type NcObGetRkey = ObResponse<
+    [
+        {
+            rkey: string
+            ttl: string
+            time: number
+            type: 10
+        },
+        {
+            rkey: string
+            ttl: string
+            time: number
+            type: 20
+        },
+    ]
+>
 //#endregion
 
 //#region == LLTWOBOT =============================================
@@ -947,21 +1039,21 @@ export type NcObGetRkey = ObResponse<[
    --------------------------- */
 
 export interface LltbObBuddy {
-    user_id: number,
-    nickname: string,
-    remark: string,
-    sex: string,
-    birthday_year: number,
-    birthday_month: number,
-    birthday_day: number,
-    age: number,
-    qid: string,
-    long_nick: string,
-    level: number,
-    longNick: string,
-    eMail: string,
-    uid: string,
-    categoryId: number,
+    user_id: number
+    nickname: string
+    remark: string
+    sex: string
+    birthday_year: number
+    birthday_month: number
+    birthday_day: number
+    age: number
+    qid: string
+    long_nick: string
+    level: number
+    longNick: string
+    eMail: string
+    uid: string
+    categoryId: number
     richTime: number
 }
 
@@ -1087,7 +1179,7 @@ export type LltbObGetMsgHistory = ObResponse<{
 export type LltbObForwardNode = {
     content: ObSeg[]
     sender: {
-        nickname: string,
+        nickname: string
         user_id: number
     }
     time: number
@@ -1147,64 +1239,73 @@ export type LltbObCreateGroupFileFolder = ObResponse<{
 export type LltbObGetEssenceMsgList = ObResponse<LltbObEssenceMsg[]>
 
 export type LltbObGetRkey = ObResponse<{
-    private_key: string,
-    group_key:  string,
-    expired_time: number,
-    updated_time: string,
+    private_key: string
+    group_key: string
+    expired_time: number
+    updated_time: string
 }>
 
 // == 消息 =================
 
 export type LltbObEssenceMsg = {
-  sender_id: number,
-  sender_nick: string,
-  sender_time: number,
-  operator_id: number,
-  operator_nick: string,
-  operator_time: number,
-  message_id: number,
+    sender_id: number
+    sender_nick: string
+    sender_time: number
+    operator_id: number
+    operator_nick: string
+    operator_time: number
+    message_id: number
 }
 
 export type LltbObMdSeg = ObSeg<'markdown', { content: string }>
 
-export type LltbObImageSeg = ObSeg<'image', {
-    file: string,
-    url: string,
-    file_size: string,
-    summary: string,
-    subType: number,
-    type: 'flash' | 'show',
-    thumb: string,
-    name: string,
-}>
+export type LltbObImageSeg = ObSeg<
+    'image',
+    {
+        file: string
+        url: string
+        file_size: string
+        summary: string
+        subType: number
+        type: 'flash' | 'show'
+        thumb: string
+        name: string
+    }
+>
 
-export type LltbObMfaceSeg = ObSeg<'mface', {
-    emoji_package_id: number,
-    emoji_id: string,
-    key: string,
-    summary: string,
-    url: string
-}>
+export type LltbObMfaceSeg = ObSeg<
+    'mface',
+    {
+        emoji_package_id: number
+        emoji_id: string
+        key: string
+        summary: string
+        url: string
+    }
+>
 
-export type LltbObFileSeg = ObSeg<'file', {
-    file: string,
-    url: string,
-    path: string,
-    file_size: string,
-    file_id: string,
-    thumb: string,
-    name: string,
-}>
+export type LltbObFileSeg = ObSeg<
+    'file',
+    {
+        file: string
+        url: string
+        path: string
+        file_size: string
+        file_id: string
+        thumb: string
+        name: string
+    }
+>
 
 // == 事件 =================
 
 export interface LltbObPokeEvent extends ObPokeEvent {
     raw_info: [
-        {uid: string},
-        {src: string},
-        {txt: string},
-        {uid: string},
-        {txt: string}
+        { uid: string },
+        { src: string },
+        { txt: string },
+        { uid: string },
+        { txt: string },
     ]
 }
 
@@ -1238,7 +1339,9 @@ export interface LltbObGroupMessageSendEvent extends LltbObAbsMessageSendEvent {
     }
 }
 
-export type LltbObMessageSendEvent = LltbObPrivateMessageSendEvent | LltbObGroupMessageSendEvent
+export type LltbObMessageSendEvent =
+    | LltbObPrivateMessageSendEvent
+    | LltbObGroupMessageSendEvent
 
 export interface LltbObMsg extends ObMsg {
     message_seq: number
@@ -1246,10 +1349,12 @@ export interface LltbObMsg extends ObMsg {
 
 export interface LltbObGroupMsgEmojiLikeEvent extends ObNoticeEvent {
     notice_type: 'group_msg_emoji_like'
-    likes: [{
-        emoji_id: string
-        count: number
-    }],
+    likes: [
+        {
+            emoji_id: string
+            count: number
+        },
+    ]
     user_id: number
     group_id: number
     message_id: number

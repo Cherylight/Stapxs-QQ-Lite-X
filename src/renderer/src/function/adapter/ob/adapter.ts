@@ -197,13 +197,13 @@ export class OneBotAdapter implements AdapterInterface {
 
         const LagrangeOneBot = (await import('./LagrangeOneBot')).default
         const NapCatOneBot = (await import('./NapCapOneBot')).default
-        const LLTwoBotOneBot = (await import('./LLTwoBotOneBot')).default
+        const LLBTOneBot = (await import('./LLBotOneBot')).default
         if (LagrangeOneBot.match(implInfo))
             return new LagrangeOneBot(this.connector, this.botInfo.value)
         if (NapCatOneBot.match(implInfo))
             return new NapCatOneBot(this.connector, this.botInfo.value)
-        if (LLTwoBotOneBot.match(implInfo))
-            return new LLTwoBotOneBot(this.connector, this.botInfo.value)
+        if (LLBTOneBot.match(implInfo))
+            return new LLBTOneBot(this.connector, this.botInfo.value)
         return undefined
     }
 

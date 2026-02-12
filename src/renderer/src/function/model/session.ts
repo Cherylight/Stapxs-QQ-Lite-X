@@ -1142,7 +1142,7 @@ export class GroupSession extends Session {
         // 拼接图片
         let tail: Img | undefined
         for (const msg of this.essenceMsgs) {
-            if (!msg.imgList) continue
+            if (msg.imgList.length === 0) continue
             tail?.concatNext(msg.imgList.at(0)!)
             tail = msg.imgList.at(-1)
         }
