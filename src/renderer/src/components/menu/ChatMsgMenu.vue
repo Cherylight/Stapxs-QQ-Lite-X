@@ -93,7 +93,6 @@ import { MenuEventData } from '@renderer/function/elements/information'
 import Emoji from '@renderer/function/model/emoji'
 import { Msg } from '@renderer/function/model/msg'
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { BaseUser, Member } from '@renderer/function/model/user'
 import { runtimeData } from '@renderer/function/msg'
 import { downloadFile } from '@renderer/function/utils/appUtil'
 import { sendMsgRaw, singleForward } from '@renderer/function/utils/msgUtil'
@@ -150,17 +149,8 @@ init()
 
 //#region == 方法 =====================================================
 function init(): void {
-    // 判断能不能管理这个消息
-    if (session instanceof GroupSession) {
-        let canAdmin = (msg.sender as Member | BaseUser).canBeAdmined(
-            session.getMe().role,
-        )
-        if (msg.sender.user_id === runtimeData.loginInfo.uin) canAdmin = true
-
-        if (canAdmin) {
-            menuDisplay.revoke = true
-        }
-    }
+    // 撤回
+    menuDisplay.revoke = msg.canRecall()
 
     // 消息不存在,但还可以多选和转发(x)
     if (!msg.exist) {

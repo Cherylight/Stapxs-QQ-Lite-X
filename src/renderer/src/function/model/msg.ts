@@ -7,12 +7,14 @@
  */
 
 import app from '@renderer/main'
-import {
-    markRaw,
-    shallowReactive,
-    shallowRef
-} from 'vue'
-import type { EssenceData, ForwardNodeData, MsgData, SegData, SenderData } from '../adapter/interface'
+import { markRaw, shallowReactive, shallowRef } from 'vue'
+import type {
+    EssenceData,
+    ForwardNodeData,
+    MsgData,
+    SegData,
+    SenderData,
+} from '../adapter/interface'
 import { popInfo } from '../base'
 import { runtimeData } from '../msg'
 import { delay } from '../utils/systemUtil'
@@ -24,8 +26,9 @@ import { GroupSession, Session, TempSession } from './session'
 import { BaseUser, ForwardSender, getSender, Member, type IUser } from './user'
 import { autoMarkRaw, autoReactive } from './utils'
 import { sendStatEvent } from '../utils/appUtil'
+import { Role } from '../adapter/enmu'
 
-type IconData = { icon: string, rotate: boolean, desc: string, color: string }
+type IconData = { icon: string; rotate: boolean; desc: string; color: string }
 
 /**
  * 聊天消息
@@ -75,8 +78,18 @@ export class Msg extends Message {
     toMe: boolean = this.atme
     fromMe: boolean = false
     constructor(data: MsgData)
-    constructor(segs: Seg[], sender: IUser, session?: Session, senderTime?: Time)
-    constructor(arg1: Seg[] | MsgData, arg2?: IUser, arg3?: Session, arg4?: Time) {
+    constructor(
+        segs: Seg[],
+        sender: IUser,
+        session?: Session,
+        senderTime?: Time,
+    )
+    constructor(
+        arg1: Seg[] | MsgData,
+        arg2?: IUser,
+        arg3?: Session,
+        arg4?: Time,
+    ) {
         if (arg2) {
             // constructor(segs: Seg[], sender: user, session?: Session, senderTime?: Time)
             const segs = arg1 as Seg[]
@@ -87,7 +100,7 @@ export class Msg extends Message {
             this.message = segs
             this.sender = sender
             this.session = session
-        }else {
+        } else {
             // constructor(data: MsgData)
             const data = arg1 as MsgData
             super(data)
@@ -101,25 +114,28 @@ export class Msg extends Message {
             for (const seg of this.message) {
                 if (seg.type === 'atall') this.atall = true
                 else if (
-                    seg instanceof AtSeg && Number(seg.user_id) === Number(runtimeData.loginInfo.uin)
-                ) this.atme = true
+                    seg instanceof AtSeg &&
+                    Number(seg.user_id) === Number(runtimeData.loginInfo.uin)
+                )
+                    this.atme = true
             }
             // 生成session
             this.session = Session.getSession(
                 data.session.type,
                 data.session.id,
-                data.session.group_id
+                data.session.group_id,
             )
 
             this.sender = new BaseUser(data.sender.id, data.sender.nickname)
 
-            this.session.activate().then(()=>{
+            this.session.activate().then(() => {
                 // 获取发送者
                 this.sender = getSender(data.sender, this.session)
             })
         }
 
-        if (this.sender.user_id === runtimeData.loginInfo.uin) this.fromMe = true
+        if (this.sender.user_id === runtimeData.loginInfo.uin)
+            this.fromMe = true
 
         // TODO: 文件图片支持
         let last: undefined | Img
@@ -133,14 +149,16 @@ export class Msg extends Message {
     }
 
     static parseSegs(data: SegData[]): Seg[] {
-        return data.map(item => Seg.parse(item)).filter(seg => seg !== undefined)
+        return data
+            .map((item) => Seg.parse(item))
+            .filter((seg) => seg !== undefined)
     }
 
     /**
      * 纯文本
      */
     plaintext(): string {
-        return this.message.map(seg => seg.plaintext(this)).join('')
+        return this.message.map((seg) => seg.plaintext(this)).join('')
     }
 
     /**
@@ -149,7 +167,7 @@ export class Msg extends Message {
     override get preMsg(): string {
         if (this.session?.type === 'group') {
             return this.sender.name + ': ' + this.plaintext()
-        }else {
+        } else {
             return this.plaintext()
         }
     }
@@ -168,7 +186,26 @@ export class Msg extends Message {
         return undefined
     }
 
-    iconClick(): void {return}
+    canRecall(): boolean {
+        // 无会话信息不能撤回
+        if (!this.session) return false
+        const self = this.session.getMe()
+        const sender = this.sender
+        // 撤回其他人
+        if (self instanceof Member && sender.user_id !== self.user_id) {
+            if (!self.canAdmin(sender.role ?? Role.User)) return false
+        }
+        // 撤回自己
+        if (self?.role === Role.Admin || self?.role === Role.Owner) return true
+        // 超过两分钟不能撤回
+        const now = Date.now()
+        if (now - (this.time?.time ?? now) > 2 * 60 * 1000) return false
+        return true
+    }
+
+    iconClick(): void {
+        return
+    }
 
     /**
      * 判断是否有卡片消息
@@ -185,7 +222,7 @@ export class Msg extends Message {
 
     /**
      * 判断是否是合并转发消息
-    * @returns 是否有合并转发消息
+     * @returns 是否有合并转发消息
      */
     hasForward(): boolean {
         for (const item of this.message) {
@@ -198,7 +235,7 @@ export class Msg extends Message {
 
     /**
      * 判断是否有回复消息
-    * @returns 是否有回复消息
+     * @returns 是否有回复消息
      */
     hasReply(): boolean {
         for (const item of this.message) {
@@ -219,7 +256,7 @@ export class Msg extends Message {
         if (add) {
             if (emojiData.includes(operation_id)) return
             emojiData.push(operation_id)
-        }else {
+        } else {
             const index = emojiData.indexOf(operation_id)
             if (index === -1) return
             emojiData.splice(index, 1)
@@ -237,21 +274,22 @@ export class Msg extends Message {
             message_id: this.message_id,
             session: {
                 id: this.session.id,
-                group_id: this.session.type === 'temp' ? (
-                    this.session as TempSession
-                ).group_id : undefined,
-                type: this.session.type
+                group_id:
+                    this.session.type === 'temp'
+                        ? (this.session as TempSession).group_id
+                        : undefined,
+                type: this.session.type,
             },
             sender: this.sender.serializeData() as SenderData,
             time: this.time?.time,
-            message: this.message.map(seg => seg.serializeData()),
+            message: this.message.map((seg) => seg.serializeData()),
             isDelete: this.isDelete,
         }
     }
 
     copy(): typeof this {
         return new (this.constructor as typeof Msg)(
-            this.serializeData()
+            this.serializeData(),
         ) as typeof this
     }
 
@@ -259,9 +297,9 @@ export class Msg extends Message {
         return new ForwardMsg({
             sender: {
                 nickname: this.sender.name,
-                face: this.sender.face
+                face: this.sender.face,
             },
-            content: this.message.map(seg => seg.serializeData())
+            content: this.message.map((seg) => seg.serializeData()),
         })
     }
 
@@ -304,7 +342,8 @@ export class SelfMsg extends Msg {
     async send(): Promise<boolean> {
         if (!runtimeData.nowAdapter) return false
         if (this.state === 'sending') throw new Error('该消息正在发送,不能发送')
-        if (this.state === 'sent') throw new Error('该消息已经发送成功,不能发送')
+        if (this.state === 'sent')
+            throw new Error('该消息已经发送成功,不能发送')
         if (!this.session) throw new Error('会话信息缺失')
 
         //#region 发送消息 =======================================================
@@ -316,7 +355,7 @@ export class SelfMsg extends Msg {
         if (!msgId) {
             SelfMsg.lock--
             this.state = 'failed'
-            popInfo.error( '发送消息失败')
+            popInfo.error('发送消息失败')
             return false
         }
         this.message_id = msgId
@@ -331,19 +370,24 @@ export class SelfMsg extends Msg {
         let msg: Msg | undefined
         // 不知道为啥这里有时候会失败...重试5次吧
         for (let retry = 0; retry < 5; retry++) {
-            try{
-                const msgData = await runtimeData.nowAdapter.getMsg(this.session, msgId)
+            try {
+                const msgData = await runtimeData.nowAdapter.getMsg(
+                    this.session,
+                    msgId,
+                )
 
                 if (!msgData) continue
 
                 msg = new Msg(msgData)
                 break
-            } catch {/**/}
+            } catch {
+                /**/
+            }
             await delay(100)
         }
 
         if (!msg) {
-            popInfo.error( '更新消息失败...')
+            popInfo.error('更新消息失败...')
             // 不知道自己组装的消息和tx的消息有多大差距...按照sent处理吧
             this.state = 'sent'
             return true
@@ -352,7 +396,8 @@ export class SelfMsg extends Msg {
         this.message = msg.message
         const oldImgs = this.imgList
         this.imgList = msg.imgList
-        if (oldImgs.length > 0) this.session.updateImgList(oldImgs, this.imgList)
+        if (oldImgs.length > 0)
+            this.session.updateImgList(oldImgs, this.imgList)
         this.state = 'sent'
         return true
         //#endregion
@@ -381,7 +426,7 @@ export class SelfMsg extends Msg {
                 resolve()
                 return
             }
-            setTimeout(()=>check(resolve), 100)
+            setTimeout(() => check(resolve), 100)
         }
         return new Promise((resolve) => check(resolve))
     }
@@ -405,7 +450,9 @@ export class SelfMsg extends Msg {
     override copy(): typeof this {
         const msg = new Msg(this.serializeData())
         if (!msg.session) throw new Error('复制消息失败，会话信息缺失')
-        return markRaw(shallowReactive(new SelfMsg(msg.message, msg.session))) as typeof this
+        return markRaw(
+            shallowReactive(new SelfMsg(msg.message, msg.session)),
+        ) as typeof this
     }
 
     override get exist(): boolean {
@@ -413,19 +460,21 @@ export class SelfMsg extends Msg {
         return super.exist
     }
 
-    override get icon(): IconData|undefined {
-        if (this.state === 'sending') return {
-            icon: 'spinner',
-            rotate: true,
-            desc: app.config.globalProperties.$t('正在发送'),
-            color: 'var(--color-font-2)',
-        }
-        if (this.state === 'failed') return {
-            icon: 'exclamation-triangle',
-            rotate: false,
-            desc: app.config.globalProperties.$t('发送失败'),
-            color: 'var(--color-yellow)',
-        }
+    override get icon(): IconData | undefined {
+        if (this.state === 'sending')
+            return {
+                icon: 'spinner',
+                rotate: true,
+                desc: app.config.globalProperties.$t('正在发送'),
+                color: 'var(--color-font-2)',
+            }
+        if (this.state === 'failed')
+            return {
+                icon: 'exclamation-triangle',
+                rotate: false,
+                desc: app.config.globalProperties.$t('发送失败'),
+                color: 'var(--color-yellow)',
+            }
         return super.icon
     }
 
@@ -459,7 +508,14 @@ export class SelfPreMsg extends Msg {
      */
     static createMerge(messages: Msg[]): SelfPreMsg {
         const segs = [new ForwardSeg(messages)]
-        return markRaw(new this(segs.map(seg => { seg.id = '0'; return seg })))
+        return markRaw(
+            new this(
+                segs.map((seg) => {
+                    seg.id = '0'
+                    return seg
+                }),
+            ),
+        )
     }
 }
 
@@ -494,7 +550,7 @@ export class ForwardMsg extends Msg {
     serializeNodeData(): ForwardNodeData {
         return {
             sender: this.sender.serializeData(),
-            content: this.message.map(seg => seg.serializeData()),
+            content: this.message.map((seg) => seg.serializeData()),
         }
     }
 
@@ -507,7 +563,7 @@ export class ForwardMsg extends Msg {
 
     override copy(): typeof this {
         return new (this.constructor as typeof ForwardMsg)(
-            this.serializeNodeData()
+            this.serializeNodeData(),
         ) as typeof this
     }
 }
