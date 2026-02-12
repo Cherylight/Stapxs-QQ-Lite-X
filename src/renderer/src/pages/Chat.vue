@@ -187,6 +187,7 @@ import {
     mergeForward,
     singleForward,
 } from '@renderer/function/utils/msgUtil'
+import { ensurePopBox } from '@renderer/function/utils/popBox'
 import {
     copyToClipboard,
     getViewTime,
@@ -564,6 +565,7 @@ async function recallMsgs() {
         popInfo.error($t('当前适配器不支持撤回消息'))
         return
     }
+    if (!(await ensurePopBox($t('要撤回选中的消息吗？')))) return
     const msgList = msgBar.value.getMultiselectList()
     const tasks: Promise<true | undefined>[] = []
     for (const msg of msgList) {
