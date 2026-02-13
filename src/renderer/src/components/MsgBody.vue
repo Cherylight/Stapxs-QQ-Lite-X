@@ -99,13 +99,13 @@
                     @v-move-right.prevent="$emit('rightMove', data)"
                 >
                     <!-- 消息体 -->
-                    <template v-if="data.message.length === 0">
+                    <template v-if="msgSpeicalType === 'space'">
                         <span class="msg-text" style="opacity: 0.5">{{
                             $t('空消息')
                         }}</span>
                     </template>
                     <!-- 超级表情 -->
-                    <template v-else-if="isSuperFaceMsg()">
+                    <template v-else-if="msgSpeicalType === 'super-face'">
                         <div class="msg-super-face" style="--height: 35vh">
                             <LazyLottie
                                 :animation-link="
@@ -119,7 +119,15 @@
                             />
                         </div>
                     </template>
-                    <template v-else-if="!hasCard()">
+                    <!-- 卡片消息 -->
+                    <template v-else-if="msgSpeicalType === 'json'">
+                        <JsonSegComp :seg="data.message[0] as JsonSeg" />
+                    </template>
+                    <template v-else-if="msgSpeicalType === 'xml'">
+                        <XmlSegComp :seg="data.message[0] as XmlSeg" />
+                    </template>
+                    <!-- 常规消息 -->
+                    <template v-else>
                         <div
                             v-for="(item, index) in data.message"
                             :key="data.uuid + '-m-' + index"
@@ -448,22 +456,6 @@
                             }}</span>
                         </div>
                     </template>
-                    <template v-else>
-                        <template
-                            v-for="(item, index) in data.message"
-                            :key="data.uuid + '-m-' + index"
-                        >
-                            <CardSegComp
-                                v-if="
-                                    item instanceof JsonSeg ||
-                                    item instanceof XmlSeg
-                                "
-                                :id="data.uuid"
-                                :item="item"
-                                @page-view="loadLinkPreview"
-                            />
-                        </template>
-                    </template>
                     <!-- 链接预览框 -->
                     <div
                         v-if="
@@ -707,7 +699,6 @@
 <script setup lang="ts">
 import MsgPrevTooltip from './tooltip/MsgPrevTooltip.vue'
 import ImgSegComp from './msg-component/ImgSegComp.vue'
-import CardSegComp from './msg-component/CardSegComp.vue'
 import EmojiFace from './EmojiFace.vue'
 
 import markdownit from 'markdown-it'
@@ -759,6 +750,8 @@ import LazyLottie from './LazyLottie.vue'
 import { vUserTooltip } from '@renderer/function/tooltip'
 import { VueCompData } from '@renderer/function/elements/vueComp'
 import { Img } from '@renderer/function/model/img'
+import JsonSegComp from './msg-component/JsonSegComp.vue'
+import XmlSegComp from './msg-component/XmlSegComp.vue'
 
 //#region == 声明变量 ================================================================
 const {
@@ -849,6 +842,22 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
             type: 'px',
         },
     },
+}
+
+let msgSpeicalType: 'space' | 'normally' | 'super-face' | 'json' | 'xml' =
+    'normally'
+
+if (data.message.length === 0) {
+    msgSpeicalType = 'space'
+} else if (data.message.length === 1) {
+    const seg = data.message[0]
+    if (seg instanceof FaceSeg && seg.face?.hasSuper) {
+        msgSpeicalType = 'super-face'
+    } else if (seg instanceof JsonSeg) {
+        msgSpeicalType = 'json'
+    } else if (seg instanceof XmlSeg) {
+        msgSpeicalType = 'xml'
+    }
 }
 
 //#endregion
@@ -1153,16 +1162,6 @@ export default defineComponent({
                 })
         },
 
-        hasCard() {
-            let hasCard = false
-            this.data.message.forEach((item: any) => {
-                if (item.type === 'json' || item.type === 'xml') {
-                    hasCard = true
-                }
-            })
-            return hasCard
-        },
-
         hasMarkdown() {
             let hasMarkdown = false
             this.data.message.forEach((item: any) => {
@@ -1171,15 +1170,6 @@ export default defineComponent({
                 }
             })
             return hasMarkdown
-        },
-
-        isSuperFaceMsg() {
-            if (runtimeData.sysConfig.use_super_face === false) return false
-            if (this.data.message.length !== 1) return false
-            const seg = this.data.message.at(0)
-            if (!(seg instanceof FaceSeg)) return false
-            if (!seg.face) return false
-            return seg.face.hasSuper
         },
 
         async showPock() {

@@ -2349,3 +2349,8 @@ msgstr ""
 msgid "终于不用翻表情了"
 msgstr ""
 
+msgid "最近使用"
+msgstr ""
+
+msgid "群公告"
+msgstr ""

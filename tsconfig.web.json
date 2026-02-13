@@ -4,20 +4,18 @@
         "src/renderer/src/env.d.ts",
         "src/renderer/src/**/*",
         "src/renderer/src/**/*.vue",
-        "src/preload/*.d.ts",
+        "src/preload/*.d.ts"
     ],
     "exclude": [
         "src/renderer/src/assets/img/qq-face/**/*",
         "src/renderer/src/pages/chat-view/Chat弹幕.vue",
-        "src/renderer/src/pages/chat-view/SystemNotice.vue",
+        "src/renderer/src/pages/chat-view/SystemNotice.vue"
     ],
     "compilerOptions": {
         "composite": true,
         "moduleResolution": "bundler",
         "paths": {
-        "@renderer/*": [
-            "./src/renderer/src/*"
-        ],
+            "@renderer/*": ["./src/renderer/src/*"]
         },
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true
