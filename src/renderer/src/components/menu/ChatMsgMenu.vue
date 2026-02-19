@@ -64,9 +64,13 @@
                 <div><font-awesome-icon :icon="['fas', 'floppy-disk']" /></div>
                 <a>{{ $t('下载图片') }}</a>
             </div>
-            <div v-if="menuDisplay.revoke" @click="recallMsg">
+            <div v-if="menuDisplay.recall" @click="recallMsg">
                 <div><font-awesome-icon :icon="['fas', 'xmark']" /></div>
                 <a>{{ $t('撤回') }}</a>
+            </div>
+            <div v-if="menuDisplay.reedit" @click="reedit">
+                <div><font-awesome-icon :icon="['fas', 'pencil']" /></div>
+                <a>{{ $t('重新编辑') }}</a>
             </div>
             <div v-if="menuDisplay.delete" @click="deleteMsg">
                 <div>
@@ -131,7 +135,7 @@ const selectCache = shallowRef<string>('')
 const imgUrl = shallowRef<string>('')
 
 const menuDisplay = shallowReactive({
-    revoke: false,
+    recall: false,
     reply: true,
     copySelect: false,
     forward: true,
@@ -142,6 +146,7 @@ const menuDisplay = shallowReactive({
     downloadImg: false,
     select: true,
     copy: true,
+    reedit: false,
 })
 //#endregion
 
@@ -150,13 +155,16 @@ init()
 //#region == 方法 =====================================================
 function init(): void {
     // 撤回
-    menuDisplay.revoke = msg.canRecall()
+    menuDisplay.recall = msg.canRecall()
+    // 重新编辑
+    menuDisplay.reedit =
+        msg.canRecall() && msg.sender.user_id === runtimeData.loginInfo.uin
 
     // 消息不存在,但还可以多选和转发(x)
     if (!msg.exist) {
         // 已被撤回的自己的消息只显示复制
         menuDisplay.reply = false
-        menuDisplay.revoke = false
+        menuDisplay.recall = false
     }
 
     const selection = document.getSelection()
@@ -345,6 +353,32 @@ async function recallMsg() {
     emit('close')
 
     await runtimeData.nowAdapter.recallMsg(msg as Msg)
+}
+/**
+ * 重新编辑消息
+ */
+async function reedit() {
+    if (!runtimeData.nowAdapter?.recallMsg) {
+        popInfo.error($t('当前适配器不支持重新编辑消息'))
+        return
+    }
+
+    // 关闭消息菜单
+    emit('close')
+
+    if (!(msg instanceof Msg)) {
+        popInfo.error($t('消息数据异常'))
+        return
+    }
+
+    if (!msg.session) {
+        popInfo.error($t('获取消息会话失败'))
+        return
+    }
+
+    msg.session.inputMsg.reeditFromMsg(msg)
+
+    await runtimeData.nowAdapter.recallMsg(msg)
 }
 /**
  * 删除消息
