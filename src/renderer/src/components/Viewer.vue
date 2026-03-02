@@ -1079,7 +1079,19 @@ function penMouseMove(x: number, y: number) {
     ctx.fill()
     penLastPoint = point
 }
-function penMouseUp(_x: number, _y: number) {
+function penMouseUp(x: number, y: number) {
+    if (!penLastPoint) return
+    const ctx = canvas.value?.getContext('2d')
+    if (!ctx) return
+    const point = getPos(x, y)
+    ctx.beginPath()
+    ctx.moveTo(penLastPoint.x, penLastPoint.y)
+    ctx.lineTo(point.x, point.y)
+    ctx.stroke()
+    // 末端整个圆，防止连接处出现裂缝
+    ctx.beginPath()
+    ctx.arc(point.x, point.y, currentLineWidth.value / 2, 0, Math.PI * 2)
+    ctx.fill()
     penLastPoint = undefined
 }
 
@@ -1116,6 +1128,9 @@ function rectMouseUp(x: number, y: number) {
     const ctx = canvas.value?.getContext('2d')
     if (!ctx) return
     const point = getPos(x, y)
+    const lastImg = editHistory.at(-1)
+    if (!lastImg) return
+    ctx.putImageData(lastImg, 0, 0)
     ctx.beginPath()
     ctx.rect(
         rectStartPoint.x,
