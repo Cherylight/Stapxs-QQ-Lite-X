@@ -216,10 +216,9 @@ body.with-bar .chat-pan {
     resize: none;
     border: 0;
     width: 100%;
-    min-height: 1.1rem;
+    min-height: 2.2rem;
     height: var(--input-height);
     max-height: 40vh;
-    transition: height 0.3s;
 }
 
 .chat-pan > div.loading {

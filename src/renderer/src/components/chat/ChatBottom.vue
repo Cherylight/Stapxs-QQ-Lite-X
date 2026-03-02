@@ -4,7 +4,7 @@
         :class="{ hide: hide }"
         :style="{
             '--open-reply': inputMsg.reply ? '1' : '0',
-            '--input-height': textAreaHeight + 'px',
+            '--input-height': inputHeight + 'px',
             '--input-pan-height': inputPanHeight + 'px',
         }"
         @mouseenter="hoverStart()"
@@ -238,6 +238,7 @@ import {
     TemplateRef,
     computed,
     watchEffect,
+    onMounted,
 } from 'vue'
 import Viewer from '../Viewer.vue'
 import { Role } from '@renderer/function/adapter/enmu'
@@ -247,6 +248,7 @@ import { FileSender } from '@renderer/function/utils/fileSender'
 import { uploadFile } from '@renderer/function/input'
 import { InputMsg } from '@renderer/function/model/inputMsg'
 import { useFrame, useUpdate } from '@renderer/function/utils/vuse'
+import { calcTextareaHeight } from '@renderer/function/utils/calcTextareaHiehgt'
 
 const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
     inject('viewer')!
@@ -269,17 +271,7 @@ const details = shallowRef<'face' | 'essence' | undefined>()
 const onAtFind = shallowRef(false)
 const inputPanHeight = shallowRef(0)
 const update = useUpdate()
-
-const textAreaHeight = computed(() => {
-    if (!inputMsg.value.content) return 0
-    void inputMsg.value.content
-    if (!mainInput.value) return 0
-    const dom = mainInput.value as HTMLTextAreaElement
-    dom.style.height = 'auto'
-    const height = dom.scrollHeight
-    dom.style.height = ''
-    return height
-})
+const inputHeight = shallowRef(0)
 
 const hover = shallowRef(false)
 const sendTimeout = shallowRef<ReturnType<typeof setTimeout> | undefined>(
@@ -321,6 +313,20 @@ useFrame(() => {
     if (!inputPan.value) return
     inputPanHeight.value = (inputPan.value as HTMLElement).offsetHeight
 })
+
+onMounted(() => {
+    watchEffect(() => {
+        void inputMsg.value.content
+        calcInputHeight()
+    })
+    setTimeout(calcInputHeight, 0)
+})
+
+function calcInputHeight() {
+    if (!mainInput.value) return
+    const height = calcTextareaHeight(mainInput.value, '|')
+    inputHeight.value = height
+}
 
 /**
  * 初始化
