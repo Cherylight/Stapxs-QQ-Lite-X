@@ -247,7 +247,11 @@ import { fitScroll } from '@renderer/function/utils/appUtil'
 import { FileSender } from '@renderer/function/utils/fileSender'
 import { uploadFile } from '@renderer/function/input'
 import { InputMsg } from '@renderer/function/model/inputMsg'
-import { useFrame, useUpdate } from '@renderer/function/utils/vuse'
+import {
+    useFrame,
+    useResizeObserver,
+    useUpdate,
+} from '@renderer/function/utils/vuse'
 import { calcTextareaHeight } from '@renderer/function/utils/calcTextareaHiehgt'
 
 const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
@@ -314,6 +318,7 @@ useFrame(() => {
     inputPanHeight.value = (inputPan.value as HTMLElement).offsetHeight
 })
 
+useResizeObserver(calcInputHeight, inputPan)
 onMounted(() => {
     watchEffect(() => {
         void inputMsg.value.content
