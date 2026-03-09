@@ -5,7 +5,7 @@
  *      2025/10/6
  * @Description: 用于处理用户输入消息
  */
-import { shallowRef, shallowReactive, computed } from 'vue'
+import { shallowRef, shallowReactive, computed, nextTick } from 'vue'
 import { Msg } from './msg'
 import { AtSeg, ImgSeg, ReplySeg, Seg, TxtSeg } from './seg'
 import { autoMarkRaw } from './utils'
@@ -60,19 +60,26 @@ export class InputMsg {
         const inputDom = document.getElementById(
             'main-input',
         ) as HTMLTextAreaElement | null
+        const sqCode = `[SQ:${id}]`
+        const selectionStart = inputDom?.selectionStart
+        const selectionEnd = inputDom?.selectionEnd ?? selectionStart
         if (
             inputDom?.value === this.content &&
-            inputDom.selectionStart !== null &&
-            inputDom.selectionStart < this.content.length
+            selectionStart &&
+            selectionStart < this.content.length
         ) {
-            const first = this.content.substring(0, inputDom.selectionStart)
+            const first = this.content.substring(0, selectionStart)
             const last = this.content.substring(
-                inputDom.selectionStart,
+                selectionEnd!,
                 this.content.length,
             )
-            this.content = first + '[SQ:' + id + ']' + last
+            this.content = first + sqCode + last
+            nextTick(() => {
+                inputDom.selectionStart = selectionStart + sqCode.length
+                inputDom.selectionEnd = selectionStart + sqCode.length
+            })
         } else {
-            this.content += `[SQ:${id}]`
+            this.content += sqCode
         }
         this.focus()
         return id
