@@ -200,6 +200,7 @@
                     ref="main-input"
                     v-model="inputMsg.content"
                     type="text"
+                    :data-session-id="session.id"
                     @paste="addImg"
                     @keydown="mainKeyDown"
                     @keyup="mainKeyUp"
@@ -357,13 +358,6 @@ function switchDetail(detail: 'face' | 'essence' | undefined) {
     }
 }
 
-/**
- * 将焦点移回主发送框
- */
-function toMainInput() {
-    mainInput.value?.focus()
-}
-
 //#region == 发送消息 ==========================================
 const compositionTag = shallowRef(false)
 function handleCompositionStart() {
@@ -444,7 +438,7 @@ function mainKeyUp(event: KeyboardEvent) {
  * 发送消息
  */
 function sendMsg() {
-    if (inputMsg.value.isVoid) return toMainInput()
+    if (inputMsg.value.isVoid) return void inputMsg.value.focus()
     // 关闭所有其他的已打开的更多功能弹窗
     switchDetail(undefined)
     // 无消息不发送
@@ -582,7 +576,6 @@ function choiceAt(id: number) {
     // 添加 at 信息
     inputMsg.value.addSq(new AtSeg(member.user_id))
 
-    toMainInput()
     endChoiceAt()
 }
 function endChoiceAt() {
@@ -739,7 +732,6 @@ function hoverEnd(event?: MouseEvent) {
 
 defineExpose({
     init,
-    toMainInput,
 })
 </script>
 

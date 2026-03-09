@@ -312,7 +312,7 @@ function init() {
     chatBottom.value?.init()
     // 聚焦输入框
     // PS: 有虚拟键盘的设备会弹键盘,要做判断
-    if (shouldAutoFocus()) chatBottom.value?.toMainInput()
+    if (shouldAutoFocus()) chat.inputMsg.focus()
     // 滑动到底部
     nextTick(() => {
         scrollBottom(false)
@@ -380,7 +380,6 @@ function showMsgMenu(data: MenuEventData, msg: Msg): Promise<void> | undefined {
 function showUserMenu(data: MenuEventData, user: IUser) {
     const setAtFunc = (member: Member) => {
         chat.inputMsg.addSq(new AtSeg(member.user_id))
-        chatBottom.value?.toMainInput()
     }
 
     const menu = openContextMenu(
@@ -408,7 +407,6 @@ function replyMsg(msg: Msg) {
     }
 
     chat.inputMsg.setReply(msg)
-    chatBottom.value?.toMainInput()
 }
 
 /**

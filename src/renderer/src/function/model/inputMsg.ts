@@ -42,6 +42,7 @@ export class InputMsg {
         ) {
             this.addSq(new AtSeg(msg.sender.user_id))
         }
+        this.focus()
     }
     /**
      * 移除当前回复消息
@@ -73,6 +74,7 @@ export class InputMsg {
         } else {
             this.content += `[SQ:${id}]`
         }
+        this.focus()
         return id
     }
 
@@ -148,6 +150,7 @@ export class InputMsg {
 
     reeditFromMsg(msg: Msg): void {
         this.clear()
+        this.focus()
         for (const seg of msg.message) {
             // TODO 支持图片
             if (seg instanceof ReplySeg) {
@@ -159,6 +162,20 @@ export class InputMsg {
                 this.addSq(seg)
             }
         }
+    }
+
+    /**
+     * 将自身输入框设置为焦点
+     * @return 是否成功设置焦点
+     */
+    focus(): boolean {
+        const inputDom = document.getElementById(
+            'main-input',
+        ) as HTMLTextAreaElement | null
+        if (!inputDom) return false
+        if (inputDom.dataset.sessionId !== String(this.session.id)) return false
+        inputDom.focus()
+        return true
     }
 
     /**
