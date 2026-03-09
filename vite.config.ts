@@ -1,6 +1,7 @@
 import ViteYaml from '@modyfi/vite-plugin-yaml'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import updateRecordPlugin from './plugin/update-record.ts'
 
 import { resolve } from 'node:path'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -23,6 +24,7 @@ export function configFactory(outPath: string): UserConfigFnObject {
             vue(),
             vueDevTools(),
             ViteYaml(),
+            updateRecordPlugin(),
             VitePWA({
                 registerType: 'autoUpdate',
                 workbox: {

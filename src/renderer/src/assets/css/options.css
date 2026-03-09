@@ -287,7 +287,9 @@
 
 .ss-switch input:checked ~ div > div {
     border: var(--switch-dot-border) solid #fff;
-    margin-left: calc(100% - var(--switch-height) + var(--switch-dot-margin) - 5px);
+    margin-left: calc(
+        100% - var(--switch-height) + var(--switch-dot-margin) - 5px
+    );
 }
 
 .opt-page > div {
@@ -352,7 +354,7 @@
     max-width: 170px;
 }
 .opt-item > div.select-wrapper::after {
-    content: "";
+    content: '';
     position: absolute;
     pointer-events: none;
     right: 12px;
@@ -762,6 +764,88 @@
     color: var(--color-font-1);
 }
 
+.update-record-git {
+    overflow-y: auto;
+    padding: 0 10px;
+}
+
+.update-record-git > li {
+    margin: 10px 0;
+    background-color: var(--color-card-1);
+}
+
+.update-record-git > li::marker {
+    content: '';
+}
+
+.update-record-git > li > header {
+    padding: 0;
+}
+
+.update-record-git > li > header > .commit-type {
+    padding: 2px 8px;
+    border-radius: 5px;
+    color: var(--color-font-r);
+    display: inline-flex;
+    margin-right: 10px;
+    background: var(--color-font);
+}
+
+.update-record-git > li > header > .commit-type > svg {
+    width: 2ch;
+    height: 2ch;
+    margin-right: 1ch;
+}
+
+.update-record-git > li > header > .commit-type.feat {
+    background: var(--color-yellow);
+}
+
+.update-record-git > li > header > .commit-type.fix {
+    background: var(--color-issue-close);
+}
+
+.update-record-git > li > header > .commit-type.refactor {
+    background: var(--color-blue);
+}
+
+.update-record-git > li > header > .commit-type.style {
+    background: var(--color-green);
+}
+
+.update-record-git > li > header > .commit-content {
+    color: var(--color-main);
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.update-record-git > li > div {
+    display: flex;
+}
+
+.update-record-git > li > div > a {
+    margin-right: auto;
+    color: var(--color-main);
+    text-decoration: none;
+}
+
+.update-record-git > li > div > a:hover {
+    text-decoration: underline;
+}
+
+.update-record-git > li > div > .commit-info {
+    color: var(--color-font-1);
+}
+
+.update-record-git > .more > a {
+    color: var(--color-main);
+    text-decoration: none;
+}
+
+.update-record-git > .more > a:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 700px) {
     .option-title {
         display: none !important;
@@ -804,6 +888,6 @@
 
     .opt-main > div:last-child {
         height: unset;
-        overflow: auto
+        overflow: auto;
     }
 }

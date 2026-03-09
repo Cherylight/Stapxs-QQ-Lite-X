@@ -1,6 +1,28 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/client" />
 
+declare module 'virtual:update-record' {
+    const commits: {
+        hash: string
+        content: string
+        type:
+            | 'feat'
+            | 'fix'
+            | 'docs'
+            | 'style'
+            | 'refactor'
+            | 'perf'
+            | 'test'
+            | 'chore'
+            | 'revert'
+            | 'ci'
+            | 'unknown'
+        author: string
+        date: number
+    }[]
+    export default commits
+}
+
 declare module 'vue3-danmaku'
 declare module '*.vue' {
     import type { DefineComponent } from 'vue'
