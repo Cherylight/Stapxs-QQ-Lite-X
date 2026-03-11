@@ -900,7 +900,7 @@ defineExpose({
 <script lang="ts">
 export default defineComponent({
     name: 'MsgBody',
-    inject: ['viewer'],
+    inject: ['viewer', 'mergePan'],
     data() {
         return {
             backend,
@@ -1392,7 +1392,8 @@ export default defineComponent({
                 popInfo.error(this.$t('请先等发送完成...'))
                 return
             }
-            runtimeData.mergeMsgStack.push(seg)
+            if (!this.mergePan) return
+            ;(this.mergePan as any).openMergeMsg(seg)
         },
     },
 })

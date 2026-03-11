@@ -209,6 +209,7 @@ import {
     watch,
     shallowRef,
     markRaw,
+    provide,
 } from 'vue'
 //#region == 常量声明 ====================================================================
 const { chat } = defineProps<{ chat: Session }>()
@@ -225,6 +226,7 @@ const mergePan = useTemplateRef('mergePan')
 const msgPan = useTemplateRef('msgPan')
 const chatPan = useTemplateRef('chat-pan')
 const chatBottom = useTemplateRef('bottom')
+provide('mergePan', mergePan)
 //#endregion
 
 const tagsDefault = {

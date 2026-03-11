@@ -1,6 +1,6 @@
 <template>
     <Transition name="merge-pan">
-        <Teleport v-if="runtimeData.mergeMsgStack.length > 0" to="body">
+        <Teleport v-if="stack.length > 0" to="body">
             <div
                 v-move="chatMoveOptions"
                 class="merge-pan"
@@ -17,9 +17,7 @@
                         <font-awesome-icon
                             :icon="[
                                 'fas',
-                                runtimeData.mergeMsgStack.length > 1
-                                    ? 'angle-left'
-                                    : 'xmark',
+                                stack.length > 1 ? 'angle-left' : 'xmark',
                             ]"
                             @click="exitMergeMsg"
                         />
@@ -35,8 +33,7 @@
                         >
                             <div
                                 v-if="
-                                    nowData === undefined &&
-                                    runtimeData.mergeMsgStack.length === 0
+                                    nowData === undefined && stack.length === 0
                                 "
                                 class="merge-node"
                             >
@@ -153,11 +150,18 @@ import {
 import { vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import { useViewportUnits } from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
-import { markRaw, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
+import {
+    markRaw,
+    nextTick,
+    shallowReactive,
+    shallowRef,
+    useTemplateRef,
+    watch,
+} from 'vue'
 import ChatMsgMenu from './menu/ChatMsgMenu.vue'
 
 const { vw } = useViewportUnits()
-const stack = runtimeData.mergeMsgStack
+const stack = shallowReactive<ForwardSeg[]>([])
 const nowData = shallowRef<undefined | ForwardSeg>()
 const addMode = shallowRef(true)
 const positionCache: number[] = []
@@ -205,7 +209,7 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
 }
 
 watch(
-    () => runtimeData.mergeMsgStack.length,
+    () => stack.length,
     (newLength, oldLength) => {
         // 最后一个保留下来做展开关闭动画
         if (stack.length !== 0) nowData.value = stack.at(-1)
@@ -221,6 +225,10 @@ function $t(value: string) {
 }
 
 //#region == 操作与状态 ===================================================
+function openMergeMsg(seg: ForwardSeg) {
+    stack.push(seg)
+}
+
 /**
  * 退出一层合并转发弹窗
  */
@@ -370,5 +378,6 @@ function restoreScrollPosition() {
 defineExpose({
     isMergeOpen,
     closeMergeMsg,
+    openMergeMsg,
 })
 </script>
