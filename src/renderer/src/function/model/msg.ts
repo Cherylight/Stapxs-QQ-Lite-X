@@ -265,7 +265,7 @@ export class Msg extends Message {
                 return
             }
         }
-        this.emojis[id] = emojiData
+        this.emojis[id] = [...emojiData]
     }
 
     serializeData(): MsgData {
