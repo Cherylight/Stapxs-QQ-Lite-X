@@ -13,7 +13,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('close_notice'),
+                        changed: !option.checkDefault('close_notice'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'volume-xmark']" />
@@ -26,8 +26,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed:
-                            !OptionManager.checkDefault('bubble_sort_user'),
+                        changed: !option.checkDefault('bubble_sort_user'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'box-open']" />
@@ -43,8 +42,7 @@
             >
                 <div
                     :class="{
-                        changed:
-                            !OptionManager.checkDefault('group_notice_type'),
+                        changed: !option.checkDefault('group_notice_type'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'user-group']" />
@@ -75,7 +73,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('preview_notice'),
+                        changed: !option.checkDefault('preview_notice'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'eye']" />
@@ -88,7 +86,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('auto_mark_read'),
+                        changed: !option.checkDefault('auto_mark_read'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'check']" />
@@ -131,7 +129,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('close_respond'),
+                        changed: !option.checkDefault('close_respond'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'face-laugh-squint']" />
@@ -149,9 +147,7 @@
             >
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault(
-                            'show_response_message',
-                        ),
+                        changed: !option.checkDefault('show_response_message'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'comment']" />
@@ -182,8 +178,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed:
-                            !OptionManager.checkDefault('dont_parse_delete'),
+                        changed: !option.checkDefault('dont_parse_delete'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'delete-left']" />
@@ -198,7 +193,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('hide_empty_msg'),
+                        changed: !option.checkDefault('hide_empty_msg'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'xmark']" />
@@ -214,7 +209,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('msg_tail'),
+                        changed: !option.checkDefault('msg_tail'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'fish-fins']" />
@@ -233,7 +228,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('send_face'),
+                        changed: !option.checkDefault('send_face'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'square-arrow-up-right']" />
@@ -246,7 +241,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('send_key'),
+                        changed: !option.checkDefault('send_key'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'keyboard']" />
@@ -287,7 +282,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('jump_forward'),
+                        changed: !option.checkDefault('jump_forward'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'share']" />
@@ -300,7 +295,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault(
+                        changed: !option.checkDefault(
                             'default_multiselect_forward',
                         ),
                     }"
@@ -319,7 +314,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('reply_with_at'),
+                        changed: !option.checkDefault('reply_with_at'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'at']" />
@@ -350,9 +345,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault(
-                            'record_recent_emoji',
-                        ),
+                        changed: !option.checkDefault('record_recent_emoji'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'clock-rotate-left']" />
@@ -387,7 +380,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('close_browser'),
+                        changed: !option.checkDefault('close_browser'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'globe']" />
@@ -400,7 +393,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('close_ad'),
+                        changed: !option.checkDefault('close_ad'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'rectangle-ad']" />
@@ -425,7 +418,7 @@
             >
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('close_ga'),
+                        changed: !option.checkDefault('close_ga'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'cloud']" />
@@ -465,7 +458,7 @@
             >
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('open_ga_bot'),
+                        changed: !option.checkDefault('open_ga_bot'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'dice']" />
@@ -481,12 +474,14 @@
 
 <script setup lang="ts">
 import Switch from '@renderer/components/Switch.vue'
-import OptionManager from '@renderer/function/option/option'
+import useOptionStore from '@renderer/state/option'
 import { runtimeData } from '@renderer/function/msg'
 import { popBox } from '@renderer/function/utils/popBox'
 import UmamiInfoPan from '@renderer/components/popBox/UmamiInfoPan.vue'
 import { backend } from '@renderer/runtime/backend'
 import { shallowRef } from 'vue'
+
+const option = useOptionStore()
 
 const ndt = shallowRef(0)
 const ndv = shallowRef(false)

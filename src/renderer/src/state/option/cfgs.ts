@@ -2,18 +2,21 @@
  * important: 禁止塞对象，塞得东西必须是可以序列化成json的
  */
 import languageConfig from '@renderer/assets/l10n/_l10nconfig.json'
-import { refreshFavicon } from '../utils/favicon'
-import { GroupSession, Session } from '../model/session'
-import { BubbleBox, SessionBoxData } from '../model/box'
+import { refreshFavicon } from '@renderer/function/utils/favicon'
+import { GroupSession, Session } from '@renderer/function/model/session'
+import { BubbleBox, SessionBoxData } from '@renderer/function/model/box'
 import {
     loadWinColor,
     sendIdentifyData,
     updateWinColor,
-} from '../utils/appUtil'
+} from '@renderer/function/utils/appUtil'
 import app, { i18n } from '@renderer/main'
-import { getPortableFileLang, getTrueLang } from '../utils/systemUtil'
+import {
+    getPortableFileLang,
+    getTrueLang,
+} from '@renderer/function/utils/systemUtil'
 import { backend } from '@renderer/runtime/backend'
-import { OptionField } from './option'
+import type { OptionField } from './index'
 
 /**
  * 配置文件声明

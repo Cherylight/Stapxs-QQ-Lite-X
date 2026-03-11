@@ -8,7 +8,7 @@
 
 import { shallowReactive } from 'vue'
 import { PopInfoElem } from './elements/system'
-import OptionManager from './option/option'
+import useOptionStore from '@renderer/state/option'
 import { runtimeData } from './msg'
 
 // =============== 日志 ===============
@@ -25,7 +25,8 @@ const logTypeInfo: Record<LogType, [string, string]> = {
 }
 
 function normallyConditionCheck(type: LogType): boolean {
-    const logLevel = OptionManager.options.log_level
+    const option = useOptionStore()
+    const logLevel = option.options.log_level
     if (logLevel === 'all') return true
     if (logLevel === 'debug' && (type === 'DEBUG' || type === 'UI')) return true
     if (logLevel === 'info' && type === 'INFO') return true
@@ -43,12 +44,18 @@ function normallyConditionCheck(type: LogType): boolean {
  * @param deep 调用深度（用于获取调用者信息）
  * @private
  */
-function printLog(type: LogType, args: string, data: any, hidden: boolean, deep: number) {
-    deep ++
+function printLog(
+    type: LogType,
+    args: string,
+    data: any,
+    hidden: boolean,
+    deep: number,
+) {
+    deep++
     const error = new Error()
     // 浏览器类型，用于判断是不是 webkit
     let isWebkit = /webkit/i.test(navigator.userAgent)
-    if(window.electron != undefined) {
+    if (window.electron != undefined) {
         // electron 是 chrome，但是 userAgent 里面含有 webkit 字样
         isWebkit = false
     }
@@ -75,7 +82,8 @@ function printLog(type: LogType, args: string, data: any, hidden: boolean, deep:
             // 火狐的原始格式:onclose @http://localhost:8080/src/function/connect.ts?t=1753012335169:220:12
             //   -- by Mr.Lee
             if (from) {
-                from = from.replace(`${window.location.origin}/`, '')
+                from = from
+                    .replace(`${window.location.origin}/`, '')
                     .replace(/\?t=\d+:/, ' ')
                     .replace('/', '.')
             }
@@ -97,7 +105,7 @@ function buildLogParams(
     type: LogType,
     args: string,
     hidden: boolean,
-    from?: string
+    from?: string,
 ): { message: string; styles: string[] } {
     const hasFrom = !hidden && from
     if (hasFrom) {
@@ -106,8 +114,8 @@ function buildLogParams(
             styles: [
                 `background:#${logTypeInfo[type][0]};color:#${logTypeInfo[type][1]};border-radius:7px 0 0 7px;padding:2px 4px 2px 7px;margin-bottom:7px;`,
                 'background:#e3e8ec;color:#000;padding:2px 7px 4px 4px;border-radius:0 7px 7px 0;margin-bottom:7px;',
-                ''
-            ]
+                '',
+            ],
         }
     } else {
         return {
@@ -115,13 +123,18 @@ function buildLogParams(
             styles: [
                 `background:#${logTypeInfo[type][0]};color:#${logTypeInfo[type][1]};border-radius:7px;padding:2px 4px 2px 7px;margin-bottom:7px;`,
                 '',
-                ''
-            ]
+                '',
+            ],
         }
     }
 }
 
-function logOutput(message: string, styles: string[], data: any, useStyles = true) {
+function logOutput(
+    message: string,
+    styles: string[],
+    data: any,
+    useStyles = true,
+) {
     if (!data) data = ''
     if (useStyles) {
         // eslint-disable-next-line no-console
@@ -138,8 +151,14 @@ export const logger = {
      * @param mode 日志类型
      * @param args 日志内容
      */
-    add(type: LogType, args: string, data = '' as any, hidden = false, deep = 0) {
-        deep ++
+    add(
+        type: LogType,
+        args: string,
+        data = '' as any,
+        hidden = false,
+        deep = 0,
+    ) {
+        deep++
         // PS：WS, UI, ERR, INFO, DEBUG
         // all 将会输出以上全部类型，debug 将会输出 DEBUG、UI，info 将会输出 INFO，err 将会输出 ERR
         // api 通信不受这个控制,受api_log控制
@@ -147,11 +166,11 @@ export const logger = {
         printLog(type, args, data, hidden, deep)
     },
     info(args: string, hidden = false, deep = 0) {
-        deep ++
+        deep++
         this.add('INFO', args, undefined, hidden, deep)
     },
     error(e: Error | null, args: string, hidden = false, deep = 0) {
-        deep ++
+        deep++
         if (e) {
             this.add('ERR', args + '\n', e, hidden, deep)
         } else {
@@ -159,11 +178,11 @@ export const logger = {
         }
     },
     debug(args: string, hidden = false, deep = 0) {
-        deep ++
+        deep++
         this.add('DEBUG', args, undefined, hidden, deep)
     },
     system(args: string, deep = 0) {
-        deep ++
+        deep++
         this.add('SYSTEM', args, undefined, true, deep)
     },
 }
@@ -229,7 +248,7 @@ export const popInfo = {
         setTimeout(() => {
             popList.splice(0, popList.length)
         }, 300)
-    }
+    },
 }
 
 export const popList: PopInfoElem[] = shallowReactive([])

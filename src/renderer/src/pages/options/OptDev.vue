@@ -18,7 +18,7 @@
             </div>
             <div
                 class="opt-item"
-                :class="{ changed: !OptionManager.checkDefault('proxyUrl') }"
+                :class="{ changed: !option.checkDefault('proxyUrl') }"
             >
                 <font-awesome-icon :icon="['fas', 'route']" />
                 <div>
@@ -97,7 +97,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('log_level'),
+                        changed: !option.checkDefault('log_level'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'book']" />
@@ -128,7 +128,7 @@
             </div>
             <!-- TODO 这个输入框确实不好用...不知道用啥输入框合适...等那天都啥api统计齐全了直接做成复选框 -->
             <!-- <div class="opt-item">
-                <div :class="{changed: !OptionManager.checkDefault('api_log')}" />
+                <div :class="{changed: !option.checkDefault('api_log')}" />
                 <font-awesome-icon :icon="['fas', 'right-left']" />
                 <div>
                     <span>{{ $t('通信过滤器') }}</span>
@@ -141,7 +141,7 @@
             <div class="opt-item">
                 <div
                     :class="{
-                        changed: !OptionManager.checkDefault('debug_msg'),
+                        changed: !option.checkDefault('debug_msg'),
                     }"
                 />
                 <font-awesome-icon :icon="['fas', 'robot']" />
@@ -325,7 +325,7 @@
 
 <script setup lang="ts">
 import Switch from '@renderer/components/Switch.vue'
-import OptionManager from '@renderer/function/option/option'
+import useOptionStore from '@renderer/state/option'
 import { popInfo } from '@renderer/function/base'
 import { runtimeData } from '@renderer/function/msg'
 import { BrowserInfo, detect } from 'detect-browser'
@@ -344,6 +344,8 @@ import {
 } from '@renderer/function/utils/systemUtil'
 import win from '@renderer/runtime/win'
 import WelPan from '@renderer/components/popBox/WelPan.vue'
+
+const option = useOptionStore()
 
 const $t = app.config.globalProperties.$t
 const appmsg_text = shallowRef('')
@@ -572,7 +574,7 @@ async function printVersionInfo() {
 }
 
 function printSetUpInfo() {
-    const json = JSON.stringify(OptionManager.rawConfigs)
+    const json = JSON.stringify(option.rawConfigs)
     htmlPopBox(
         '<textarea style="width: calc(100% - 40px);min-height: 90px;background: var(--color-card-1);color: var(--color-font);border: 0;padding: 20px;border-radius: 7px;margin-top: -10px;">' +
             json +
@@ -618,9 +620,7 @@ function importSetUpInfo() {
                         ) as HTMLTextAreaElement
                         if (input) {
                             try {
-                                await OptionManager.loadAllFromString(
-                                    input.value,
-                                )
+                                await option.loadAllFromString(input.value)
                                 location.reload()
                             } catch {
                                 popInfo.error(
