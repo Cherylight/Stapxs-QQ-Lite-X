@@ -108,7 +108,11 @@ import {
 import GlobalSessionSearchBar from '@renderer/components/GlobalSessionSearchBar.vue'
 import Viewer from '@renderer/components/Viewer.vue'
 import { vHide } from '@renderer/function/utils/vcmd'
-import { useFrame, useKeyboard } from '@renderer/function/utils/vuse'
+import {
+    useBackHoldup,
+    useFrame,
+    useKeyboard,
+} from '@renderer/function/utils/vuse'
 import Chat from '@renderer/pages/Chat.vue'
 import SideBar from '@renderer/pages/SideBar.vue'
 import { backend } from '@renderer/runtime/backend'
@@ -242,29 +246,21 @@ async function init() {
     //#endregion
 
     //#region == popstate监听 ==================================
-    if (
-        backend.platform == 'web' &&
-        (getDeviceType() === 'Android' || getDeviceType() === 'iOS')
-    ) {
-        window.addEventListener('popstate', () => {
-            if (!driver.isConnected()) {
-                // 离开提醒
-                ensurePopBox($t('离开 Stapxs QQ Lite X？'), $t('离开')).then(
-                    (ensure) => {
-                        if (ensure) history.back()
-                        else history.pushState('ssqqweb', '', location.href)
-                    },
-                )
-            } else {
-                // 内部的页面返回处理，此处使用 watch backTimes 监听
-                runtimeData.watch.backTimes += 1
-                history.pushState('ssqqweb', '', location.href)
-            }
-        })
-        if (history.state != 'ssqqweb') {
-            history.pushState('ssqqweb', '', location.href)
+    let askFlag = false
+    const exit = useBackHoldup(async () => {
+        if (askFlag) exit()
+        else {
+            askFlag = true
+            // 离开提醒
+            const ensure = await ensurePopBox(
+                $t('离开 Stapxs QQ Lite X？'),
+                $t('离开'),
+            )
+            if (ensure) exit()
+            askFlag = false
         }
-    }
+        return true
+    })
     //#endregion
 
     //#region == 加载 Umami 统计功能 ============================

@@ -194,6 +194,7 @@ import {
 } from '@renderer/function/utils/systemUtil'
 import { vHide, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import {
+    useBackHoldup,
     useFrame,
     useKeyboard,
     useViewportUnits,
@@ -294,12 +295,10 @@ useKeyboard('ctrl+w', () => {
 //#region == 侦测器 ======================================================================
 watch(() => chat?.id, init)
 // Web：系统返回操作
-watch(
-    () => runtimeData.watch.backTimes,
-    () => {
-        exitWin()
-    },
-)
+useBackHoldup(() => {
+    exitWin()
+    return true
+})
 //#endregion
 
 //#region == 函数 ========================================================================
