@@ -10,7 +10,7 @@ import app from '@renderer/main'
 import { shallowRef, ShallowRef } from 'vue'
 import { GroupFileData, GroupFolderData } from '../adapter/interface'
 import { popInfo } from '../base'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { downloadFile } from '../utils/appUtil'
 import { getSizeFromBytes } from '../utils/systemUtil'
 import { Name, Time } from './data'
@@ -31,21 +31,24 @@ export class GroupFile {
     url?: string
     folder?: GroupFileFolder
 
-    downloadPercent: ShallowRef<number|undefined> = shallowRef()
+    downloadPercent: ShallowRef<number | undefined> = shallowRef()
 
-    constructor(data: GroupFileData, group: GroupSession, folder?: GroupFileFolder) {
+    constructor(
+        data: GroupFileData,
+        group: GroupSession,
+        folder?: GroupFileFolder,
+    ) {
         this.id = data.file_id
         this._name = new Name(data.file_name)
         this.size = data.size
         this.downloadTimes = data.download_times
         this.folder = folder
-        if(data.dead_time) this.deadTime = data.dead_time
+        if (data.dead_time) this.deadTime = data.dead_time
         let user: IUser | undefined
-        if (data.uploader_id)
-            user = group.getUserById(data.uploader_id)
+        if (data.uploader_id) user = group.getUserById(data.uploader_id)
         user ??= new BaseUser(data.uploader_id ?? 0, data.uploader_name)
         this.creator = user
-        if(data.upload_time) this.createTime = new Time(data.upload_time)
+        if (data.upload_time) this.createTime = new Time(data.upload_time)
         this.group = group
     }
 
@@ -65,16 +68,20 @@ export class GroupFile {
 
         let re: boolean | undefined
 
-        downloadFile(this.url as string, this.name, (event: ProgressEvent) => {
-            if (!event.lengthComputable) return
-            const percent = Math.floor((event.loaded / event.total) * 100)
-            this.downloadPercent.value = percent
-            if (percent >= 100) re = true
-        },
-        ()=>{
-            this.downloadPercent.value = undefined
-            re = false
-        })
+        downloadFile(
+            this.url as string,
+            this.name,
+            (event: ProgressEvent) => {
+                if (!event.lengthComputable) return
+                const percent = Math.floor((event.loaded / event.total) * 100)
+                this.downloadPercent.value = percent
+                if (percent >= 100) re = true
+            },
+            () => {
+                this.downloadPercent.value = undefined
+                re = false
+            },
+        )
 
         return await new Promise((resolve) => {
             const timer = setInterval(() => {
@@ -92,12 +99,13 @@ export class GroupFile {
      */
     async getUrl() {
         const { $t } = app.config.globalProperties
+        const runtimeData = useRuntimeData()
         if (!runtimeData.nowAdapter) return
 
         const data = await runtimeData.nowAdapter.getGroupFileUrl!(this)
 
         if (!data) {
-            popInfo.error( $t('获取下载连接失败'))
+            popInfo.error($t('获取下载连接失败'))
             return false
         }
 
@@ -141,13 +149,14 @@ export class GroupFileFolder {
     createTime?: Time
     creator: IUser
 
-    items: ShallowRef<(GroupFile | GroupFileFolder)[] | undefined> = shallowRef(undefined)
+    items: ShallowRef<(GroupFile | GroupFileFolder)[] | undefined> =
+        shallowRef(undefined)
     private readonly _isOpen: ShallowRef<boolean> = shallowRef(false)
     constructor(data: GroupFolderData, group: GroupSession) {
         this.id = data.folder_id
         this._name = new Name(data.folder_name)
         this.count = data.count
-        if(data.create_time) this.createTime = new Time(data.create_time)
+        if (data.create_time) this.createTime = new Time(data.create_time)
         let user: IUser | undefined
         if (data.creator_id) user = group.getUserById(data.creator_id)
         user ??= new BaseUser(data.creator_id ?? 0, data.creator_name)
@@ -161,12 +170,16 @@ export class GroupFileFolder {
         if (this.items.value !== undefined) return true
 
         const { $t } = app.config.globalProperties
+        const runtimeData = useRuntimeData()
 
         if (!runtimeData.nowAdapter) return false
 
-        const data = await runtimeData.nowAdapter.getGroupFolderFile!(this.group, this.id)
+        const data = await runtimeData.nowAdapter.getGroupFolderFile!(
+            this.group,
+            this.id,
+        )
         if (!data) {
-            popInfo.error( $t('获取文件夹内容失败'))
+            popInfo.error($t('获取文件夹内容失败'))
             return false
         }
 
@@ -177,8 +190,12 @@ export class GroupFileFolder {
         }
 
         const out: (GroupFile | GroupFileFolder)[] = [
-            ...data.folders.map(folder => new GroupFileFolder(folder, this.group)).sort(sort),
-            ...data.files.map(file => new GroupFile(file, this.group, this)).sort(sort),
+            ...data.folders
+                .map((folder) => new GroupFileFolder(folder, this.group))
+                .sort(sort),
+            ...data.files
+                .map((file) => new GroupFile(file, this.group, this))
+                .sort(sort),
         ]
 
         this.items.value = out

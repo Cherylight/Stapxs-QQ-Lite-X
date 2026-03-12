@@ -16,7 +16,9 @@
                 <a>{{ $t('置顶') }}</a>
             </div>
             <div v-if="displayTag.cancelTop" @click="clickCancelTop">
-                <div><font-awesome-icon :icon="['fas', 'fa-grip-lines']" /></div>
+                <div>
+                    <font-awesome-icon :icon="['fas', 'fa-grip-lines']" />
+                </div>
                 <a>{{ $t('取消置顶') }}</a>
             </div>
             <div v-if="displayTag.remove" @click="clickRemove">
@@ -28,7 +30,9 @@
                 <a>{{ $t('重载') }}</a>
             </div>
             <div v-if="displayTag.read" @click="clickReaded">
-                <div><font-awesome-icon :icon="['fas', 'fa-check-to-slot']" /></div>
+                <div>
+                    <font-awesome-icon :icon="['fas', 'fa-check-to-slot']" />
+                </div>
                 <a>{{ $t('标记已读') }}</a>
             </div>
             <div v-if="displayTag.unread" @click="clickRead">
@@ -36,11 +40,15 @@
                 <a>{{ $t('标记未读') }}</a>
             </div>
             <div v-if="displayTag.noticeOpen" @click="clickNoticeOpen">
-                <div><font-awesome-icon :icon="['fas', 'fa-volume-high']" /></div>
+                <div>
+                    <font-awesome-icon :icon="['fas', 'fa-volume-high']" />
+                </div>
                 <a>{{ $t('开启通知') }}</a>
             </div>
             <div v-if="displayTag.noticeClose" @click="clickNoticeClose">
-                <div><font-awesome-icon :icon="['fas', 'fa-volume-xmark']" /></div>
+                <div>
+                    <font-awesome-icon :icon="['fas', 'fa-volume-xmark']" />
+                </div>
                 <a>{{ $t('关闭通知') }}</a>
             </div>
             <div v-if="displayTag.putInBox" @click="clickPutInBox">
@@ -52,11 +60,20 @@
                 <a>{{ $t('设置') }}</a>
             </div>
             <div v-if="displayTag.leaveBox" @click="clickLeaveBox">
-                <div><font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" /></div>
+                <div>
+                    <font-awesome-icon
+                        :icon="['fas', 'arrow-up-right-from-square']"
+                    />
+                </div>
                 <a>{{ $t('离开盒子') }}</a>
             </div>
             <div v-if="displayTag.deleteBox" @click="clickDeleteBox">
-                <div><font-awesome-icon :icon="['fas', 'fa-trash']" style="color: var(--color-red)" /></div>
+                <div>
+                    <font-awesome-icon
+                        :icon="['fas', 'fa-trash']"
+                        style="color: var(--color-red)"
+                    />
+                </div>
                 <a style="color: var(--color-red)">{{ $t('删除') }}</a>
             </div>
         </div>
@@ -66,32 +83,29 @@
 <script setup lang="ts">
 import { BubbleBox, SessionBox } from '@renderer/function/model/box'
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { ensurePopBox, popBox } from '@renderer/function/utils/popBox'
 import { i18n } from '@renderer/main'
 import ConfigBox from '@renderer/components/popBox/ConfigBox.vue'
 import SelectBox from '@renderer/components/popBox/SelectBox.vue'
-import {
-    markRaw,
-    shallowReactive,
-    ShallowReactive,
-} from 'vue'
+import { markRaw, shallowReactive, ShallowReactive } from 'vue'
 
 //#region == 声明变量 ================================================================
 const $t = i18n.global.t
+const runtimeData = useRuntimeData()
 const displayTag: ShallowReactive<{
-    top: boolean,
-    cancelTop: boolean,
-    remove: boolean,
-    reload: boolean,
-    read: boolean,
-    unread: boolean,
-    noticeOpen: boolean,
-    noticeClose: boolean,
-    putInBox: boolean,
-    configBox: boolean,
-    leaveBox: boolean,
-    deleteBox: boolean,
+    top: boolean
+    cancelTop: boolean
+    remove: boolean
+    reload: boolean
+    read: boolean
+    unread: boolean
+    noticeOpen: boolean
+    noticeClose: boolean
+    putInBox: boolean
+    configBox: boolean
+    leaveBox: boolean
+    deleteBox: boolean
 }> = shallowReactive({
     top: false,
     cancelTop: false,
@@ -107,25 +121,20 @@ const displayTag: ShallowReactive<{
     deleteBox: false,
 })
 
-const {
-	from,
-	session,
-	box,
-} = defineProps<{
-	from: 'message' | 'friend',
-	session?: Session,
-	box?: SessionBox,
+const { from, session, box } = defineProps<{
+    from: 'message' | 'friend'
+    session?: Session
+    box?: SessionBox
 }>()
 const emit = defineEmits<{
-    close: [arg?: any],
+    close: [arg?: any]
 }>()
 init()
 //#endregion
 
 //#region == 方法函数 ================================================================
 async function init(): Promise<void> {
-    for (const key in displayTag)
-        displayTag[key] = false
+    for (const key in displayTag) displayTag[key] = false
 
     if (session) checkSessionMenuConfig(from, session, box)
     else checkBoxMenuConfig(from, box!)
@@ -172,7 +181,7 @@ function checkSessionMenuConfig(
             displayTag.unread = true
             displayTag.read = false
         }
-    }else {
+    } else {
         displayTag.read = false
         displayTag.unread = false
     }
@@ -185,7 +194,7 @@ function checkSessionMenuConfig(
             displayTag.noticeOpen = true
             displayTag.noticeClose = false
         }
-    }else {
+    } else {
         displayTag.noticeOpen = false
         displayTag.noticeClose = false
     }
@@ -235,7 +244,7 @@ function checkBoxMenuConfig(
         } else {
             displayTag.read = false
         }
-    }else {
+    } else {
         displayTag.read = false
     }
 
@@ -244,7 +253,6 @@ function checkBoxMenuConfig(
     // 删除
     displayTag.deleteBox = true
 }
-
 
 /**
  * 检查群收纳盒的菜单配置
@@ -270,7 +278,7 @@ function checkBubbleBoxConfig(
         } else {
             displayTag.read = false
         }
-    }else {
+    } else {
         displayTag.read = false
     }
 }
@@ -312,11 +320,11 @@ function clickRead() {
     emit('close')
 }
 function clickNoticeOpen() {
-    (getTarget() as GroupSession)?.setNotice(true)
+    ;(getTarget() as GroupSession)?.setNotice(true)
     emit('close')
 }
 function clickNoticeClose() {
-    (getTarget() as GroupSession)?.setNotice(false)
+    ;(getTarget() as GroupSession)?.setNotice(false)
     emit('close')
 }
 function clickPutInBox() {
@@ -338,10 +346,12 @@ function clickConfigBox() {
         title: $t('收纳盒设置'),
         comp: ConfigBox,
         model: markRaw(getTarget()) as SessionBox,
-        button: [{
-            text: $t('确定'),
-            master: true,
-        },],
+        button: [
+            {
+                text: $t('确定'),
+                master: true,
+            },
+        ],
     })
     emit('close')
 }
@@ -354,10 +364,9 @@ function clickLeaveBox() {
 }
 function clickDeleteBox() {
     const target = getTarget() as SessionBox
-    ensurePopBox($t('确定要删除收纳盒吗？它会永远消失的！'))
-        .then(ensure => {
-            if (ensure) target.remove()
-        })
+    ensurePopBox($t('确定要删除收纳盒吗？它会永远消失的！')).then((ensure) => {
+        if (ensure) target.remove()
+    })
     emit('close')
 }
 //#endregion

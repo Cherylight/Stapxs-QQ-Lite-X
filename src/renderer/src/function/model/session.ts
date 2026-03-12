@@ -19,7 +19,7 @@ import {
 import { Role } from '../adapter/enmu'
 import { SessionData } from '../adapter/interface'
 import { logger, popInfo } from '../base'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { Notify } from '../notify'
 import { queueWait } from '../utils/systemUtil'
 import { Ann } from './ann'
@@ -247,6 +247,7 @@ export abstract class Session {
      */
     setAlwaysTop(flag: boolean, saveCfg: boolean = true): void {
         this.alwaysTop = flag
+        const runtimeData = useRuntimeData()
         // 更新置顶列表
         if (flag && !Session.alwaysTopSessions.has(this))
             Session.alwaysTopSessions.add(this)
@@ -281,6 +282,7 @@ export abstract class Session {
         )
     }
     private async _addMessage(msg: Message) {
+        const runtimeData = useRuntimeData()
         // 过滤空消息
         if (
             msg instanceof Msg &&
@@ -338,7 +340,7 @@ export abstract class Session {
         this.refreshPreMsg()
         if (
             msg instanceof Msg &&
-            msg.sender.user_id !== runtimeData.loginInfo.uin
+            msg.sender.user_id !== runtimeData.loginInfo?.uin
         )
             this.newMsg++
 
@@ -360,6 +362,7 @@ export abstract class Session {
         this.loadHistoryLock.value = selfId
 
         const { $t } = app.config.globalProperties
+        const runtimeData = useRuntimeData()
         // 过滤不支持的适配器
         if (!runtimeData.nowAdapter?.getHistoryMsg) {
             this.lastLoadFailFlag.value = true
@@ -428,6 +431,7 @@ export abstract class Session {
      * 刷新预览消息
      */
     refreshPreMsg(): void {
+        const runtimeData = useRuntimeData()
         for (let i = this.messageList.length - 1; i >= 0; i--) {
             const msg = this.messageList[i]
             // 启用预览通知
@@ -468,6 +472,8 @@ export abstract class Session {
         if (!targetMsg) return
 
         await this.runHook('beforeSetReadHook')
+
+        const runtimeData = useRuntimeData()
 
         // 调用api
         // 过滤设置
@@ -820,16 +826,20 @@ export class GroupSession extends Session {
     }
 
     override async prepareActive(): Promise<void> {
+        const runtimeData = useRuntimeData()
         // 加载群成员 ==============================================
         // emm, 这种高危api,还是不要刷新缓存得了...
         await this.reloadUserList()
-        this.me = this.getUserById(runtimeData.loginInfo.uin) ?? null
-        if (!this.me)
-            logger.error(
-                null,
-                `群 ${this.id} 成员列表中没有自己(${runtimeData.loginInfo.uin})的信息`,
-            )
-
+        if (!runtimeData.loginInfo) {
+            logger.error(null, '没有登录信息，无法获取自身成员信息')
+        } else {
+            this.me = this.getUserById(runtimeData.loginInfo?.uin) ?? null
+            if (!this.me)
+                logger.error(
+                    null,
+                    `群 ${this.id} 成员列表中没有自己(${runtimeData.loginInfo?.uin})的信息`,
+                )
+        }
         // 加载历史记录 ============================================
         if (this.messageList.length < 20) await this.loadHistory()
 
@@ -850,6 +860,7 @@ export class GroupSession extends Session {
         if (this.memsLoadLocker) return
         this.memsLoadLocker = true
         this.memsLoaded = false
+        const runtimeData = useRuntimeData()
         // 获取新数据
         const memData = await runtimeData.nowAdapter?.getMemberList(
             this,
@@ -968,6 +979,7 @@ export class GroupSession extends Session {
         this.notice = flag
 
         if (!saveCfg) return
+        const runtimeData = useRuntimeData()
         if (flag) {
             if (runtimeData.sysConfig.notice_group.includes(this.id)) return
             runtimeData.sysConfig.notice_group = [
@@ -995,6 +1007,7 @@ export class GroupSession extends Session {
 
         await this.activate()
 
+        const runtimeData = useRuntimeData()
         if (!runtimeData.nowAdapter?.getGroupAnnouncement) {
             popInfo.error(
                 app.config.globalProperties.$t('当前适配器不支持获取群公告'),
@@ -1050,6 +1063,7 @@ export class GroupSession extends Session {
 
         await this.activate()
 
+        const runtimeData = useRuntimeData()
         if (!runtimeData.nowAdapter?.getGroupFile) {
             popInfo.error(
                 app.config.globalProperties.$t('当前适配器不支持获取群文件'),
@@ -1117,6 +1131,7 @@ export class GroupSession extends Session {
 
         await this.activate()
 
+        const runtimeData = useRuntimeData()
         if (!runtimeData.nowAdapter?.getGroupEssence) {
             popInfo.error(
                 app.config.globalProperties.$t(
@@ -1249,10 +1264,11 @@ export class UserSession extends Session {
     }
 
     override getUserById(id: number): BaseUser | User | undefined {
-        if (id === runtimeData.loginInfo.uin)
+        const runtimeData = useRuntimeData()
+        if (id === runtimeData.loginInfo?.uin)
             return new BaseUser(
-                runtimeData.loginInfo.uin,
-                runtimeData.loginInfo.nickname,
+                runtimeData.loginInfo?.uin,
+                runtimeData.loginInfo?.nickname,
             )
         if (id !== this.id) return undefined
         if (this.userCache) return this.userCache
@@ -1267,6 +1283,7 @@ export class UserSession extends Session {
      */
     async getUserInfo(useCache: boolean = true): Promise<User | undefined> {
         if (useCache && this.userCache) return this.userCache
+        const runtimeData = useRuntimeData()
         const data = await runtimeData.nowAdapter?.getUserInfo(
             this.id,
             useCache,
@@ -1380,10 +1397,11 @@ export class TempSession extends Session {
     }
 
     override getUserById(id: number): BaseUser | Member | undefined {
-        if (id === runtimeData.loginInfo.uin) {
+        const runtimeData = useRuntimeData()
+        if (id === runtimeData.loginInfo?.uin) {
             return new BaseUser(
-                runtimeData.loginInfo.uin,
-                runtimeData.loginInfo.nickname,
+                runtimeData.loginInfo?.uin,
+                runtimeData.loginInfo?.nickname,
             )
         }
         if (id !== this.id) return undefined
@@ -1396,8 +1414,9 @@ export class TempSession extends Session {
      * @returns 自身成员对象
      */
     override getMe(): BaseUser | Member {
-        const uin = runtimeData.loginInfo.uin
-        const mem = this.getUserById(uin)
+        const runtimeData = useRuntimeData()
+        if (!runtimeData.loginInfo?.uin) throw new Error('未登录')
+        const mem = this.getUserById(runtimeData.loginInfo?.uin)
         return mem as BaseUser | Member
     }
 }

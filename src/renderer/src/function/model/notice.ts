@@ -19,7 +19,7 @@ import type {
     SenderData,
     SessionData,
 } from '../adapter/interface'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import Emoji from './emoji'
 import { Message } from './message'
 import { Msg } from './msg'
@@ -88,12 +88,14 @@ export class RecallNotice extends ReceivedNotice {
     }
 
     override get fromMe(): boolean {
-        return this.operator.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.operator.user_id === runtimeData.loginInfo?.uin
     }
 
     override get toMe(): boolean {
         if (this.fromMe) return false
-        return this.user.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.user.user_id === runtimeData.loginInfo?.uin
     }
 }
 
@@ -133,12 +135,14 @@ export class BanNotice extends ReceivedNotice {
     }
 
     override get fromMe(): boolean {
-        return this.operator.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.operator.user_id === runtimeData.loginInfo?.uin
     }
 
     override get toMe(): boolean {
         if (this.fromMe) return false
-        return this.user.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.user.user_id === runtimeData.loginInfo?.uin
     }
 
     get formatDuration(): string {
@@ -167,12 +171,14 @@ export class BanLiftNotice extends ReceivedNotice {
     }
 
     override get fromMe(): boolean {
-        return this.operator.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.operator.user_id === runtimeData.loginInfo?.uin
     }
 
     override get toMe(): boolean {
         if (this.fromMe) return false
-        return this.user.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.user.user_id === runtimeData.loginInfo?.uin
     }
 
     override get preMsg(): string {
@@ -201,12 +207,14 @@ export class PokeNotice extends ReceivedNotice {
     }
 
     override get fromMe(): boolean {
-        return this.user.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.user.user_id === runtimeData.loginInfo?.uin
     }
 
     override get toMe(): boolean {
         if (this.fromMe) return false
-        return this.target.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.target.user_id === runtimeData.loginInfo?.uin
     }
 
     override get preMsg(): string {
@@ -248,7 +256,8 @@ export class JoinNotice extends ReceivedNotice {
     }
 
     override get fromMe(): boolean {
-        return this.operator_info?.id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.operator_info?.id === runtimeData.loginInfo?.uin
     }
 
     /**
@@ -283,12 +292,14 @@ export class LeaveNotice extends ReceivedNotice {
     }
 
     override get fromMe(): boolean {
-        return this.operator.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.operator.user_id === runtimeData.loginInfo?.uin
     }
 
     override get toMe(): boolean {
         if (this.fromMe) return false
-        return this.user.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.user.user_id === runtimeData.loginInfo?.uin
     }
 
     get kick(): boolean {
@@ -322,23 +333,27 @@ export class ResponseNotice extends ReceivedNotice {
     }
 
     override get fromMe(): boolean {
-        return this.operator.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.operator.user_id === runtimeData.loginInfo?.uin
     }
 
     override get toMe(): boolean {
         if (this.fromMe) return false
-        return this.user.user_id === runtimeData.loginInfo.uin
+        const runtimeData = useRuntimeData()
+        return this.user.user_id === runtimeData.loginInfo?.uin
     }
 
     override get preMsg(): string {
         const { $t } = app.config.globalProperties
         let out = ''
-        if (this.operator.user_id === runtimeData.loginInfo.uin) out += $t('你')
+        const runtimeData = useRuntimeData()
+        if (this.operator.user_id === runtimeData.loginInfo?.uin)
+            out += $t('你')
         else out += this.operator.name
 
         out += $t('回应了')
 
-        if (this.user.user_id === runtimeData.loginInfo.uin) out += $t('你')
+        if (this.user.user_id === runtimeData.loginInfo?.uin) out += $t('你')
         else out += this.user.name
         out += $t('的消息:')
         const emoji = Emoji.get(this.emojiId)

@@ -11,15 +11,18 @@
     <div class="opt-page">
         <template v-if="selfInfo">
             <div class="ss-card account-info">
-                <img :src="selfInfo.face" :alt="'[' + $t('头像') +']'">
+                <img :src="selfInfo.face" :alt="'[' + $t('头像') + ']'" />
                 <div>
                     <div>
-                        <span>{{ runtimeData.loginInfo.nickname }}</span>
-                        <span>{{ runtimeData.loginInfo.uin }}</span>
+                        <span>{{ runtimeData.loginInfo?.nickname }}</span>
+                        <span>{{ runtimeData.loginInfo?.uin }}</span>
                     </div>
                     <span>{{ selfInfo.longNick }}</span>
                 </div>
-                <font-awesome-icon :icon="['fas', 'right-from-bracket']" @click="exitConnect" />
+                <font-awesome-icon
+                    :icon="['fas', 'right-from-bracket']"
+                    @click="exitConnect"
+                />
             </div>
             <div class="ss-card">
                 <header>{{ $t('账号设置') }}</header>
@@ -29,11 +32,13 @@
                         <span>{{ $t('昵称') }}</span>
                         <span>{{ $t('就只是个名字而已 ……') }}</span>
                     </div>
-                    <input v-model="selfNick"
+                    <input
+                        v-model="selfNick"
                         class="ss-input"
-                        style="width: 150px;"
+                        style="width: 150px"
                         type="text"
-                        @keyup="setNick">
+                        @keyup="setNick"
+                    />
                 </div>
                 <div class="opt-item">
                     <font-awesome-icon :icon="['fas', 'pen']" />
@@ -41,11 +46,13 @@
                         <span>{{ $t('签名') }}</span>
                         <span>{{ $t('啊吧啊吧（智慧的眼神）') }}</span>
                     </div>
-                    <input v-model="selfSign"
+                    <input
+                        v-model="selfSign"
                         class="ss-input"
-                        style="width: 150px;"
+                        style="width: 150px"
                         type="text"
-                        @keyup="setLNick">
+                        @keyup="setLNick"
+                    />
                 </div>
             </div>
         </template>
@@ -58,13 +65,13 @@
                 </button>
             </div>
         </template>
-        <div v-if="Object.keys(implBar).length > 0"
-            class="ss-card">
+        <div v-if="Object.keys(implBar).length > 0" class="ss-card">
             <header>{{ $t('适配器信息') }}</header>
             <div class="l10n-info">
                 <font-awesome-icon :icon="['fas', 'robot']" />
                 <div>
-                    <span>{{ nowAdapter.name }}
+                    <span
+                        >{{ nowAdapter.name }}
                         <a>{{ nowAdapter.version }}</a>
                     </span>
                     <span>{{ $t('这是你连接的 QQ Bot 的相关信息') }}</span>
@@ -79,24 +86,21 @@
 import { AdapterInterface } from '@renderer/function/adapter/interface'
 import { popInfo } from '@renderer/function/base'
 import { User } from '@renderer/function/model/user'
-import { resetRuntime, runtimeData } from '@renderer/function/msg'
 import { openLoginPan } from '@renderer/function/utils/systemUtil'
 import { i18n } from '@renderer/main'
-import {
-    computed,
-    markRaw,
-    shallowRef,
-    watch,
-} from 'vue'
+import useRuntimeData from '@renderer/state/runtimeData'
+import { computed, markRaw, shallowRef, watch } from 'vue'
+
+const runtimeData = useRuntimeData()
 
 const nowAdapter = computed(() => runtimeData.nowAdapter as AdapterInterface)
-const implBar = computed(()=>{
+const implBar = computed(() => {
     return markRaw(runtimeData.nowAdapter?.optInfo?.() ?? {})
 })
 const selfInfo = computed(() => runtimeData.selfInfo)
 
 const emit = defineEmits<{
-    'closePopBox': []
+    closePopBox: []
 }>()
 
 const selfNick = shallowRef<string>('')
@@ -107,15 +111,18 @@ function $t(value: string, option: any = {}) {
 }
 
 updateSelfInfo()
-watch(() => runtimeData.selfInfo, () => {
-    updateSelfInfo()
-})
+watch(
+    () => runtimeData.selfInfo,
+    () => {
+        updateSelfInfo()
+    },
+)
 
 function updateSelfInfo() {
     if (runtimeData.selfInfo) {
         selfNick.value = runtimeData.selfInfo.nickname?.toString() ?? ''
         selfSign.value = runtimeData.selfInfo.longNick?.toString() ?? ''
-    }else {
+    } else {
         selfNick.value = ''
         selfSign.value = ''
     }
@@ -127,7 +134,7 @@ function updateSelfInfo() {
 function exitConnect() {
     runtimeData.sysConfig.auto_connect = false
     runtimeData.nowAdapter?.close()
-    resetRuntime(true)
+    runtimeData.reset()
     goLogin()
 }
 
@@ -145,7 +152,7 @@ function goLogin() {
 async function setNick(event: KeyboardEvent) {
     if (event.key === 'Enter' && selfNick.value !== '') {
         if (!runtimeData.nowAdapter?.setNickname) {
-            popInfo.error( $t('当前适配器不支持设置昵称'))
+            popInfo.error($t('当前适配器不支持设置昵称'))
             return
         }
 
@@ -154,8 +161,8 @@ async function setNick(event: KeyboardEvent) {
         if (re) {
             popInfo.info($t('检查更新结果ing'))
             await refreshSelfInfo()
-        }else {
-            popInfo.error( $t('个性签名设置失败'))
+        } else {
+            popInfo.error($t('个性签名设置失败'))
         }
     }
 }
@@ -167,35 +174,42 @@ async function setNick(event: KeyboardEvent) {
 async function setLNick(event: KeyboardEvent) {
     if (event.key === 'Enter' && selfSign.value !== '') {
         if (!runtimeData.nowAdapter?.setSign) {
-            popInfo.error( $t('当前适配器不支持设置个性签名'))
+            popInfo.error($t('当前适配器不支持设置个性签名'))
             return
         }
         const re = await runtimeData.nowAdapter?.setSign(selfSign.value)
         if (re) {
             popInfo.info($t('检查更新结果ing'))
             await refreshSelfInfo()
-        }else {
-            popInfo.error( $t('个性签名设置失败'))
+        } else {
+            popInfo.error($t('个性签名设置失败'))
         }
     }
 }
 
 async function refreshSelfInfo() {
     if (!runtimeData.nowAdapter) {
-        popInfo.error( $t('连接中断...'))
+        popInfo.error($t('连接中断...'))
         return
     }
-    const selfInfo = await runtimeData.nowAdapter.getUserInfo(runtimeData.loginInfo.uin, false)
+    if (!runtimeData.loginInfo) {
+        popInfo.error($t('未登录...'))
+        return
+    }
+    const selfInfo = await runtimeData.nowAdapter.getUserInfo(
+        runtimeData.loginInfo.uin,
+        false,
+    )
     if (!selfInfo) {
-        popInfo.error( $t('检查更新失败'))
+        popInfo.error($t('检查更新失败'))
         return
     }
     if (selfInfo) {
         runtimeData.selfInfo = new User(selfInfo)
         runtimeData.loginInfo.nickname = selfInfo.nickname?.toString() ?? ''
         popInfo.info($t('设置成功'))
-    }else {
-        popInfo.error( $t('设置失败'))
+    } else {
+        popInfo.error($t('设置失败'))
     }
 }
 </script>

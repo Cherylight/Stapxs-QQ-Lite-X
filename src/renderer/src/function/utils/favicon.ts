@@ -1,6 +1,6 @@
 import { nextTick } from 'vue'
 import { Session } from '../model/session'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 let needRefreshFavicon = false
 
@@ -14,11 +14,12 @@ export function refreshFavicon() {
     if (needRefreshFavicon) return
     needRefreshFavicon = true
     nextTick(() => {
+        const runtimeData = useRuntimeData()
         needRefreshFavicon = false
         let num = 0
         if (runtimeData.sysConfig.use_favicon_notice === false) return main(0)
         for (const session of Session.activeSessions.values()) {
-            if (session.newMsg > 0) num ++
+            if (session.newMsg > 0) num++
         }
         main(num)
     })
@@ -26,7 +27,9 @@ export function refreshFavicon() {
 
 function main(num: number) {
     const width = num.toString().length * 150
-    const color = getComputedStyle(document.body).getPropertyValue('--color-main').trim()
+    const color = getComputedStyle(document.body)
+        .getPropertyValue('--color-main')
+        .trim()
     // 对比缓存
     if (cacheInfo === `${num}-${color}`) return
     // 存储缓存信息
@@ -122,10 +125,12 @@ function main(num: number) {
         d="M 430 725 Q 480 710 490 650 Q 500 640 510 650 Q 520 710 570 725 Q 500 775 430 725 Z"
         style="fill: #ECC425"
         />
-    ${num > 0 ? `
+    ${
+        num > 0
+            ? `
         <!-- 新消息数量 -->
         <path
-            d="M ${600-width} 400 L ${400+width} 400 L  ${400+width} 1000 L ${600-width} 1000 Z"
+            d="M ${600 - width} 400 L ${400 + width} 400 L  ${400 + width} 1000 L ${600 - width} 1000 Z"
             style="fill: red"
         />
         <circle cx="${600 - width}" cy="700" r="300" style="fill: red" />
@@ -139,12 +144,16 @@ function main(num: number) {
             >
             ${num}
         </text>
-        ` : ''}
+        `
+            : ''
+    }
 </svg>
 `
 
-    const svgDataUrl = 'data:image/svg+xml;charset=utf8,' + encodeURIComponent(svg)
-    let link: HTMLLinkElement | null = document.querySelector('link[rel~="icon"]')
+    const svgDataUrl =
+        'data:image/svg+xml;charset=utf8,' + encodeURIComponent(svg)
+    let link: HTMLLinkElement | null =
+        document.querySelector('link[rel~="icon"]')
     if (!link) {
         link = document.createElement('link')
         link.rel = 'icon'

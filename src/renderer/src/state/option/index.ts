@@ -1,10 +1,10 @@
-import { RunTimeDataElem } from '@renderer/function/elements/information'
 import { OptionInfos } from './cfgs'
 import { checkAndMigration, migration } from './migration'
 
 import { computed, shallowReactive } from 'vue'
 import { loadAllOptions, saveAllOptions } from './utils'
 import { defineStore } from 'pinia'
+import useRuntimeData from '../runtimeData'
 
 type OptionGlobalTag = 'global'
 type OptionOtherTag = 'protocol' | 'user'
@@ -31,9 +31,6 @@ export type AppConfig = {
     [K in keyof typeof OptionInfos]: ExtractDefault<(typeof OptionInfos)[K]>
 }
 //#region == 配置管理器 ======================================================
-
-let runtimeData!: RunTimeDataElem
-
 /**
  * 获取配置标签
  * @param config
@@ -52,6 +49,7 @@ function getOptionTags(config: OptionField<any>): OptionAllTag[] {
  * @param config 配置项对象
  */
 function getOptionKey(name: string, config: OptionField<any>): string {
+    const runtimeData = useRuntimeData()
     const tags = getOptionTags(config)
     let out = ''
     if (tags.includes('global')) out += '#TAG:global#'
@@ -62,7 +60,7 @@ function getOptionKey(name: string, config: OptionField<any>): string {
         out += `#TAG:protocol=${protocol}#`
     }
     if (tags.includes('user')) {
-        const loginUin = runtimeData.loginInfo.uin
+        const loginUin = runtimeData.loginInfo?.uin
         if (!loginUin) throw new Error('当前没有用户登录，无法获取用户配置项')
         out += `#TAG:user=${loginUin}#`
     }
@@ -142,7 +140,7 @@ export const useOptionStore = defineStore('option', () => {
      * 初始化
      * @param data
      */
-    async function init(data: RunTimeDataElem) {
+    async function init() {
         // 加载依赖
         queueWait = await import('@renderer/function/utils/systemUtil').then(
             (mod) => mod.queueWait,
@@ -209,8 +207,6 @@ export const useOptionStore = defineStore('option', () => {
                 },
             }),
         )
-        runtimeData = data
-        runtimeData.sysConfig = options
         initd = true
         // 触发加载钩子
         for (const prop in OptionInfos) {

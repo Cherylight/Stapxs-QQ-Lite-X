@@ -188,7 +188,7 @@
                                         'msg-at': true,
                                         atme:
                                             item.user_id ===
-                                                runtimeData.loginInfo.uin &&
+                                                runtimeData.loginInfo?.uin &&
                                             showToMe,
                                     }"
                                 >
@@ -665,7 +665,7 @@
                         <div
                             :class="{
                                 'me-send': info.includes(
-                                    runtimeData.loginInfo.uin,
+                                    runtimeData.loginInfo?.uin,
                                 ),
                             }"
                             @click="$emit('emojiClick', id as string, data)"
@@ -727,7 +727,6 @@ import {
     XmlSeg,
 } from '@renderer/function/model/seg'
 import { IUser, Member } from '@renderer/function/model/user'
-import { runtimeData } from '@renderer/function/msg'
 import {
     openLink,
     scrollToMsg as scrollToMsgFunc,
@@ -752,6 +751,7 @@ import { VueCompData } from '@renderer/function/elements/vueComp'
 import { Img } from '@renderer/function/model/img'
 import JsonSegComp from './msg-component/JsonSegComp.vue'
 import XmlSegComp from './msg-component/XmlSegComp.vue'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 //#region == 声明变量 ================================================================
 const {
@@ -816,6 +816,8 @@ const emit = defineEmits<{
 }>()
 
 const msgMain = useTemplateRef<HTMLDivElement>('msgMain')
+
+const runtimeData = useRuntimeData()
 
 const moveOptions: VMoveOptions<HTMLDivElement> = {
     moveHook: (_, move: number) => {
@@ -902,6 +904,7 @@ export default defineComponent({
     name: 'MsgBody',
     inject: ['viewer', 'mergePan'],
     data() {
+        const runtimeData = useRuntimeData()
         return {
             backend,
             md: markdownit({ breaks: true }),
@@ -909,7 +912,6 @@ export default defineComponent({
             isDebugMsg: runtimeData.sysConfig.debug_msg,
             linkViewStyle: '',
             View: ViewFuns,
-            runtimeData: runtimeData,
             pageViewInfo: undefined as { [key: string]: any } | undefined,
             getVideo: false,
             senderInfo: null as any,
@@ -923,9 +925,10 @@ export default defineComponent({
         }
     },
     mounted() {
+        const runtimeData = useRuntimeData()
         // 初始化 isMe 参数
         this.isMe =
-            Number(runtimeData.loginInfo.uin) ===
+            Number(runtimeData.loginInfo?.uin) ===
             Number(this.data.sender.user_id)
         this.getLink()
     },
@@ -1117,6 +1120,7 @@ export default defineComponent({
          * @param message_id
          */
         getRepMsg(message_id: string): string | null {
+            const runtimeData = useRuntimeData()
             const list = runtimeData.nowChat!.messageList.filter((item) => {
                 if (!(item instanceof Msg)) return false
                 return item.message_id === message_id
@@ -1173,6 +1177,7 @@ export default defineComponent({
         },
 
         async showPock() {
+            const runtimeData = useRuntimeData()
             // 如果是最后一条消息并且在最近发送
             if (this.data.uuid != runtimeData.nowChat?.messageList.at(-1)?.uuid)
                 return

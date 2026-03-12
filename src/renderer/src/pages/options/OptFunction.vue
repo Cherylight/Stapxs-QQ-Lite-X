@@ -475,13 +475,14 @@
 <script setup lang="ts">
 import Switch from '@renderer/components/Switch.vue'
 import useOptionStore from '@renderer/state/option'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { popBox } from '@renderer/function/utils/popBox'
 import UmamiInfoPan from '@renderer/components/popBox/UmamiInfoPan.vue'
 import { backend } from '@renderer/runtime/backend'
 import { shallowRef } from 'vue'
 
 const option = useOptionStore()
+const runtimeData = useRuntimeData()
 
 const ndt = shallowRef(0)
 const ndv = shallowRef(false)

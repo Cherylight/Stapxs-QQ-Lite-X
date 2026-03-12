@@ -8,11 +8,16 @@
  *               增加用户相关模型，而非仅局限于发送者
  */
 
-import { ForwardSenderData, MemberData, SenderData, UserData } from '@renderer/function/adapter/interface'
+import {
+    ForwardSenderData,
+    MemberData,
+    SenderData,
+    UserData,
+} from '@renderer/function/adapter/interface'
 import app, { nowTimes } from '@renderer/main'
 import { computed } from 'vue'
 import { Gender, Role } from '../adapter/enmu'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { Name, Time } from './data'
 import { ProxyUrl } from './proxyUrl'
 import { GroupSession, Session, TempSession, UserSession } from './session'
@@ -66,8 +71,8 @@ export class Member implements IUser {
         if (data.nickname) this._nickname = new Name(data.nickname)
         if (data.title) this._title = new Name(data.title)
         this.user = UserSession.getSessionById(data.user_id)
-        if (data.banTime){
-            const banTime = data.banTime - (Date.now() / 1000)
+        if (data.banTime) {
+            const banTime = data.banTime - Date.now() / 1000
             if (banTime > 0) this.setBanTime(banTime)
         }
         switch (data.role) {
@@ -155,24 +160,28 @@ export class Member implements IUser {
 
     get name(): string {
         const { $t } = app.config.globalProperties
-        const name = this.user?.remark?.toString()
-            ?? this._card?.toString()
-            ?? this._nickname?.toString()
-            ?? this.user_id.toString()
+        const name =
+            this.user?.remark?.toString() ??
+            this._card?.toString() ??
+            this._nickname?.toString() ??
+            this.user_id.toString()
         if (this.leave) return name + $t('(已离开)')
         return name
     }
 
     get namePy(): string {
-        const name = this.user?.remark?.py
-            ?? this._card?.py
-            ?? this._nickname?.py
-            ?? this.user_id.toString()
+        const name =
+            this.user?.remark?.py ??
+            this._card?.py ??
+            this._nickname?.py ??
+            this.user_id.toString()
         return name
     }
 
-    private readonly _face = computed(()=>{
-        return ProxyUrl.proxy(`https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.user_id}&d=${nowTimes}`)
+    private readonly _face = computed(() => {
+        return ProxyUrl.proxy(
+            `https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.user_id}&d=${nowTimes}`,
+        )
     })
 
     get face(): string {
@@ -224,7 +233,7 @@ export class Member implements IUser {
         this.last_sent_time = newData.last_sent_time
         this.level = newData.level
         this.role = newData.role
-        if(newData._banTime) this._banTime = newData._banTime
+        if (newData._banTime) this._banTime = newData._banTime
     }
 
     serializeData(): SenderData {
@@ -261,9 +270,9 @@ export class User implements IUser {
     sex: Gender
     constructor(data: UserData) {
         this.user_id = data.id
-        if(data.nickname) this._nickname = new Name(data.nickname)
-        if(data.remark) this._remark = new Name(data.remark)
-        if(data.longNick) this._longNick = new Name(data.longNick)
+        if (data.nickname) this._nickname = new Name(data.nickname)
+        if (data.remark) this._remark = new Name(data.remark)
+        if (data.longNick) this._longNick = new Name(data.longNick)
         this.qid = data.qid
         this.country = data.country
         this.province = data.province
@@ -277,7 +286,7 @@ export class User implements IUser {
         this.sex = data.sex
     }
 
-    get nickname(): Name|undefined {
+    get nickname(): Name | undefined {
         return this._nickname
     }
 
@@ -305,22 +314,27 @@ export class User implements IUser {
     }
 
     get name(): string {
-        return this._remark?.toString()
-            ?? this._nickname?.toString()
-            ?? this._longNick?.toString()
-            ?? this.user_id.toString()
+        return (
+            this._remark?.toString() ??
+            this._nickname?.toString() ??
+            this._longNick?.toString() ??
+            this.user_id.toString()
+        )
     }
 
     get namePy(): string {
-        const name = this._remark?.py
-            ?? this._nickname?.py
-            ?? this._longNick?.py
-            ?? this.user_id.toString()
+        const name =
+            this._remark?.py ??
+            this._nickname?.py ??
+            this._longNick?.py ??
+            this.user_id.toString()
         return name
     }
 
-    private readonly _face = computed(()=>{
-        return ProxyUrl.proxy(`https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.user_id}&d=${nowTimes}`)
+    private readonly _face = computed(() => {
+        return ProxyUrl.proxy(
+            `https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.user_id}&d=${nowTimes}`,
+        )
     })
 
     get face(): string {
@@ -374,6 +388,8 @@ export class BaseUser implements IUser {
      * @returns
      */
     static createMe(): BaseUser {
+        const runtimeData = useRuntimeData()
+        if (!runtimeData.loginInfo) throw new Error('未登录')
         return new BaseUser(
             runtimeData.loginInfo.uin,
             runtimeData.loginInfo.nickname,
@@ -444,17 +460,21 @@ export class BaseUser implements IUser {
     }
 
     get name(): string {
-        return this._remark?.toString()
-            ?? this._card?.toString()
-            ?? this._nickname?.toString()
-            ?? this.user_id.toString()
+        return (
+            this._remark?.toString() ??
+            this._card?.toString() ??
+            this._nickname?.toString() ??
+            this.user_id.toString()
+        )
     }
 
     get namePy(): string {
-        return this._remark?.py
-            ?? this._card?.py
-            ?? this._nickname?.py
-            ?? this.user_id.toString()
+        return (
+            this._remark?.py ??
+            this._card?.py ??
+            this._nickname?.py ??
+            this.user_id.toString()
+        )
     }
 
     /**
@@ -477,8 +497,10 @@ export class BaseUser implements IUser {
         return canBeAdmined(this.role, other)
     }
 
-    private readonly _face = computed(()=>{
-        return ProxyUrl.proxy(`https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.user_id}&d=${nowTimes}`)
+    private readonly _face = computed(() => {
+        return ProxyUrl.proxy(
+            `https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.user_id}&d=${nowTimes}`,
+        )
     })
 
     get face(): string {
@@ -507,7 +529,7 @@ export class BaseUser implements IUser {
             area: this.area,
             level: this.level,
             role: this.role,
-            title: this.title?.toString()
+            title: this.title?.toString(),
         }
     }
 }
@@ -543,7 +565,7 @@ function isRobot(id: number): boolean {
 /**
  * 合并转发的发送者
  */
-export class ForwardSender implements IUser{
+export class ForwardSender implements IUser {
     user_id = 0
     _nickname: Name
     _face: ProxyUrl
@@ -574,7 +596,7 @@ export class ForwardSender implements IUser{
     serializeData(): ForwardSenderData {
         return {
             nickname: this._nickname?.toString() ?? this.user_id.toString(),
-            face: this._face.url
+            face: this._face.url,
         }
     }
 }
@@ -585,8 +607,14 @@ export class ForwardSender implements IUser{
  * @param session? 来源会话
  */
 export function getSender(sender: SenderData): BaseUser
-export function getSender(sender: SenderData, session: GroupSession): Member | BaseUser
-export function getSender(sender: SenderData, session: UserSession | TempSession): User | BaseUser
+export function getSender(
+    sender: SenderData,
+    session: GroupSession,
+): Member | BaseUser
+export function getSender(
+    sender: SenderData,
+    session: UserSession | TempSession,
+): User | BaseUser
 export function getSender(sender: SenderData, session?: Session): IUser
 export function getSender(sender: SenderData, session?: Session): IUser {
     if (!session) return BaseUser.parse(sender)

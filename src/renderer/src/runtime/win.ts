@@ -1,7 +1,7 @@
 import horizontalStyles from '@renderer/assets/css/append/mobile/append_mobile_horizontal.css?raw'
 import verticalCss from '@renderer/assets/css/append/mobile/append_mobile_vertical.css?raw'
 import { logger } from '@renderer/function/base'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { computed, ComputedRef, shallowRef, watchEffect, markRaw } from 'vue'
 import { backend } from './backend'
 
@@ -33,6 +33,7 @@ const win = markRaw({
      * 初始化
      */
     async init() {
+        const runtimeData = useRuntimeData()
         // computed 初始化
         this._needBar = computed(() => {
             if (backend.isWeb()) return false
@@ -208,6 +209,7 @@ const win = markRaw({
      * 刷新透明效果状态
      */
     refreshVibrancyState() {
+        const runtimeData = useRuntimeData()
         if (this.hasInit) this.changeAnimation()
 
         const useVibrancy = runtimeData.sysConfig.vibrancy
@@ -218,6 +220,7 @@ const win = markRaw({
      * 设置透明效果
      */
     setVibrancy(use: boolean) {
+        const runtimeData = useRuntimeData()
         if (use) {
             document.body.classList.add('vibrancy')
             runtimeData.tags.vibrancy = true
@@ -235,6 +238,7 @@ const win = markRaw({
      * 刷新暗色模式
      */
     refreshDarkMode() {
+        const runtimeData = useRuntimeData()
         let darkMode: boolean
         switch (runtimeData.sysConfig.opt_dark_mode) {
             case 'auto':

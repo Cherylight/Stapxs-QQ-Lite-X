@@ -179,7 +179,7 @@ import {
     UserSession,
 } from '@renderer/function/model/session'
 import { IUser, Member } from '@renderer/function/model/user'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { shouldAutoFocus } from '@renderer/function/utils/appUtil'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
 import {
@@ -218,6 +218,7 @@ const headHeight = shallowRef(0)
 const bottomHeight = shallowRef(0)
 
 const $t = app.config.globalProperties.$t
+const runtimeData = useRuntimeData()
 const { vh } = useViewportUnits()
 
 //#region  == 模板引用 ======================================
@@ -419,6 +420,8 @@ async function changeRespond(id: string, msg: Msg) {
         popInfo.error($t('当前适配器不支持表情回应'))
         return
     }
+
+    if (!runtimeData.loginInfo) throw new Error('未登录')
 
     const hasSend =
         msg?.emojis[id]?.includes(runtimeData.loginInfo.uin) ?? false

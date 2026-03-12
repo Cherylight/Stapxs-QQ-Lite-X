@@ -1,12 +1,12 @@
 import { computed, toRaw } from 'vue'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { backend } from '@renderer/runtime/backend'
 
 /**
  * 走代理的url
  */
-export class ProxyUrl{
-    constructor(public raw: string){}
+export class ProxyUrl {
+    constructor(public raw: string) {}
 
     private readonly _url = computed(() => ProxyUrl.proxy(this.raw))
 
@@ -25,6 +25,7 @@ export class ProxyUrl{
      */
     static proxy(raw: string): string {
         if (backend.type !== 'web') return raw
+        const runtimeData = useRuntimeData()
         if (!runtimeData.tags.canCors) return raw
         return ProxyUrl.proxyMain(raw)
     }
@@ -44,6 +45,7 @@ export class ProxyUrl{
 
     private static proxyMain(raw: string): string {
         if (!raw.toLowerCase().startsWith('http')) return raw
+        const runtimeData = useRuntimeData()
         if (document.location.protocol == 'https:') {
             // 判断文件 URL 的协议
             // PS：Chrome 不会对 http 文件进行协议升级
@@ -57,12 +59,10 @@ export class ProxyUrl{
             proxyUrl = runtimeData.sysConfig.proxyUrl.trim()
 
         // url 校验
-        if (proxyUrl && !proxyUrl.includes('{url}'))
-            proxyUrl = undefined
+        if (proxyUrl && !proxyUrl.includes('{url}')) proxyUrl = undefined
 
         // 包装 url
-        if (proxyUrl)
-            return proxyUrl.replace('{url}', encodeURIComponent(raw))
+        if (proxyUrl) return proxyUrl.replace('{url}', encodeURIComponent(raw))
         return raw
     }
 }

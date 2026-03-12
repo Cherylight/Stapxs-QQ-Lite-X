@@ -11,7 +11,7 @@ import app from '@renderer/main'
 import { Message } from './model/message'
 import { GroupSession, Session } from './model/session'
 import { Notice, ReceivedNotice, SystemNotice } from './model/notice'
-import { runtimeData } from './msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { Msg } from './model/msg'
 import { NotifyInfo } from './elements/system'
 import { Notify } from './notify'
@@ -24,7 +24,8 @@ import { refreshFavicon } from './utils/favicon'
  */
 Session.afterNewMessageHook.push((session: Session, _: Message) => {
     const { $t } = app.config.globalProperties
-    if (session.appendInfo === $t('对方正在输入……')) session.appendInfo = undefined
+    if (session.appendInfo === $t('对方正在输入……'))
+        session.appendInfo = undefined
 })
 //#region == 通知相关 ==============================================
 /**
@@ -103,15 +104,14 @@ Session.afterNewMessageHook.push((session: Session, msg: Message) => {
 
 // 本人无苹果设备,不保证可以用
 //#region == Touch Bar ============================================
-Session.afterActiveHook.push((_)=>{
+Session.afterActiveHook.push((_) => {
     if (!backend.isDesktop()) return
-    const list = [] as
-        { id: number, name: string, image?: string }[]
+    const list = [] as { id: number; name: string; image?: string }[]
     for (const session of Session.activeSessions.values()) {
         list.push({
             id: session.id,
             name: session.showName,
-            image: session.face
+            image: session.face,
         })
     }
     backend.call(undefined, 'sys:flushOnMessage', false, list)
@@ -123,6 +123,7 @@ Session.afterActiveHook.push((_)=>{
  * 判断现在窗口是否有必要发通知
  */
 function needSendNotice(session: Session): boolean {
+    const runtimeData = useRuntimeData()
     if (!document.hasFocus()) return true
     if (document.hidden) return true
     if (runtimeData.nowChat !== session) return true
@@ -140,7 +141,7 @@ function hasConnectionWithImport(msg: Message): boolean {
             if (userIsImportant(user.user_id)) return true
         }
         return false
-    }else if (msg instanceof Msg) {
+    } else if (msg instanceof Msg) {
         return userIsImportant(msg.sender)
     }
     return false
@@ -155,7 +156,7 @@ function isImportant(msg: Message): boolean {
     if (msg instanceof Notice) {
         if (msg.toMe) return true
         return false
-    }else if (msg instanceof Msg) {
+    } else if (msg instanceof Msg) {
         if (msg.atme) return true
         if (msg.atall) return true
         return false
@@ -175,15 +176,18 @@ function addHighlightInfo(session: Session, msg: string): void {
  * @param msg 消息
  * @param important 特别关心
  */
-function sendNotify(session: Session, msg: Message, important: boolean = false): void {
+function sendNotify(
+    session: Session,
+    msg: Message,
+    important: boolean = false,
+): void {
+    const runtimeData = useRuntimeData()
     // 如果没有开启通知，直接返回
     if (runtimeData.sysConfig.close_notice) return
 
     let tag: string
-    if (msg instanceof Msg)
-        tag = `${session.id}/${msg.message_id ?? ''}`
-    else
-        tag = `${session.id}/`
+    if (msg instanceof Msg) tag = `${session.id}/${msg.message_id ?? ''}`
+    else tag = `${session.id}/`
 
     // 组装通知
     const msgInfo = {
@@ -206,6 +210,7 @@ function sendNotify(session: Session, msg: Message, important: boolean = false):
  */
 function groupNeedShowNotice(session: GroupSession): boolean {
     if (session.notice) return true
+    const runtimeData = useRuntimeData()
     if (runtimeData.sysConfig.group_notice_type === 'all') return true
     if (runtimeData.sysConfig.group_notice_type === 'inner') return true
     return false
@@ -217,6 +222,7 @@ function groupNeedShowNotice(session: GroupSession): boolean {
  */
 function groupNeedSendNotify(session: GroupSession): boolean {
     if (session.notice) return true
+    const runtimeData = useRuntimeData()
     if (runtimeData.sysConfig.group_notice_type === 'all') return true
     return false
 }

@@ -9,6 +9,7 @@
  *               用于处理收到的事件，分发向钩子
  */
 
+import useRuntimeData from '@renderer/state/runtimeData'
 import { EventData, EventType } from './adapter/interface'
 import {
     BanEvent,
@@ -22,7 +23,7 @@ import {
     ResponseEvent,
 } from './model/event'
 import { Session } from './model/session'
-import { newMsg, recallMsg, runtimeData } from './msg'
+import { newMsg, recallMsg } from './msg'
 
 type EventHook<T extends Event> = (event: T) => void | Promise<void>
 const eventHooks: Map<EventType, EventHook<any>[]> = new Map()
@@ -102,6 +103,7 @@ eventHandle('leave', async (event: LeaveEvent) => {
 
 // 表情回应
 eventHandle('response', async (event: ResponseEvent) => {
+    const runtimeData = useRuntimeData()
     if (runtimeData.sysConfig.close_respond) return
     event.msg.setEmoji(event.emojiId, event.operator.user_id, event.add)
 

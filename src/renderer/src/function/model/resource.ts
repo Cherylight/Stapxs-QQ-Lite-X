@@ -7,7 +7,7 @@
  */
 
 import { markRaw, shallowRef } from 'vue'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { ProxyUrl } from './proxyUrl'
 
 const timerRegistry = new FinalizationRegistry((timerId) => {
@@ -21,19 +21,25 @@ export class Resource {
     protected constructor(id: string | undefined, url: string) {
         this._id = id
         this._url.value = new ProxyUrl(url)
+        const runtimeData = useRuntimeData()
 
         // 设置定时更新
         if (!this._id) return
         if (!runtimeData.nowAdapter?.getResource) return
         const selfRef = new WeakRef(this)
-        const interval = setInterval(async () => {
-            const self = selfRef.deref()
-            if (!self) return clearInterval(interval)
-            if (!runtimeData.nowAdapter?.getResource) return
-            const newUrl = await runtimeData.nowAdapter.getResource(this._id as string)
-            if (!newUrl) return
-            this._url.value = new ProxyUrl(newUrl)
-        }, 55 * 60 * 1000)
+        const interval = setInterval(
+            async () => {
+                const self = selfRef.deref()
+                if (!self) return clearInterval(interval)
+                if (!runtimeData.nowAdapter?.getResource) return
+                const newUrl = await runtimeData.nowAdapter.getResource(
+                    this._id as string,
+                )
+                if (!newUrl) return
+                this._url.value = new ProxyUrl(newUrl)
+            },
+            55 * 60 * 1000,
+        )
         timerRegistry.register(this, interval)
     }
 
@@ -44,6 +50,7 @@ export class Resource {
      * @returns
      */
     static async fromId(id: string): Promise<Resource> {
+        const runtimeData = useRuntimeData()
         if (!runtimeData.nowAdapter?.getResource) return new Resource(id, '')
         const url = await runtimeData.nowAdapter.getResource(id)
         if (!url) return new Resource(id, '')

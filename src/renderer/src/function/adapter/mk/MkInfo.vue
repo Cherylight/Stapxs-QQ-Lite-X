@@ -1,6 +1,5 @@
 <template>
-    <div v-if="status.delay"
-        :class="'bot-status ' + status.delayType">
+    <div v-if="status.delay" :class="'bot-status ' + status.delayType">
         <div />
         <span>{{ $t('延迟') + ': ' + status.delay }}</span>
     </div>
@@ -41,24 +40,25 @@
 </template>
 
 <script setup lang="ts">
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { type MilkyAdapter } from './adapter'
-import {
-    computed,
-    markRaw,
-    shallowReactive,
-} from 'vue'
+import { computed, markRaw, shallowReactive } from 'vue'
 import { useInterval } from '@renderer/function/utils/vuse'
 import { GetImplInfoOutput } from '@saltify/milky-types'
 
-const adapter = computed<MilkyAdapter>(() => markRaw(runtimeData.nowAdapter as MilkyAdapter))
-const status = shallowReactive<{delay?: string, delayType: string, info?: GetImplInfoOutput}>(
-    {
-        delay: undefined,
-        delayType: 'normal',
-        info: undefined,
-    }
+const runtimeData = useRuntimeData()
+const adapter = computed<MilkyAdapter>(() =>
+    markRaw(runtimeData.nowAdapter as MilkyAdapter),
 )
+const status = shallowReactive<{
+    delay?: string
+    delayType: string
+    info?: GetImplInfoOutput
+}>({
+    delay: undefined,
+    delayType: 'normal',
+    info: undefined,
+})
 useInterval(() => {
     const main = async () => {
         const now = Date.now()

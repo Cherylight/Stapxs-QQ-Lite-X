@@ -16,7 +16,7 @@ import type {
     SenderData,
 } from '../adapter/interface'
 import { popInfo } from '../base'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { delay } from '../utils/systemUtil'
 import { Time, TimeoutSet } from './data'
 import { Img } from './img'
@@ -90,6 +90,7 @@ export class Msg extends Message {
         arg3?: Session,
         arg4?: Time,
     ) {
+        const runtimeData = useRuntimeData()
         if (arg2) {
             // constructor(segs: Seg[], sender: user, session?: Session, senderTime?: Time)
             const segs = arg1 as Seg[]
@@ -115,7 +116,7 @@ export class Msg extends Message {
                 if (seg.type === 'atall') this.atall = true
                 else if (
                     seg instanceof AtSeg &&
-                    Number(seg.user_id) === Number(runtimeData.loginInfo.uin)
+                    Number(seg.user_id) === Number(runtimeData.loginInfo?.uin)
                 )
                     this.atme = true
             }
@@ -134,7 +135,7 @@ export class Msg extends Message {
             })
         }
 
-        if (this.sender.user_id === runtimeData.loginInfo.uin)
+        if (this.sender.user_id === runtimeData.loginInfo?.uin)
             this.fromMe = true
 
         // TODO: 文件图片支持
@@ -340,6 +341,7 @@ export class SelfMsg extends Msg {
      * @returns 是否发送成功
      */
     async send(): Promise<boolean> {
+        const runtimeData = useRuntimeData()
         if (!runtimeData.nowAdapter) return false
         if (this.state === 'sending') throw new Error('该消息正在发送,不能发送')
         if (this.state === 'sent')

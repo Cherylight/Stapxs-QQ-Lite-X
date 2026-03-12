@@ -229,7 +229,6 @@ import imageCompression from 'browser-image-compression'
 import app from '@renderer/main'
 import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
 import { delay } from '@renderer/function/utils/systemUtil'
-import { runtimeData } from '@renderer/function/msg'
 import { AtSeg } from '@renderer/function/model/seg'
 import {
     useTemplateRef,
@@ -254,6 +253,7 @@ import {
     useUpdate,
 } from '@renderer/function/utils/vuse'
 import { calcTextareaHeight } from '@renderer/function/utils/calcTextareaHiehgt'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 const viewer: TemplateRef<undefined | InstanceType<typeof Viewer>> =
     inject('viewer')!
@@ -263,6 +263,8 @@ const { session, focusHide = false } = defineProps<{
     focusHide?: boolean
 }>()
 const inputMsg = defineModel<InputMsg>({ required: true })
+
+const runtimeData = useRuntimeData()
 
 const emit = defineEmits<{
     sendPoke: [user: IUser]

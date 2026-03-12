@@ -31,7 +31,12 @@
             <a>{{ $t('重命名') }}</a>
         </div>
         <div v-if="displayTag.delete" @click="deleteFile">
-            <div><font-awesome-icon :icon="['fas', 'trash']" style="color: var(--color-red)" /></div>
+            <div>
+                <font-awesome-icon
+                    :icon="['fas', 'trash']"
+                    style="color: var(--color-red)"
+                />
+            </div>
             <a style="color: var(--color-red)">{{ $t('删除') }}</a>
         </div>
     </div>
@@ -39,15 +44,13 @@
 
 <script setup lang="ts">
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
-import { runtimeData } from '@renderer/function/msg'
 import { i18n } from '@renderer/main'
-import {
-    shallowReactive,
-} from 'vue'
+import { shallowReactive } from 'vue'
 import { FileSender } from '@renderer/function/utils/fileSender'
 import { popInfo } from '@renderer/function/base'
 import { ensurePopBox, inputPopBox } from '@renderer/function/utils/popBox'
 import { Role } from '@renderer/function/adapter/enmu'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 //#region == 声明变量 ================================================================
 const $t = i18n.global.t
@@ -57,19 +60,18 @@ const displayTag = shallowReactive({
     close: false,
     upload: false,
     delete: false,
-    rename: false
+    rename: false,
 })
 const { file } = defineProps<{ file: GroupFile | GroupFileFolder }>()
 const emit = defineEmits<{
-    close: [arg?: any],
+    close: [arg?: any]
 }>()
+const runtimeData = useRuntimeData()
 init(file)
 //#endregion
 
 //#region == 方法函数 ================================================================
-async function init(
-    file: GroupFile | GroupFileFolder,
-): Promise<void> {
+async function init(file: GroupFile | GroupFileFolder): Promise<void> {
     for (const key in displayTag) {
         displayTag[key] = false
     }
@@ -96,11 +98,11 @@ function close(): void {
 }
 
 function download(): void {
-    (file as GroupFile)?.download()
+    ;(file as GroupFile)?.download()
     close()
 }
 function switchOpen(): void {
-    (file as GroupFileFolder)?.open()
+    ;(file as GroupFileFolder)?.open()
     close()
 }
 function upload(): void {

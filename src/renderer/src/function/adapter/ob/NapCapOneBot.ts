@@ -1,10 +1,20 @@
 import { GroupFile, GroupFileFolder } from '@renderer/function/model/file'
 import { Msg } from '@renderer/function/model/msg'
 import { Resource } from '@renderer/function/model/resource'
-import { FileSeg, ForwardSeg, ImgSeg, MdSeg, MfaceSeg } from '@renderer/function/model/seg'
-import { GroupSession, Session, UserSession } from '@renderer/function/model/session'
+import {
+    FileSeg,
+    ForwardSeg,
+    ImgSeg,
+    MdSeg,
+    MfaceSeg,
+} from '@renderer/function/model/seg'
+import {
+    GroupSession,
+    Session,
+    UserSession,
+} from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import {
     EssenceData,
     EssenceSeg,
@@ -56,7 +66,7 @@ import type {
     ObMessageEvent,
     ObMsg,
     ObSendMsg,
-    RkeyType
+    RkeyType,
 } from './type'
 import { createSender, fileToBase64, getGender, ObConnector } from './utils'
 import semver from 'semver'
@@ -92,7 +102,8 @@ export default class NapCapOneBot extends OneBotAdapter {
         this.segSerializer['mface'] = this.mfaceSerializer.bind(this)
         this.segSerializer['file'] = this.fileSerializer.bind(this)
 
-        this.noticeEventProcessers['group_msg_emoji_like'] = this.groupMsgEmojiLikeEvent.bind(this)
+        this.noticeEventProcessers['group_msg_emoji_like'] =
+            this.groupMsgEmojiLikeEvent.bind(this)
         this.eventProcessers['message_sent'] = this.messageSentEvent.bind(this)
     }
 
@@ -104,12 +115,12 @@ export default class NapCapOneBot extends OneBotAdapter {
      * @param msg 目标消息
      */
     @api
-    async setMsgReaded(session: Session, _: Msg): Promise<true|undefined> {
+    async setMsgReaded(session: Session, _: Msg): Promise<true | undefined> {
         if (session instanceof UserSession) {
             await this.connector.send('mark_msg_as_read', {
                 user_id: session.id,
             })
-        }else {
+        } else {
             await this.connector.send('mark_msg_as_read', {
                 group_id: session.id,
             })
@@ -119,7 +130,10 @@ export default class NapCapOneBot extends OneBotAdapter {
     }
     @api
     override async getFriendList(_?: boolean): Promise<FriendData[]> {
-        const data: NcObGetFriendsWithCategory = await this.connector.send('get_friends_with_category', {})
+        const data: NcObGetFriendsWithCategory = await this.connector.send(
+            'get_friends_with_category',
+            {},
+        )
         const out: FriendData[] = []
         for (const category of data.data) {
             for (const friend of category.buddyList) {
@@ -137,9 +151,12 @@ export default class NapCapOneBot extends OneBotAdapter {
     @api
     override async getUserInfo(userId: number, _?: boolean): Promise<UserData> {
         // 获取用户信息
-        const data: NcObGetStrangerInfo = await this.connector.send('get_stranger_info', {
-            user_id: userId,
-        })
+        const data: NcObGetStrangerInfo = await this.connector.send(
+            'get_stranger_info',
+            {
+                user_id: userId,
+            },
+        )
         const user = data.data
         if (!this.friendListCache) await this.getFriendList()
         return {
@@ -153,9 +170,12 @@ export default class NapCapOneBot extends OneBotAdapter {
             city: user.city === '' ? undefined : user.city,
             regTime: user.reg_time,
             qqLevel: user.qqLevel,
-            birthday_year: user.birthday_year === 0 ? undefined : user.birthday_year,
-            birthday_month: user.birthday_month === 0 ? undefined : user.birthday_month,
-            birthday_day: user.birthday_day === 0 ? undefined : user.birthday_day,
+            birthday_year:
+                user.birthday_year === 0 ? undefined : user.birthday_year,
+            birthday_month:
+                user.birthday_month === 0 ? undefined : user.birthday_month,
+            birthday_day:
+                user.birthday_day === 0 ? undefined : user.birthday_day,
             age: user.age,
             sex: getGender(user.sex),
         }
@@ -165,13 +185,20 @@ export default class NapCapOneBot extends OneBotAdapter {
      * @param group
      */
     @api
-    async getGroupAnnouncement(group: GroupSession): Promise<GroupAnnouncementData[]> {
+    async getGroupAnnouncement(
+        group: GroupSession,
+    ): Promise<GroupAnnouncementData[]> {
         // 获取群公告信息
-        const data: NcObGetGroupNotices = await this.connector.send('_get_group_notice', { group_id: group.id })
+        const data: NcObGetGroupNotices = await this.connector.send(
+            '_get_group_notice',
+            { group_id: group.id },
+        )
 
-        const out = data.data.map(item => ({
+        const out = data.data.map((item) => ({
             content: item.message.text,
-            img: item.message.image.at(0) ? `https://p.qlogo.cn/gdynamic/${item.message.image.at(0)!.id}/0/`: undefined,
+            img: item.message.image.at(0)
+                ? `https://p.qlogo.cn/gdynamic/${item.message.image.at(0)!.id}/0/`
+                : undefined,
             time: item.publish_time,
             sender: item.sender_id,
         }))
@@ -179,24 +206,37 @@ export default class NapCapOneBot extends OneBotAdapter {
     }
     @api
     async getGroupEssence(group: GroupSession): Promise<EssenceData[]> {
-        const data: NcObGetEssenceMsgList = await this.connector.send('get_essence_msg_list', { group_id: group.id })
+        const data: NcObGetEssenceMsgList = await this.connector.send(
+            'get_essence_msg_list',
+            { group_id: group.id },
+        )
 
         const out: Promise<EssenceData>[] = []
         for (const item of data.data) {
-            out.push((async () => ({
-                sender: createSender(item.sender_id, item.sender_nick),
-                sender_time: item.operator_time,
-                operator: createSender(item.operator_id, item.operator_nick),
-                operator_time: item.operator_time,
-                content: (await this.parseSeg(item.content)) as EssenceSeg[]
-            }))())
+            out.push(
+                (async () => ({
+                    sender: createSender(item.sender_id, item.sender_nick),
+                    sender_time: item.operator_time,
+                    operator: createSender(
+                        item.operator_id,
+                        item.operator_nick,
+                    ),
+                    operator_time: item.operator_time,
+                    content: (await this.parseSeg(
+                        item.content,
+                    )) as EssenceSeg[],
+                }))(),
+            )
         }
 
         return await Promise.all(out)
     }
     @api
     async getCustomFace(): Promise<string[] | undefined> {
-        const data: NcObFetchCustomFace = await this.connector.send('fetch_custom_face', {count: 500})
+        const data: NcObFetchCustomFace = await this.connector.send(
+            'fetch_custom_face',
+            { count: 500 },
+        )
 
         return data.data
     }
@@ -207,7 +247,9 @@ export default class NapCapOneBot extends OneBotAdapter {
         if (!this.isForward(msg)) return await super.sendMsg(msg)
 
         // 合并转发
-        const message = await this.forwardSegSerializer(msg.message[0] as ForwardSeg)
+        const message = await this.forwardSegSerializer(
+            msg.message[0] as ForwardSeg,
+        )
         let data: ObSendMsg
         if (msg.session instanceof UserSession) {
             data = await this.connector.send('send_private_forward_msg', {
@@ -222,21 +264,23 @@ export default class NapCapOneBot extends OneBotAdapter {
         } else {
             throw new Error('OneBot 不支持发送临时会话消息')
         }
-        if (!data.data.message_id) throw new Error('发送消息失败，返回值无message_id')
+        if (!data.data.message_id)
+            throw new Error('发送消息失败，返回值无message_id')
 
         return data.data.message_id.toString()
     }
 
     @api
-    async getHistoryMsg(session: Session, count: number, start?: Msg): Promise<MsgData[] | undefined> {
+    async getHistoryMsg(
+        session: Session,
+        count: number,
+        start?: Msg,
+    ): Promise<MsgData[] | undefined> {
         let type: 'user' | 'group'
 
-        if (session instanceof UserSession)
-            type = 'user'
-        else if (session instanceof GroupSession)
-            type = 'group'
-        else
-            throw new Error('NapCat不支持临时会话')
+        if (session instanceof UserSession) type = 'user'
+        else if (session instanceof GroupSession) type = 'group'
+        else throw new Error('NapCat不支持临时会话')
 
         let data: NcObGetHistoryMsg
 
@@ -258,7 +302,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 
         if (start) data.data.messages.pop() // 去掉第一条，避免重复
 
-        const out: Promise<MsgData>[] = data.data.messages.map(msg => {
+        const out: Promise<MsgData>[] = data.data.messages.map((msg) => {
             if (msg.user_id) msg.user_id = session.id // 修正user_id
             return this.parseMsg(msg)
         })
@@ -266,7 +310,10 @@ export default class NapCapOneBot extends OneBotAdapter {
         return await Promise.all(out)
     }
     @api
-    async sendGroupPoke(session: GroupSession, target: Member): Promise<true | undefined> {
+    async sendGroupPoke(
+        session: GroupSession,
+        target: Member,
+    ): Promise<true | undefined> {
         await this.connector.send('send_poke', {
             group_id: session.id,
             user_id: target.user_id,
@@ -281,7 +328,11 @@ export default class NapCapOneBot extends OneBotAdapter {
         return true
     }
     @api
-    async setResponse(msg: Msg, emojiId: string, add?: boolean): Promise<true | undefined> {
+    async setResponse(
+        msg: Msg,
+        emojiId: string,
+        add?: boolean,
+    ): Promise<true | undefined> {
         await this.connector.send('set_msg_emoji_like', {
             message_id: msg.message_id,
             emoji_id: emojiId,
@@ -290,18 +341,26 @@ export default class NapCapOneBot extends OneBotAdapter {
         return true
     }
     @api
-    override async getForwardMsg(forwardId: string, msg?: ObMsg): Promise<ForwardNodeData[]> {
-        const { data }: NcObGetForwardMsg = await this.connector.send('get_forward_msg', {
-            id: forwardId,
-        })
-        return await Promise.all(data.messages.map(node => this.ncNodeParser(node, msg)))
+    override async getForwardMsg(
+        forwardId: string,
+        msg?: ObMsg,
+    ): Promise<ForwardNodeData[]> {
+        const { data }: NcObGetForwardMsg = await this.connector.send(
+            'get_forward_msg',
+            {
+                id: forwardId,
+            },
+        )
+        return await Promise.all(
+            data.messages.map((node) => this.ncNodeParser(node, msg)),
+        )
     }
     /**
      * 获取资源url
      * @param id 资源id
      */
     @api
-    async getResource(id: string): Promise<string|undefined> {
+    async getResource(id: string): Promise<string | undefined> {
         const [type, url] = id.split('|||') as [RkeyType, string]
         const rkey = await this.getRkey(type)
         if (!rkey) return url
@@ -327,29 +386,41 @@ export default class NapCapOneBot extends OneBotAdapter {
     //#region == 文件相关 ======================
     @api
     async getGroupFile(group: GroupSession): Promise<FilesData> {
-        const data: NcObGetGroupFile = await this.connector.send('get_group_root_files', {
-            group_id: group.id,
-            file_count: 1000
-        })
+        const data: NcObGetGroupFile = await this.connector.send(
+            'get_group_root_files',
+            {
+                group_id: group.id,
+                file_count: 1000,
+            },
+        )
         return this.parseFileData(data)
     }
 
     @api
-    async getGroupFolderFile(group: GroupSession, folderId: string): Promise<FilesData | undefined> {
-        const data: NcObGetGroupFile = await this.connector.send('get_group_files_by_folder', {
-            group_id: group.id,
-            folder_id: folderId,
-            file_count: 1000
-        })
+    async getGroupFolderFile(
+        group: GroupSession,
+        folderId: string,
+    ): Promise<FilesData | undefined> {
+        const data: NcObGetGroupFile = await this.connector.send(
+            'get_group_files_by_folder',
+            {
+                group_id: group.id,
+                folder_id: folderId,
+                file_count: 1000,
+            },
+        )
         return this.parseFileData(data)
     }
 
     @api
     async getGroupFileUrl(file: GroupFile): Promise<string | undefined> {
-        const data: NcObGetFileUrl = await this.connector.send('get_group_file_url', {
-            group_id: file.group.id,
-            file_id: file.id,
-        })
+        const data: NcObGetFileUrl = await this.connector.send(
+            'get_group_file_url',
+            {
+                group_id: file.group.id,
+                file_id: file.id,
+            },
+        )
 
         return data.data.url
     }
@@ -360,13 +431,20 @@ export default class NapCapOneBot extends OneBotAdapter {
      * @param fold
      */
     @api
-    async sendGroupFile(group: GroupSession, file: File, fold?: GroupFileFolder): Promise<string|undefined> {
-        const data: NcObUploadGroupFile = await this.connector.send('upload_group_file', {
-            group_id: group.id,
-            file: `base64://${await fileToBase64(file)}`,
-            name: file.name,
-            folder_id: fold?.id,
-        })
+    async sendGroupFile(
+        group: GroupSession,
+        file: File,
+        fold?: GroupFileFolder,
+    ): Promise<string | undefined> {
+        const data: NcObUploadGroupFile = await this.connector.send(
+            'upload_group_file',
+            {
+                group_id: group.id,
+                file: `base64://${await fileToBase64(file)}`,
+                name: file.name,
+                folder_id: fold?.id,
+            },
+        )
         return data.data.file_id
     }
     /**
@@ -375,12 +453,18 @@ export default class NapCapOneBot extends OneBotAdapter {
      * @param file
      */
     @api
-    async sendPrivateFile(session: UserSession, file: File): Promise<string|undefined> {
-        const data: NcObUploadPrivateFile = await this.connector.send('upload_private_file', {
-            user_id: session.id,
-            file: `base64://${await fileToBase64(file)}`,
-            name: file.name,
-        })
+    async sendPrivateFile(
+        session: UserSession,
+        file: File,
+    ): Promise<string | undefined> {
+        const data: NcObUploadPrivateFile = await this.connector.send(
+            'upload_private_file',
+            {
+                user_id: session.id,
+                file: `base64://${await fileToBase64(file)}`,
+                name: file.name,
+            },
+        )
         return data.data.file_id
     }
     /**
@@ -389,11 +473,17 @@ export default class NapCapOneBot extends OneBotAdapter {
      * @param folderName
      */
     @api
-    async createFileFolder(group: GroupSession, folderName: string): Promise<string|undefined> {
-        const data: NcObCreateGroupFileFolder = await this.connector.send('create_group_file_folder', {
-            group_id: group.id,
-            folder_name: folderName,
-        })
+    async createFileFolder(
+        group: GroupSession,
+        folderName: string,
+    ): Promise<string | undefined> {
+        const data: NcObCreateGroupFileFolder = await this.connector.send(
+            'create_group_file_folder',
+            {
+                group_id: group.id,
+                folder_name: folderName,
+            },
+        )
         return data.data.groupItem.folderInfo.folderId
     }
     /**
@@ -401,7 +491,7 @@ export default class NapCapOneBot extends OneBotAdapter {
      * @param file
      */
     @api
-    async deleteGroupFile(file: GroupFile): Promise<true|undefined> {
+    async deleteGroupFile(file: GroupFile): Promise<true | undefined> {
         await this.connector.send('delete_group_file', {
             group_id: file.group.id,
             file_id: file.id,
@@ -413,7 +503,9 @@ export default class NapCapOneBot extends OneBotAdapter {
      * @param folder
      */
     @api
-    async deleteGroupFileFolder(folder: GroupFileFolder): Promise<true|undefined> {
+    async deleteGroupFileFolder(
+        folder: GroupFileFolder,
+    ): Promise<true | undefined> {
         await this.connector.send('delete_group_folder', {
             group_id: folder.group.id,
             folder_id: folder.id,
@@ -424,7 +516,9 @@ export default class NapCapOneBot extends OneBotAdapter {
     //#region == 个人信息 ======================
     @api
     async setNickname(nickname: string): Promise<true | undefined> {
-        const selfInfo = await this.getUserInfo(runtimeData.loginInfo.uin)
+        const runtimeData = useRuntimeData()
+        if (!runtimeData.loginInfo) throw new Error('未登录')
+        const selfInfo = await this.getUserInfo(runtimeData.loginInfo?.uin)
         await this.connector.send('set_qq_profile', {
             nickname: nickname,
             personal_note: selfInfo.longNick,
@@ -434,7 +528,9 @@ export default class NapCapOneBot extends OneBotAdapter {
     }
     @api
     async setSign(sign: string): Promise<true | undefined> {
-        const selfInfo = await this.getUserInfo(runtimeData.loginInfo.uin)
+        const runtimeData = useRuntimeData()
+        if (!runtimeData.loginInfo) throw new Error('未登录')
+        const selfInfo = await this.getUserInfo(runtimeData.loginInfo?.uin)
         await this.connector.send('set_qq_profile', {
             nickname: selfInfo.nickname,
             personal_note: sign,
@@ -453,7 +549,10 @@ export default class NapCapOneBot extends OneBotAdapter {
             content: data.data.content,
         }
     }
-    override async imageParser(data: NcObImgSeg, msg?: ObMsg): Promise<ImgSegData> {
+    override async imageParser(
+        data: NcObImgSeg,
+        msg?: ObMsg,
+    ): Promise<ImgSegData> {
         if (!('key' in data.data)) {
             let type: RkeyType
 
@@ -467,7 +566,7 @@ export default class NapCapOneBot extends OneBotAdapter {
                 isFace: data.data.sub_type === 7 || data.data.sub_type === 1,
                 summary: data.data.summary || '[图片]',
             }
-        }else {
+        } else {
             return {
                 type: 'mface',
                 url: data.data.url,
@@ -487,12 +586,17 @@ export default class NapCapOneBot extends OneBotAdapter {
             file_id: data.data.file_id,
         }
     }
-    override async forwardParser(_data: ObForwardSeg, _?: ObMsg): Promise<ForwardSegData> {
+    override async forwardParser(
+        _data: ObForwardSeg,
+        _?: ObMsg,
+    ): Promise<ForwardSegData> {
         const data = _data as any as NcObForwardSeg
         const id = data.data.id
         let nodes: ForwardNodeData[] = []
-        if (data.data.content){
-            nodes = await Promise.all(data.data.content.map(node => this.ncNodeParser(node)))
+        if (data.data.content) {
+            nodes = await Promise.all(
+                data.data.content.map((node) => this.ncNodeParser(node)),
+            )
         } else {
             nodes = await this.getForwardMsg(id)
         }
@@ -502,9 +606,13 @@ export default class NapCapOneBot extends OneBotAdapter {
             content: nodes,
         }
     }
-    override async jsonParser(data: ObJsonSeg, _?: ObMsg): Promise<JsonSegData> {
+    override async jsonParser(
+        data: ObJsonSeg,
+        _?: ObMsg,
+    ): Promise<JsonSegData> {
         const jsonData = JSON.parse(data.data.data)
-        if (jsonData['app'] !== 'com.tencent.multimsg') return super.jsonParser(data)
+        if (jsonData['app'] !== 'com.tencent.multimsg')
+            return super.jsonParser(data)
 
         const forwardId = jsonData['meta']['detail']['resid']
 
@@ -515,7 +623,10 @@ export default class NapCapOneBot extends OneBotAdapter {
         }
         return out as any as JsonSegData
     }
-    async ncNodeParser(data: NcForwardData, msg?: ObMsg): Promise<ForwardNodeData> {
+    async ncNodeParser(
+        data: NcForwardData,
+        msg?: ObMsg,
+    ): Promise<ForwardNodeData> {
         return {
             sender: {
                 nickname: data.sender.nickname,
@@ -532,7 +643,7 @@ export default class NapCapOneBot extends OneBotAdapter {
             type: 'markdown',
             data: {
                 content: seg.content,
-            }
+            },
         }
     }
     override async imageSerializer(seg: ImgSeg): Promise<NcObImgSeg> {
@@ -544,7 +655,7 @@ export default class NapCapOneBot extends OneBotAdapter {
                 sub_type: seg.isFace ? 7 : 0, // 0表示普通图片，7表示表情
                 summary: seg.summary,
                 file_size: 0,
-            }
+            },
         }
     }
     async mfaceSerializer(seg: MfaceSeg): Promise<NcObMfaceSeg> {
@@ -557,7 +668,7 @@ export default class NapCapOneBot extends OneBotAdapter {
                 key: seg.key,
                 emoji_id: seg.id,
                 emoji_package_id: seg.packageId,
-            }
+            },
         }
     }
     async fileSerializer(seg: FileSeg): Promise<NcObFileSeg> {
@@ -569,25 +680,27 @@ export default class NapCapOneBot extends OneBotAdapter {
                 file_id: seg.file_id,
                 file_size: seg.size,
                 url: seg.url,
-            }
+            },
         }
     }
     async forwardSegSerializer(seg: ForwardSeg): Promise<ObForwardNodeSeg[]> {
-        const serializer = async (msg: Msg)=>{
+        const serializer = async (msg: Msg) => {
             if (!this.isForward(msg)) return await this.serializeMsg(msg)
             else return this.forwardSegSerializer(msg.message[0] as ForwardSeg)
         }
         const msgs = seg.content
-        const messagesList = await Promise.all(msgs.map(msg => serializer(msg)))
+        const messagesList = await Promise.all(
+            msgs.map((msg) => serializer(msg)),
+        )
         const out: ObForwardNodeSeg[] = []
-        for (let i = 0;i < messagesList.length;i++) {
+        for (let i = 0; i < messagesList.length; i++) {
             out.push({
                 type: 'node',
                 data: {
                     nickname: msgs[i].sender.name,
                     user_id: msgs[i].sender.user_id.toString(),
                     content: messagesList[i],
-                }
+                },
             })
         }
         return out
@@ -605,11 +718,15 @@ export default class NapCapOneBot extends OneBotAdapter {
         re.time = event.time
         return re
     }
-    override async groupDecreaseEvent(event: ObGroupDecreaseEvent): Promise<LeaveEventData> {
+    override async groupDecreaseEvent(
+        event: ObGroupDecreaseEvent,
+    ): Promise<LeaveEventData> {
         if (event.operator_id === 0) event.operator_id = event.user_id
         return await super.groupDecreaseEvent(event)
     }
-    async groupMsgEmojiLikeEvent(event: NcObGroupMsgEmojiLikeEvent): Promise<ResponseEventData> {
+    async groupMsgEmojiLikeEvent(
+        event: NcObGroupMsgEmojiLikeEvent,
+    ): Promise<ResponseEventData> {
         return {
             type: 'response',
             session: {
@@ -623,7 +740,9 @@ export default class NapCapOneBot extends OneBotAdapter {
             time: event.time,
         }
     }
-    async messageSentEvent(event: NcObMessageSendEvent): Promise<MessageEventData> {
+    async messageSentEvent(
+        event: NcObMessageSendEvent,
+    ): Promise<MessageEventData> {
         let data: ObMessageEvent
         if (event.message_type === 'private') {
             data = {
@@ -641,9 +760,9 @@ export default class NapCapOneBot extends OneBotAdapter {
                     nickname: event.sender.nickname,
                     sex: 'unknown',
                     age: 0,
-                }
+                },
             }
-        }else {
+        } else {
             data = {
                 time: event.time,
                 self_id: event.self_id,
@@ -665,7 +784,7 @@ export default class NapCapOneBot extends OneBotAdapter {
                     level: '',
                     role: '',
                     title: '',
-                }
+                },
             }
         }
         return await this.messageEvent(data)
@@ -690,7 +809,7 @@ export default class NapCapOneBot extends OneBotAdapter {
 
     private parseFileData(data: NcObGetGroupFile): FilesData {
         return {
-            files: data.data.files.map(file => ({
+            files: data.data.files.map((file) => ({
                 file_id: file.file_id,
                 file_name: file.file_name,
                 size: file.file_size,
@@ -700,32 +819,33 @@ export default class NapCapOneBot extends OneBotAdapter {
                 uploader_name: file.uploader_name,
                 uploader_id: file.uploader,
             })),
-            folders: data.data.folders.map(folder => ({
+            folders: data.data.folders.map((folder) => ({
                 folder_id: folder.folder_id,
                 folder_name: folder.folder_name,
                 count: folder.total_file_count,
                 create_time: folder.create_time,
                 creator_name: folder.creator_name,
                 creator_id: folder.creator,
-            }))
+            })),
         }
     }
 
-    private rkeyCache: {[key in RkeyType]: {value: string, time: number} | null} = {
-        'PRIVATE': null,
-        'GROUP': null,
-        'UNKNOWN': null
+    private rkeyCache: {
+        [key in RkeyType]: { value: string; time: number } | null
+    } = {
+        PRIVATE: null,
+        GROUP: null,
+        UNKNOWN: null,
     }
     @api
     /**
      * 获取图片rkey
      */
-    private async getRkey(type: RkeyType): Promise<string|undefined> {
+    private async getRkey(type: RkeyType): Promise<string | undefined> {
         if (type === 'UNKNOWN') return undefined
         const ncType = type === 'GROUP' ? 20 : 10
         const cache = this.rkeyCache[type]
-        if (cache && (Date.now() - cache.time) < 5 * 60 * 1000)
-            return cache.value
+        if (cache && Date.now() - cache.time < 5 * 60 * 1000) return cache.value
         const data = await this.connector.send('nc_get_rkey', {})
         for (const item of data.data) {
             if (item.type !== ncType) continue
@@ -736,7 +856,10 @@ export default class NapCapOneBot extends OneBotAdapter {
         return undefined
     }
 
-    private async createResource(url: string, type: RkeyType): Promise<Resource> {
+    private async createResource(
+        url: string,
+        type: RkeyType,
+    ): Promise<Resource> {
         let baseUrl: string
         // console.log('createResource', url, rkey)
         try {
@@ -745,7 +868,9 @@ export default class NapCapOneBot extends OneBotAdapter {
             baseUrl = u.toString()
         } catch {
             // 回退方案：使用正则在不能用 URL 的情况下处理
-            baseUrl = url.replace(/([?&])rkey=[^&]*(&?)/, (_, sep, tail) => tail ? sep : '')
+            baseUrl = url.replace(/([?&])rkey=[^&]*(&?)/, (_, sep, tail) =>
+                tail ? sep : '',
+            )
         }
         const id = `${type}|||${baseUrl}`
         let resUrl: string

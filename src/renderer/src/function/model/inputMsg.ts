@@ -10,7 +10,7 @@ import { Msg } from './msg'
 import { AtSeg, ImgSeg, ReplySeg, Seg, TxtSeg } from './seg'
 import { autoMarkRaw } from './utils'
 import app from '@renderer/main'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { Session } from './session'
 
 @autoMarkRaw
@@ -36,6 +36,7 @@ export class InputMsg {
      */
     setReply(msg: Msg) {
         this._reply.value = msg
+        const runtimeData = useRuntimeData()
         if (
             runtimeData.sysConfig.reply_with_at === 'insert' &&
             msg.sender?.user_id
@@ -122,6 +123,7 @@ export class InputMsg {
         }
         // 解析消息
         let back = this.parseMsgToSegs()
+        const runtimeData = useRuntimeData()
         // 插入引用
         if (this.reply?.message_id) {
             const front: Seg[] = [new ReplySeg(this.reply.message_id)]

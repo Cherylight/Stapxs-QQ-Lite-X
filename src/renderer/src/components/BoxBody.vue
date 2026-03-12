@@ -8,25 +8,29 @@
 -->
 
 <template>
-    <div :id="'box-' + data.id"
+    <div
+        :id="'box-' + data.id"
         :class="{
             'box-body': true,
-            'open': open,
-            'active': active,
-            'onmenu': !active && (onmenu || _open),
-            'unmounted': from === 'message' && !data.isActive
+            open: open,
+            active: active,
+            onmenu: !active && (onmenu || _open),
+            unmounted: from === 'message' && !data.isActive,
         }"
-        :style="{'--box-color': data.color}"
-        @click="data.length ? _open = !_open : undefined">
-        <div class="side-bar-button"
+        :style="{ '--box-color': data.color }"
+        @click="data.length ? (_open = !_open) : undefined"
+    >
+        <div
+            class="side-bar-button"
             :class="{
                 'box-body': true,
-                'open': open,
-                'active': active,
-                'onmenu': !active && (onmenu || _open),
-                'unmounted': from === 'message' && !data.isActive
-            }">
-            <div :class="{'new': showNotice}" />
+                open: open,
+                active: active,
+                onmenu: !active && (onmenu || _open),
+                unmounted: from === 'message' && !data.isActive,
+            }"
+        >
+            <div :class="{ new: showNotice }" />
             <font-awesome-icon :icon="['fas', data.icon]" />
             <div>
                 <div>
@@ -38,7 +42,14 @@
                 </div>
                 <div>
                     <template v-if="from === 'message'">
-                        <a v-for="(item, index) in data.highlightInfo.slice(0, 2)" :key="index" class="highlight">
+                        <a
+                            v-for="(item, index) in data.highlightInfo.slice(
+                                0,
+                                2,
+                            )"
+                            :key="index"
+                            class="highlight"
+                        >
                             [{{ item }}]
                         </a>
                         <a>
@@ -57,7 +68,10 @@
                         <a>{{ cialloMsg }}</a>
                     </template>
                     <div style="margin-left: 10px; display: flex">
-                        <font-awesome-icon v-if="data.alwaysTop" :icon="['fas', 'thumbtack']" />
+                        <font-awesome-icon
+                            v-if="data.alwaysTop"
+                            :icon="['fas', 'thumbtack']"
+                        />
                     </div>
                 </div>
             </div>
@@ -67,42 +81,49 @@
             <div
                 v-if="open && from !== 'new'"
                 class="session-body-container"
-                :style="{'--content-num': data.length}">
-                <div v-if="from === 'message'"
-                    class="box-content">
-                    <TransitionGroup
-                        name="onmsg"
-                        tag="div">
-                        <FriendBody v-for="item in data.sortContentByTime"
+                :style="{ '--content-num': data.length }"
+            >
+                <div v-if="from === 'message'" class="box-content">
+                    <TransitionGroup name="onmsg" tag="div">
+                        <FriendBody
+                            v-for="item in data.sortContentByTime"
                             :key="item.id"
-                            v-menu.prevent.stop="event => openFriendMenu(
-                                event.x,
-                                event.y,
-                                'message',
-                                toRaw(item),
-                                toRaw(data)
-                            )"
+                            v-menu.prevent.stop="
+                                (event) =>
+                                    openFriendMenu(
+                                        event.x,
+                                        event.y,
+                                        'message',
+                                        toRaw(item),
+                                        toRaw(data),
+                                    )
+                            "
                             :data="item"
                             :from="from"
                             :box="data"
-                            @click.stop="emit('userClick', item)" />
+                            @click.stop="emit('userClick', item)"
+                        />
                     </TransitionGroup>
                 </div>
-                <div v-else
-                    class="box-content">
-                    <FriendBody v-for="item in data.sortContentByName"
+                <div v-else class="box-content">
+                    <FriendBody
+                        v-for="item in data.sortContentByName"
                         :key="item.id"
-                        v-menu.prevent.stop="event => openFriendMenu(
-                            event.x,
-                            event.y,
-                            'friend',
-                            toRaw(item),
-                            toRaw(data)
-                        )"
+                        v-menu.prevent.stop="
+                            (event) =>
+                                openFriendMenu(
+                                    event.x,
+                                    event.y,
+                                    'friend',
+                                    toRaw(item),
+                                    toRaw(data),
+                                )
+                        "
                         :data="item"
                         :from="from"
                         :box="data"
-                        @click.stop="emit('userClick', item)" />
+                        @click.stop="emit('userClick', item)"
+                    />
                 </div>
             </div>
         </Transition>
@@ -111,21 +132,20 @@
 
 <script setup lang="ts">
 import { SessionBox } from '@renderer/function/model/box'
-import {
-    computed,
-    shallowRef,
-    toRaw,
-    watch,
-} from 'vue'
+import { computed, shallowRef, toRaw, watch } from 'vue'
 
 import { Session } from '@renderer/function/model/session'
-import { runtimeData } from '@renderer/function/msg'
 import { randomChoice, randomNum } from '@renderer/function/utils/systemUtil'
 import { vMenu } from '@renderer/function/utils/vcmd'
 import { i18n } from '@renderer/main'
 import FriendBody from './FriendBody.vue'
-import { friendMenuInfo, openFriendMenu } from '@renderer/function/utils/contextMenu'
+import {
+    friendMenuInfo,
+    openFriendMenu,
+} from '@renderer/function/utils/contextMenu'
+import useRuntimeData from '@renderer/state/runtimeData'
 const $t = i18n.global.t
+const runtimeData = useRuntimeData()
 //#region == 彩蛋相关 ============================================================
 const cialloList = [
     '拟吼哇.欧四与个会所话读后组～',
@@ -135,13 +155,15 @@ const cialloList = [
     '电动的，来自拉格让日点牛奶',
     '爱丽丝·妈个陀螺仪的',
     'NoneBot，是一个用于工业级单片机通讯的框架',
-    'await mathcer.send(\'ciallo world\')',
-    '(...args: any[]) => \'ciallo world\'',
-    'await UniMessage(\'ciallo world\').send()',
-].map(item => $t(item))
-const flanAge = Math.floor(
-    (Date.now() - new Date('2002-07-04').getTime()) / (365.25 * 24 * 60 * 60 * 1000)
-) + 495
+    "await mathcer.send('ciallo world')",
+    "(...args: any[]) => 'ciallo world'",
+    "await UniMessage('ciallo world').send()",
+].map((item) => $t(item))
+const flanAge =
+    Math.floor(
+        (Date.now() - new Date('2002-07-04').getTime()) /
+            (365.25 * 24 * 60 * 60 * 1000),
+    ) + 495
 
 // 我也来搞个抽签
 let cialloMsg = randomChoice(...cialloList)
@@ -151,26 +173,23 @@ if (random === flanAge)
 //#endregion
 
 //#region == 变量生命 ============================================================
-const {
-    data,
-    from = 'message',
-} = defineProps<{
-    data: SessionBox,
+const { data, from = 'message' } = defineProps<{
+    data: SessionBox
     from?: 'message' | 'friend' | 'new'
 }>()
 const emit = defineEmits<{
-    userClick: [session: Session],
+    userClick: [session: Session]
 }>()
 
 const _open = shallowRef(false)
 //#endregion
 
 // 元素被打开时自动展开
-watch(()=>runtimeData.nowBox?.id, autoOpenClose)
+watch(() => runtimeData.nowBox?.id, autoOpenClose)
 // 初次加载时自动展开
 autoOpenClose()
 
-const onmenu = computed(()=>{
+const onmenu = computed(() => {
     if (!friendMenuInfo.box) return false
     return friendMenuInfo.box.id === data.id
 })
@@ -190,7 +209,7 @@ const showNotice = computed(() => {
 function autoOpenClose() {
     if (from !== 'message') return
     if (!runtimeData.nowBox) return
-    if(runtimeData.nowBox.id === data.id) {
+    if (runtimeData.nowBox.id === data.id) {
         _open.value = true
     } else {
         _open.value = false

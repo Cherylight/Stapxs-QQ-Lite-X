@@ -6,7 +6,9 @@
                 <a>{{ $t('提及') }}</a>
             </div>
             <div v-if="menuDisplay.poke" @click="sendPoke">
-                <div><font-awesome-icon :icon="['fas', 'fa-hand-point-up']" /></div>
+                <div>
+                    <font-awesome-icon :icon="['fas', 'fa-hand-point-up']" />
+                </div>
                 <a>{{ $t('戳一戳') }}</a>
             </div>
             <div v-if="menuDisplay.remove" @click="removeUser">
@@ -28,32 +30,29 @@
 import { popInfo } from '@renderer/function/base'
 import { GroupSession, Session } from '@renderer/function/model/session'
 import { IUser, Member } from '@renderer/function/model/user'
-import { runtimeData } from '@renderer/function/msg'
 import { ensurePopBox } from '@renderer/function/utils/popBox'
 import app from '@renderer/main'
 import { shallowReactive } from 'vue'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 //#region == 变量声明 ============================================
 const menuDisplay = shallowReactive({
     at: false,
-	poke: false,
-	remove: false,
+    poke: false,
+    remove: false,
 })
 const $t = app.config.globalProperties.$t
-const {
-	user,
-	session,
-	sendPokeFunc,
-	setAtFunc,
-} = defineProps<{
-	session: Session
-	user: IUser
-	sendPokeFunc: (member: Member) => void
-	setAtFunc: (user: IUser) => void
+const { user, session, sendPokeFunc, setAtFunc } = defineProps<{
+    session: Session
+    user: IUser
+    sendPokeFunc: (member: Member) => void
+    setAtFunc: (user: IUser) => void
 }>()
 const emit = defineEmits<{
     close: [arg?: any]
 }>()
+const runtimeData = useRuntimeData()
+
 init()
 //#endregion
 
@@ -62,7 +61,7 @@ function init() {
     let canAdmin: boolean
     if (!(session instanceof GroupSession)) canAdmin = false
     else if (!(user instanceof Member)) canAdmin = false
-    else if (user.user_id === runtimeData.loginInfo.uin) canAdmin = false
+    else if (user.user_id === runtimeData.loginInfo?.uin) canAdmin = false
     else if (user.canBeAdmined(session.getMe().role)) canAdmin = true
     else canAdmin = false
 
@@ -78,28 +77,27 @@ function init() {
     menuDisplay.poke = true
 
     // 群成员设置
-    if(canAdmin) {
+    if (canAdmin) {
         // menuDisplay.config = true
     }
 }
 
 function setAt() {
-	setAtFunc(user)
-	emit('close')
+    setAtFunc(user)
+    emit('close')
 }
 
 function sendPoke() {
-	sendPokeFunc(user as Member)
-	menuDisplay.poke = false
+    sendPokeFunc(user as Member)
+    menuDisplay.poke = false
 }
-
 
 /**
  * 移出群聊
  */
 async function removeUser() {
     const ensure = ensurePopBox(
-        $t('真的要将 {user} 移出群聊吗', { user: user.name })
+        $t('真的要将 {user} 移出群聊吗', { user: user.name }),
     )
 
     if (!ensure) return

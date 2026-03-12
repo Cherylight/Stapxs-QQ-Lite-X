@@ -13,28 +13,28 @@
 import app from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
 import { logger, popInfo } from './base'
-import { runtimeData } from './msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { openLoginPan } from './utils/systemUtil'
 
 type OnMessageData = string
 
 type OnCloseData = {
-    code: string | number,
-    message: string,
+    code: string | number
+    message: string
 }
 
 interface Ws {
     // 开启关闭
-    open(url: string): Promise<boolean>                     // 打开连接
-    close(): Promise<void>                                  // 关闭连接
+    open(url: string): Promise<boolean> // 打开连接
+    close(): Promise<void> // 关闭连接
     // 夹送数据
-    send(data: string): void                                // 发送数据
+    send(data: string): void // 发送数据
     // 自身状态
-    get state(): DriverState                                // 当前状态
-    isConnected(): boolean                                  // 是否连接
-    onError(callback: (data: OnCloseData) => void): void    // 错误回调
+    get state(): DriverState // 当前状态
+    isConnected(): boolean // 是否连接
+    onError(callback: (data: OnCloseData) => void): void // 错误回调
     onMessage(callback: (msg: OnMessageData) => void): void // 接收消息回调
-    reset(): void                                           // 重置状态
+    reset(): void // 重置状态
 }
 
 class NativeWs implements Ws {
@@ -50,8 +50,7 @@ class NativeWs implements Ws {
      * @returns 连接是否成功
      */
     open(url: string): Promise<boolean> {
-        if (this.websocket)
-            throw new Error('WebSocket已存在，无法重复连接')
+        if (this.websocket) throw new Error('WebSocket已存在，无法重复连接')
         if (this.selfState === DriverState.Connecting)
             throw new Error('WebSocket正在连接中，无法重复连接')
         if (this.selfState === DriverState.Close)
@@ -67,7 +66,7 @@ class NativeWs implements Ws {
                 isConnected = true
                 resolve(true)
             }
-            const onclose = (err: CloseEvent|Event) => {
+            const onclose = (err: CloseEvent | Event) => {
                 this.websocket = undefined
                 this.selfState = DriverState.Disconnected
                 if (isConnected) return this.onClose(err)
@@ -113,7 +112,10 @@ class NativeWs implements Ws {
         return this.selfState
     }
     isConnected(): boolean {
-        return this.selfState === DriverState.Connected && this.websocket !== undefined
+        return (
+            this.selfState === DriverState.Connected &&
+            this.websocket !== undefined
+        )
     }
     onError(callback: (err: OnCloseData) => void): void {
         this.onErrorHook = callback
@@ -132,7 +134,7 @@ class NativeWs implements Ws {
     //#endregion
 
     //#region == 私有方法 ============================================
-    private onClose(err: CloseEvent|Event) {
+    private onClose(err: CloseEvent | Event) {
         this.websocket = undefined
 
         let errData: OnCloseData
@@ -141,7 +143,7 @@ class NativeWs implements Ws {
                 code: err.code,
                 message: err.reason,
             }
-        }else {
+        } else {
             errData = {
                 code: -1,
                 message: '连接异常关闭',
@@ -197,18 +199,14 @@ class BackendWs implements Ws {
     }
     close(): Promise<void> {
         let resolve!: (value: void | PromiseLike<void>) => void
-        const promise = new Promise<void>(
-            r => resolve = r
-        )
+        const promise = new Promise<void>((r) => (resolve = r))
         this.selfState = DriverState.Close
         const onclose = (_: OnCloseData) => {
             resolve()
         }
         this._onCloseHook = onclose
         backend.call('Onebot', 'onebot:close', false)
-        popInfo.info(
-            app.config.globalProperties.$t('正在断开链接……'),
-        )
+        popInfo.info(app.config.globalProperties.$t('正在断开链接……'))
         return promise
     }
     //#endregion
@@ -272,12 +270,12 @@ interface Fetch {
     get(
         url: string,
         data: Record<string, any>,
-        header: Record<string, any>
+        header: Record<string, any>,
     ): Promise<string>
     post(
         url: string,
         data: Record<string, any>,
-        header: Record<string, any>
+        header: Record<string, any>,
     ): Promise<string>
 }
 
@@ -285,14 +283,14 @@ class NativeFetch implements Fetch {
     async get(
         url: string,
         data: Record<string, any>,
-        header: Record<string, any>
+        header: Record<string, any>,
     ): Promise<string> {
         return await this.main(url, data, header, 'GET')
     }
     async post(
         url: string,
         data: Record<string, any>,
-        header: Record<string, any>
+        header: Record<string, any>,
     ): Promise<string> {
         return await this.main(url, data, header, 'POST')
     }
@@ -301,12 +299,12 @@ class NativeFetch implements Fetch {
         url: string,
         data: Record<string, any>,
         header: Record<string, any>,
-        method: 'GET' | 'POST'
+        method: 'GET' | 'POST',
     ) {
         const params = { method, headers: header } as RequestInit
         if (method === 'GET') {
             const urlObj = new URL(url)
-            Object.keys(data).forEach(key => {
+            Object.keys(data).forEach((key) => {
                 urlObj.searchParams.append(key, data[key])
             })
             url = urlObj.toString()
@@ -325,24 +323,30 @@ class NativeFetch implements Fetch {
 const nativeFetch = new NativeFetch()
 
 class BackendFetch implements Fetch {
-    async get(url: string, data: Record<string, any>, header: Record<string, any>): Promise<string> {
-        return await backend.call(
-            undefined,
-            'onebot:get',
-            true,
-            { url, data, header }
-        )
+    async get(
+        url: string,
+        data: Record<string, any>,
+        header: Record<string, any>,
+    ): Promise<string> {
+        return await backend.call(undefined, 'onebot:get', true, {
+            url,
+            data,
+            header,
+        })
     }
-    async post(url: string, data: Record<string, any>, header: Record<string, any>): Promise<string> {
-        return await backend.call(
-            undefined,
-            'onebot:post',
-            true,
-            { url, data, header }
-        )
+    async post(
+        url: string,
+        data: Record<string, any>,
+        header: Record<string, any>,
+    ): Promise<string> {
+        return await backend.call(undefined, 'onebot:post', true, {
+            url,
+            data,
+            header,
+        })
     }
 }
-const backendFetch = new BackendFetch
+const backendFetch = new BackendFetch()
 
 /**
  * 驱动器，直接用于和后端通信以及和适配器通信
@@ -362,6 +366,7 @@ class Driver {
     private path?: string
     private onMessageHook?: (msg: string) => void
     private onErrHook?: (err: OnCloseData) => void
+
     reset(
         url: string,
         ssl: boolean,
@@ -370,6 +375,7 @@ class Driver {
         header: Record<string, string> = {},
         retry: number = 5,
     ) {
+        const runtimeData = useRuntimeData()
         this.url = url
         this.ssl = ssl
         this.header = header
@@ -382,7 +388,7 @@ class Driver {
         if (backend.isWeb()) {
             this.ws = nativeWs
             this.fetch = nativeFetch
-        }else {
+        } else {
             this.ws = backendWs
             this.fetch = backendFetch
         }
@@ -394,9 +400,9 @@ class Driver {
         this.onMessageHook = undefined
 
         // 收到消息
-        this.ws.onMessage(msg => this.onMessageHook?.(msg))
+        this.ws.onMessage((msg) => this.onMessageHook?.(msg))
         // 自动重连
-        this.ws.onError(async(err) => {
+        this.ws.onError(async (err) => {
             // 自动重连
             if (this.state === DriverState.Close) return
             popInfo.info('连接不稳定')
@@ -408,12 +414,11 @@ class Driver {
             this.state = DriverState.Error
             this.onErrHook?.(err)
             runtimeData.nowAdapter = undefined
-            popInfo.error( '连接中断')
+            popInfo.error('连接中断')
             // 打开登陆弹窗
             openLoginPan()
         })
     }
-
 
     //#region == 开启关闭 ============================================
     /**
@@ -427,19 +432,21 @@ class Driver {
         const re = await this.connectWs(false)
         if (re) {
             this.state = DriverState.Connected
-        }else {
+        } else {
             this.state = DriverState.Error
         }
         return re
     }
 
     async close(): Promise<void> {
+        const runtimeData = useRuntimeData()
         let needCloseWs = true
 
         if (this.state === DriverState.Disconnected) needCloseWs = false
         if (this.state === DriverState.Error) needCloseWs = false
 
-        if (this.state === DriverState.Connecting) throw new Error('驱动器正在连接中，无法关闭')
+        if (this.state === DriverState.Connecting)
+            throw new Error('驱动器正在连接中，无法关闭')
 
         this.state = DriverState.Close
         runtimeData.nowAdapter = undefined
@@ -462,9 +469,16 @@ class Driver {
      * get 方法 获取数据
      * @returns 获取的数据
      */
-    async get(path: string, data: Record<string, any>): Promise<boolean|string>  {
+    async get(
+        path: string,
+        data: Record<string, any>,
+    ): Promise<boolean | string> {
         if (!this.ws.isConnected()) return false
-        return await this.fetch.get(`${this.httpUrl}/${path}`, data, this.header)
+        return await this.fetch.get(
+            `${this.httpUrl}/${path}`,
+            data,
+            this.header,
+        )
     }
 
     /**
@@ -472,9 +486,16 @@ class Driver {
      * @param path
      * @param data
      */
-    async post(path: string, data: Record<string, any>): Promise<false|string> {
+    async post(
+        path: string,
+        data: Record<string, any>,
+    ): Promise<false | string> {
         if (!this.ws.isConnected()) return false
-        return await this.fetch.post(`${this.httpUrl}/${path}`, data, this.header)
+        return await this.fetch.post(
+            `${this.httpUrl}/${path}`,
+            data,
+            this.header,
+        )
     }
     //#endregion
 
@@ -518,13 +539,13 @@ class Driver {
      */
     private getUrl(protocol: 'ws' | 'http') {
         if (this.ssl) protocol += 's'
-        if (protocol.startsWith('http')){
+        if (protocol.startsWith('http')) {
             return `${protocol}://${this.url}`
-        }
-        else {
+        } else {
             let url = `${protocol}://${this.url}`
             if (this.path) url = `${url}/${this.path}`
-            if (this.token) url = `${url}?access_token=${encodeURIComponent(this.token)}`
+            if (this.token)
+                url = `${url}?access_token=${encodeURIComponent(this.token)}`
 
             return url
         }

@@ -140,7 +140,6 @@ import { MenuEventData } from '@renderer/function/elements/information'
 import { Message } from '@renderer/function/model/message'
 import { Msg } from '@renderer/function/model/msg'
 import { ForwardSeg } from '@renderer/function/model/seg'
-import { runtimeData } from '@renderer/function/msg'
 import { openContextMenu } from '@renderer/function/utils/contextMenu'
 import { mergeForward, singleForward } from '@renderer/function/utils/msgUtil'
 import {
@@ -159,6 +158,7 @@ import {
     watch,
 } from 'vue'
 import ChatMsgMenu from './menu/ChatMsgMenu.vue'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 const { vw } = useViewportUnits()
 const stack = shallowReactive<ForwardSeg[]>([])
@@ -169,6 +169,8 @@ const isMultiselectMode = shallowRef(false)
 
 const msgBarEl = useTemplateRef('msgBar')
 const mergePanEl = useTemplateRef('mergePan')
+
+const runtimeData = useRuntimeData()
 
 const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
     beforeHook: (_) => {

@@ -501,7 +501,7 @@ import useOptionStore from '@renderer/state/option'
 import { toRaw, shallowRef, watchEffect } from 'vue'
 import { getDeviceType } from '@renderer/function/utils/systemUtil'
 import { BrowserInfo, detect } from 'detect-browser'
-import { runtimeData } from '../../function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 import { sendIdentifyData } from '@renderer/function/utils/appUtil'
 import {
@@ -518,6 +518,7 @@ import win from '@renderer/runtime/win'
 import { logger, popInfo } from '@renderer/function/base'
 
 const option = useOptionStore()
+const runtimeData = useRuntimeData()
 
 const COLOR_NAMES = [
     '林槐蓝',

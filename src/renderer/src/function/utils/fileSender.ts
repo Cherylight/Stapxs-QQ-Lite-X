@@ -1,7 +1,7 @@
 import { i18n } from '@renderer/main'
 import { GroupSession, UserSession } from '../model/session'
 import { Msg } from '../model/msg'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { popInfo } from '../base'
 import { noticePopBox, waitPopBox } from './popBox'
 import { TimeoutSet } from '../model/data'
@@ -14,23 +14,38 @@ export class FileSender {
     private static lock: number = 0
     static readonly sendIds: TimeoutSet<string> = new TimeoutSet()
 
-    static async sendFile(file: File, target: UserSession | GroupSession): Promise<undefined|Msg>
-    static async sendFile(file: File, target: GroupSession, path?: GroupFileFolder): Promise<undefined|Msg>
-    static async sendFile(file: File, target: GroupSession | UserSession, folder?: GroupFileFolder): Promise<undefined|Msg> {
+    static async sendFile(
+        file: File,
+        target: UserSession | GroupSession,
+    ): Promise<undefined | Msg>
+    static async sendFile(
+        file: File,
+        target: GroupSession,
+        path?: GroupFileFolder,
+    ): Promise<undefined | Msg>
+    static async sendFile(
+        file: File,
+        target: GroupSession | UserSession,
+        folder?: GroupFileFolder,
+    ): Promise<undefined | Msg> {
         const $t = i18n.global.t
+        const runtimeData = useRuntimeData()
 
         // 检测
         if (!runtimeData.nowAdapter?.getHistoryMsg) {
-            popInfo.error( $t('当前适配器不支持发送文件！'))
+            popInfo.error($t('当前适配器不支持发送文件！'))
             return
         }
 
         if (target.type === 'group' && !runtimeData.nowAdapter?.sendGroupFile) {
-            popInfo.error( $t('当前适配器不支持发送群文件！'))
+            popInfo.error($t('当前适配器不支持发送群文件！'))
             return
         }
-        if (target.type === 'user' && !runtimeData.nowAdapter?.sendPrivateFile) {
-            popInfo.error( $t('当前适配器不支持发送私聊文件！'))
+        if (
+            target.type === 'user' &&
+            !runtimeData.nowAdapter?.sendPrivateFile
+        ) {
+            popInfo.error($t('当前适配器不支持发送私聊文件！'))
             return
         }
 
@@ -43,7 +58,11 @@ export class FileSender {
         this.lock++
         let re: string | undefined
         if (target.type === 'group') {
-            re = await runtimeData.nowAdapter.sendGroupFile!(target, file, folder)
+            re = await runtimeData.nowAdapter.sendGroupFile!(
+                target,
+                file,
+                folder,
+            )
         } else {
             re = await runtimeData.nowAdapter.sendPrivateFile!(target, file)
         }
@@ -54,7 +73,11 @@ export class FileSender {
         const retryTime = 5
         let head: undefined | Msg
         for (let i = 0; i < retryTime; i++) {
-            const msgs = await runtimeData.nowAdapter.getHistoryMsg(target, 20, head)
+            const msgs = await runtimeData.nowAdapter.getHistoryMsg(
+                target,
+                20,
+                head,
+            )
             if (!msgs) continue
 
             for (const msg of msgs) {
@@ -106,12 +129,27 @@ export class FileSender {
     /**
      * 发生图片并且添加消息到会话
      */
-    static async sendFileAndAddMsg(file: File, target: GroupSession | UserSession): Promise<void>
-    static async sendFileAndAddMsg(file: File, target: GroupSession, folder: GroupFileFolder): Promise<void>
-    static async sendFileAndAddMsg(file: File, target: GroupSession | UserSession, folder?: GroupFileFolder): Promise<void> {
+    static async sendFileAndAddMsg(
+        file: File,
+        target: GroupSession | UserSession,
+    ): Promise<void>
+    static async sendFileAndAddMsg(
+        file: File,
+        target: GroupSession,
+        folder: GroupFileFolder,
+    ): Promise<void>
+    static async sendFileAndAddMsg(
+        file: File,
+        target: GroupSession | UserSession,
+        folder?: GroupFileFolder,
+    ): Promise<void> {
         let reMsg: Msg | undefined
         if (folder) {
-            reMsg = await FileSender.sendFile(file, target as GroupSession, folder)
+            reMsg = await FileSender.sendFile(
+                file,
+                target as GroupSession,
+                folder,
+            )
         } else {
             reMsg = await FileSender.sendFile(file, target)
         }
@@ -121,9 +159,17 @@ export class FileSender {
         target.addMessage(reMsg)
     }
 
-    static async autoUploadFile(target: GroupSession | UserSession): Promise<void>
-    static async autoUploadFile(target: GroupSession, folder: GroupFileFolder): Promise<void>
-    static async autoUploadFile(target: GroupSession | UserSession, folder?: GroupFileFolder): Promise<void> {
+    static async autoUploadFile(
+        target: GroupSession | UserSession,
+    ): Promise<void>
+    static async autoUploadFile(
+        target: GroupSession,
+        folder: GroupFileFolder,
+    ): Promise<void>
+    static async autoUploadFile(
+        target: GroupSession | UserSession,
+        folder?: GroupFileFolder,
+    ): Promise<void> {
         const file = await uploadFile()
         if (!file) return
 
@@ -132,7 +178,8 @@ export class FileSender {
         // 提示
         const done = waitPopBox($t('正在发送文件中……'))
 
-        if (folder) await this.sendFileAndAddMsg(file, target as GroupSession, folder)
+        if (folder)
+            await this.sendFileAndAddMsg(file, target as GroupSession, folder)
         else await this.sendFileAndAddMsg(file, target)
 
         done()

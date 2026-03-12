@@ -340,7 +340,7 @@ import {
     UserSession,
 } from '@renderer/function/model/session'
 import { Member, User } from '@renderer/function/model/user'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { changeSession, qqLevelToEmoji } from '@renderer/function/utils/msgUtil'
 import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
 import {
@@ -364,6 +364,7 @@ const { chat } = defineProps<{
 const emit = defineEmits<{
     close: []
 }>()
+const runtimeData = useRuntimeData()
 const userInfo: ShallowRef<User | undefined> =
     chat instanceof UserSession ? chat.useUserInfo() : shallowRef(undefined)
 
@@ -513,7 +514,7 @@ function closeChatInfoPan() {
  */
 function startChat(mem: Member) {
     // 如果是自己的话就忽略
-    if (mem.user_id == runtimeData.loginInfo.uin) return
+    if (mem.user_id == runtimeData.loginInfo?.uin) return
 
     // 检查这个人是不是好友
     let session: Session | undefined = mem?.user

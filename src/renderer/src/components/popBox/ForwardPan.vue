@@ -39,7 +39,7 @@ import TinySessionBody from '@renderer/components/TinySessionBody.vue'
 import { logger, popInfo } from '@renderer/function/base'
 import { Msg, SelfMsg, SelfPreMsg } from '@renderer/function/model/msg'
 import { Session } from '@renderer/function/model/session'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { changeSession } from '@renderer/function/utils/msgUtil'
 import { popBox } from '@renderer/function/utils/popBox'
 import { vAutoFocus, vSearch } from '@renderer/function/utils/vcmd'
@@ -57,6 +57,7 @@ import {
 //#region == 声明/导出变量 ===========================================================
 // 变量
 type MsgWhileSend = { session: Session; msgs: SelfMsg[] }[]
+const runtimeData = useRuntimeData()
 const { $t } = app.config.globalProperties
 const selected: ShallowRef<Session[]> = shallowRef([])
 const multiselectMode: ShallowRef<boolean> = shallowRef(false)

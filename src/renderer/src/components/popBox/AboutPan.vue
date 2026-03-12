@@ -266,7 +266,7 @@ import app from '@renderer/main'
 import DepPan from './DepPan.vue'
 import Icon from '@renderer/components/Icon.vue'
 import { getVersion } from '@renderer/function/utils/systemUtil'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import UpdateRecordBox from './UpdateRecordBox.vue'
 
 const { showUI } = defineProps<{
@@ -276,6 +276,8 @@ const { showUI } = defineProps<{
 const emit = defineEmits<{
     closePopBox: []
 }>()
+
+const runtimeData = useRuntimeData()
 
 function dependencies(
     type = undefined as string | undefined,

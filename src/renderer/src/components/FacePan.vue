@@ -128,12 +128,14 @@
                         </template>
                         <template
                             v-else-if="
-                                runtimeData.stickerCache &&
-                                runtimeData.stickerCache.length > 0
+                                customFaceStore.customFaceList &&
+                                customFaceStore.customFaceList.length > 0
                             "
                         >
                             <span
-                                v-for="(url, index) in runtimeData.stickerCache"
+                                v-for="(
+                                    url, index
+                                ) in customFaceStore.customFaceList"
                                 :key="'stickers-' + index"
                                 v-tooltip="customFaceTooltip(url)"
                             >
@@ -149,8 +151,8 @@
                         <template v-else>
                             <div
                                 v-show="
-                                    runtimeData.stickerCache &&
-                                    runtimeData.stickerCache.length <= 0
+                                    customFaceStore.customFaceList &&
+                                    customFaceStore.customFaceList.length <= 0
                                 "
                                 class="ss-card"
                             >
@@ -168,7 +170,6 @@
 </template>
 
 <script setup lang="ts">
-import { runtimeData } from '@renderer/function/msg'
 import { computed, ComputedRef, Ref, shallowRef } from 'vue'
 
 import Emoji from '@renderer/function/model/emoji'
@@ -180,14 +181,19 @@ import CustomFaceTooltip from './tooltip/CustomFaceTooltip.vue'
 
 import { vTooltip } from '@renderer/function/utils/vcmd'
 import { useLocalStorage } from '@renderer/function/utils/vuse'
+import useRuntimeData from '@renderer/state/runtimeData'
+import useCustomFaceStore from '@renderer/state/customFace'
 
 const emit = defineEmits<{
     sendMsg: []
 }>()
 
+const customFaceStore = useCustomFaceStore()
 const roamingState = shallowRef<'loading' | 'ok' | 'err' | 'no-support'>(
     'no-support',
 )
+
+const runtimeData = useRuntimeData()
 
 function getRecentEmojiRecord<T>(storeId: string): {
     recordList: Ref<T[]>
@@ -226,13 +232,13 @@ const { recordList: recentCustomFacesId, showList: recentCustomFacesList } =
 initCustomFace()
 
 async function initCustomFace() {
-    if (runtimeData.stickerCache) return
+    if (customFaceStore.customFaceList) return
 
     await loadCustomFace()
 }
 async function reloadCustomFace() {
     if (roamingState.value === 'loading') return
-    runtimeData.stickerCache = undefined
+    customFaceStore.customFaceList = undefined
 
     await loadCustomFace()
 }
@@ -251,7 +257,7 @@ async function loadCustomFace() {
         return
     }
 
-    runtimeData.stickerCache = data
+    customFaceStore.customFaceList = data
     roamingState.value = 'ok'
 }
 

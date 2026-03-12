@@ -6,7 +6,7 @@ import appInfo from '../../../../../package.json'
 
 import { KeyboardInfo } from '@capacitor/keyboard'
 import { logger, popInfo } from '@renderer/function/base'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { hslToRgb, rgbToHsl } from '@renderer/function/utils/systemUtil'
 import { defineAsyncComponent, h, markRaw } from 'vue'
 import { GroupSession, Session, UserSession } from '../model/session'
@@ -25,6 +25,7 @@ export function scrollToMsg(
     showAnimation: boolean = true,
     showHighlight = true,
 ): boolean {
+    const runtimeData = useRuntimeData()
     if (msg.session === undefined) return false
     if (msg.session !== runtimeData.nowChat) return false
     if (msg.session.isActive === false) return false
@@ -64,6 +65,7 @@ export function scrollToMsg(
 export function openLink(url: string, external = false) {
     // 判断是不是 Electron，是的话打开内嵌 iframe
     if (backend.isDesktop()) {
+        const runtimeData = useRuntimeData()
         if (!external && !runtimeData.sysConfig.close_browser) {
             url = ProxyUrl.proxy(url)
             htmlPopBox(`<iframe src="${url}" class="view-iframe"></iframe>`, {
@@ -113,6 +115,7 @@ export function openLink(url: string, external = false) {
  * @param useCache 是否使用缓存
  */
 export async function reloadUsers(useCache: boolean = true) {
+    const runtimeData = useRuntimeData()
     // 加载用户列表
     if (!driver.isConnected()) return
     if (!runtimeData.nowAdapter) return
@@ -216,6 +219,7 @@ export async function reloadUsers(useCache: boolean = true) {
  */
 export function jumpToSession(session: Session, msg?: Message) {
     if (!session.isActive) session.activate()
+    const runtimeData = useRuntimeData()
 
     // 当前聊天已经打开，是没有焦点触发的消息通知；直接滚动到消息。
     if (runtimeData.nowChat === session) {
@@ -376,6 +380,7 @@ export function updateMenu(config: {
  * Electron：注册系统 IPC
  */
 export function createIpc() {
+    const runtimeData = useRuntimeData()
     // 服务发现
     backend.addListener(undefined, 'sys:serviceFound', (event, data) => {
         const info = data ?? event.payload
@@ -451,6 +456,7 @@ export function createIpc() {
  */
 export async function loadMobile() {
     const { $t } = app.config.globalProperties
+    const runtimeData = useRuntimeData()
     // Capacitor：相关初始化
     if (backend.isMobile()) {
         // 注册回调监听
@@ -691,6 +697,7 @@ interface GhCommits {
 }
 
 async function testVersionCheck() {
+    const runtimeData = useRuntimeData()
     const url = `https://api.github.com/repos/${runtimeData.repoName}/commits/test`
     const data: GhCommits = await fetch(url).then((response) => response.json())
     const nowHash = import.meta.env.VITE_HASH
@@ -906,6 +913,7 @@ openCheckList.push((_: number) => {
 // 50次ad
 openCheckList.push((times: number) => {
     const { $t } = app.config.globalProperties
+    const runtimeData = useRuntimeData()
     const openTimes = times + 1
     if (runtimeData.sysConfig.close_ad) return false
     if (openTimes % 50 != 0) return false
@@ -1096,6 +1104,7 @@ export function BackendRequest(
  * @param data 数据
  */
 export function sendStatEvent(event: string, data: { [key: string]: any }) {
+    const runtimeData = useRuntimeData()
     if (!runtimeData.sysConfig.close_ga && !import.meta.env.DEV) {
         Umami.trackEvent(event, data)
     }
@@ -1106,6 +1115,7 @@ export function sendStatEvent(event: string, data: { [key: string]: any }) {
  * @param data 数据
  */
 export function sendIdentifyData(data: { [key: string]: any }) {
+    const runtimeData = useRuntimeData()
     if (!runtimeData.sysConfig.close_ga && !import.meta.env.DEV) {
         Umami.trackIdentify(data)
     }

@@ -42,7 +42,6 @@ declare interface Window {
             lng: number
         },
     ) => void
-    runtimeData: any
 }
 
 // po 文件，按字符串处理

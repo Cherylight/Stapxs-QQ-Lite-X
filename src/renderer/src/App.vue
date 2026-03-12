@@ -93,17 +93,12 @@ import Umami from '@stapxs/umami-logger-typescript'
 import * as App from './function/utils/appUtil'
 
 import { logger, popInfo, popList } from '@renderer/function/base'
-import { runtimeData } from '@renderer/function/msg'
 import { i18n, uptime } from '@renderer/main'
 import { onMounted, provide, shallowReactive, useTemplateRef } from 'vue'
 import driver from '@renderer/function/driver'
 import { Notify } from '@renderer/function/notify'
 import { ensurePopBox } from '@renderer/function/utils/popBox'
-import {
-    getDeviceType,
-    getVersion,
-    openLoginPan,
-} from '@renderer/function/utils/systemUtil'
+import { getVersion, openLoginPan } from '@renderer/function/utils/systemUtil'
 
 import GlobalSessionSearchBar from '@renderer/components/GlobalSessionSearchBar.vue'
 import Viewer from '@renderer/components/Viewer.vue'
@@ -120,6 +115,7 @@ import win from '@renderer/runtime/win'
 import ContextMenus from '@renderer/components/menu/ContextMenus.vue'
 import Tooltips from '@renderer/components/tooltip/Tooltips.vue'
 import PopBoxes from '@renderer/components/popBox/PopBoxes.vue'
+import useRuntimeData from './state/runtimeData'
 
 //#region == 定义变量 ===================================================
 const fps = shallowReactive({
@@ -128,6 +124,7 @@ const fps = shallowReactive({
     value: 0,
 })
 const $t = i18n.global.t
+const runtimeData = useRuntimeData()
 //#endregion
 
 //#region == 组件实例注册 ===============================================
@@ -172,8 +169,6 @@ window.onbeforeunload = () => {
     runtimeData.nowAdapter?.close()
     runtimeData.nowAdapter = undefined
 }
-// 绑定 runtimeData
-window.runtimeData = runtimeData
 
 useKeyboard('f12', () => {
     if (!runtimeData.tags.dev) return

@@ -13,14 +13,19 @@
 
 <template>
     <div>
-        <div style="margin-top: 15px;" />
+        <div style="margin-top: 15px" />
         <header v-show="sideBarState === 'open'" class="side-bar-header">
             <div>
                 <span>{{ $t('消息') }}</span>
                 <div style="flex: 1" />
-                <font-awesome-icon :icon="['fas', 'compress-arrows-alt']"
-                    @click="foldAllBox" />
-                <font-awesome-icon :icon="['fas', 'trash-can']" @click="cleanList" />
+                <font-awesome-icon
+                    :icon="['fas', 'compress-arrows-alt']"
+                    @click="foldAllBox"
+                />
+                <font-awesome-icon
+                    :icon="['fas', 'trash-can']"
+                    @click="cleanList"
+                />
             </div>
         </header>
         <TransitionGroup
@@ -28,49 +33,59 @@
             id="message-list-body"
             name="onmsg"
             tag="div"
-            class="session-body-container side-bar-list">
+            class="session-body-container side-bar-list"
+        >
             <!-- 群收纳盒 -->
             <BoxBody
                 v-if="runtimeData.sysConfig.bubble_sort_user"
                 key="inMessage-bubble-box"
-                v-menu.prevent="event => openFriendMenu(
-                    event.x,
-                    event.y,
-                    'message',
-                    undefined,
-                    BubbleBox.instance,
-                )"
+                v-menu.prevent="
+                    (event) =>
+                        openFriendMenu(
+                            event.x,
+                            event.y,
+                            'message',
+                            undefined,
+                            BubbleBox.instance,
+                        )
+                "
                 :data="markRaw(BubbleBox.instance)"
                 from="message"
-                @user-click="session => changeSession(session, BubbleBox.instance)" />
+                @user-click="
+                    (session) => changeSession(session, BubbleBox.instance)
+                "
+            />
             <!-- 其他消息 -->
             <template v-for="item in showSessionList">
                 <FriendBody
                     v-if="item instanceof Session"
                     :key="'inMessage-' + item.id"
-                    v-menu.prevent="event => openFriendMenu(
-                        event.x,
-                        event.y,
-                        'message',
-                        item,
-                    )"
+                    v-menu.prevent="
+                        (event) =>
+                            openFriendMenu(event.x, event.y, 'message', item)
+                    "
                     :data="item"
                     from="message"
-                    @click="changeSession(item)" />
+                    @click="changeSession(item)"
+                />
                 <BoxBody
                     v-else-if="item instanceof SessionBox"
                     :key="'inMessage-box-' + item.id"
                     ref="sessionBoxes"
-                    v-menu.prevent="event => openFriendMenu(
-                        event.x,
-                        event.y,
-                        'message',
-                        undefined,
-                        item,
-                    )"
+                    v-menu.prevent="
+                        (event) =>
+                            openFriendMenu(
+                                event.x,
+                                event.y,
+                                'message',
+                                undefined,
+                                item,
+                            )
+                    "
                     :data="item"
                     from="message"
-                    @user-click="(session)=>changeSession(session, item)" />
+                    @user-click="(session) => changeSession(session, item)"
+                />
             </template>
         </TransitionGroup>
     </div>
@@ -80,14 +95,8 @@
 import FriendBody from '@renderer/components/FriendBody.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { runtimeData } from '@renderer/function/msg'
-import {
-    markRaw,
-    onMounted,
-    shallowRef,
-    useTemplateRef,
-    watch
-} from 'vue'
+import useRuntimeData from '@renderer/state/runtimeData'
+import { markRaw, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 
 import {
     faCheckToSlot,
@@ -108,26 +117,19 @@ const { sideBarState } = defineProps<{
 }>()
 
 const showSessionList = shallowRef<(Session | SessionBox)[]>([])
+const runtimeData = useRuntimeData()
 // 旧群收纳盒的东西
-const sessionBoxes = useTemplateRef<InstanceType<typeof BoxBody>[]>('sessionBoxes')
+const sessionBoxes =
+    useTemplateRef<InstanceType<typeof BoxBody>[]>('sessionBoxes')
 
-onMounted(()=>{
+onMounted(() => {
     library.add(faCheckToSlot, faThumbTack, faTrashCan, faGripLines)
     refreshSessionList()
     // 刷新会话列表时用
-    watch(
-        () => Session.sessionList.length,
-        refreshSessionList,
-    )
-    watch(
-        () => SessionBox.alwaysTopBoxes.size,
-        refreshSessionList,
-    )
-    watch(
-        () => Session.alwaysTopSessions.size,
-        refreshSessionList,
-    )
-    Session.afterNewMessageHook.push((_: Session, _1: Message)=>{
+    watch(() => Session.sessionList.length, refreshSessionList)
+    watch(() => SessionBox.alwaysTopBoxes.size, refreshSessionList)
+    watch(() => Session.alwaysTopSessions.size, refreshSessionList)
+    Session.afterNewMessageHook.push((_: Session, _1: Message) => {
         refreshSessionList()
     })
 })
@@ -137,10 +139,7 @@ onMounted(()=>{
  */
 function refreshSessionList() {
     // 时间排序算法
-    const sort = (
-        a: Session | SessionBox,
-        b: Session | SessionBox,
-    ) => {
+    const sort = (a: Session | SessionBox, b: Session | SessionBox) => {
         // 置顶最优先
         if (a.alwaysTop && !b.alwaysTop) return -1
         if (!a.alwaysTop && b.alwaysTop) return 1
@@ -158,7 +157,7 @@ function refreshSessionList() {
     const mainList: (Session | SessionBox)[] = []
     const alwaysTop = [
         ...Session.alwaysTopSessions,
-        ...SessionBox.alwaysTopBoxes
+        ...SessionBox.alwaysTopBoxes,
     ]
     // 过滤走群收纳盒
     const putBox: Set<SessionBox> = new Set([BubbleBox.instance])
@@ -180,7 +179,7 @@ function refreshSessionList() {
                 putBox.add(box)
                 mainList.push(box)
             }
-        }else {
+        } else {
             // 如果没有收纳盒，直接放入主列表
             mainList.push(session)
         }
@@ -191,7 +190,7 @@ function refreshSessionList() {
 /**
  * 折叠全部收纳盒
  */
-function foldAllBox(){
+function foldAllBox() {
     if (!sessionBoxes.value) return
     for (const item of sessionBoxes.value) {
         if (!item) continue
@@ -228,27 +227,27 @@ function cleanList() {
 }
 </script>
 <style>
-    .onmsg-enter-active,
-    .onmsg-leave-active,
-    .onmsg-move {
-        transition: transform 0.4s;
-    }
+.onmsg-enter-active,
+.onmsg-leave-active,
+.onmsg-move {
+    transition: transform 0.4s;
+}
 
-    .menu div.item > a {
-        font-size: 0.9rem !important;
-    }
-    .menu div.item > svg {
-        margin: 3px 10px 3px 0 !important;
-        font-size: 1rem !important;
-    }
+.menu div.item > a {
+    font-size: 0.9rem !important;
+}
+.menu div.item > svg {
+    margin: 3px 10px 3px 0 !important;
+    font-size: 1rem !important;
+}
 
-    .msg-menu-bg {
-        background: transparent !important;
-    }
+.msg-menu-bg {
+    background: transparent !important;
+}
 
-    @media (max-width: 700px) {
-        .menu {
-            width: 140px !important;
-        }
+@media (max-width: 700px) {
+    .menu {
+        width: 140px !important;
     }
+}
 </style>

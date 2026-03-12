@@ -1,6 +1,6 @@
 // import { animate } from 'animejs'
 
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { Msg, SelfMsg } from '../model/msg'
 import { Seg } from '../model/seg'
 import { GroupSession, Session, UserSession } from '../model/session'
@@ -122,6 +122,7 @@ export function isShowTime(
  * @param session 会话对象
  */
 export function changeSession(session: Session, fromBox?: SessionBox) {
+    const runtimeData = useRuntimeData()
     runtimeData.nowBox = fromBox
     if (runtimeData.nowChat === session) return
     if (!session.isActive) session.activate()
@@ -151,6 +152,7 @@ export function changeSession(session: Session, fromBox?: SessionBox) {
  * 关闭当前会话
  */
 export function closeSession() {
+    const runtimeData = useRuntimeData()
     runtimeData.nowChat = undefined
     runtimeData.nowBox = undefined
 }

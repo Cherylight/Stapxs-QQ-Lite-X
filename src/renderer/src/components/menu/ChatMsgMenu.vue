@@ -97,13 +97,13 @@ import { MenuEventData } from '@renderer/function/elements/information'
 import Emoji from '@renderer/function/model/emoji'
 import { Msg } from '@renderer/function/model/msg'
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { runtimeData } from '@renderer/function/msg'
 import { downloadFile } from '@renderer/function/utils/appUtil'
 import { sendMsgRaw, singleForward } from '@renderer/function/utils/msgUtil'
 import { copyToClipboard } from '@renderer/function/utils/systemUtil'
 import app from '@renderer/main'
 import { shallowReactive, shallowRef } from 'vue'
 import EmojiFace from '../EmojiFace.vue'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { ensurePopBox } from '@renderer/function/utils/popBox'
 
 //#region == 变量声明 ==================================================
@@ -127,6 +127,8 @@ const {
 const emit = defineEmits<{
     close: [arg?: any]
 }>()
+
+const runtimeData = useRuntimeData()
 
 const $t = app.config.globalProperties.$t
 const unfoldResponse = shallowRef<boolean>(false)
@@ -158,7 +160,7 @@ function init(): void {
     menuDisplay.recall = msg.canRecall()
     // 重新编辑
     menuDisplay.reedit =
-        msg.canRecall() && msg.sender.user_id === runtimeData.loginInfo.uin
+        msg.canRecall() && msg.sender.user_id === runtimeData.loginInfo?.uin
 
     // 消息不存在,但还可以多选和转发(x)
     if (!msg.exist) {

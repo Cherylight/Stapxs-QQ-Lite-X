@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts" generic="T extends Component">
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import {
     closePopBox,
     PopBoxButton,
@@ -80,6 +80,7 @@ import { type Component, nextTick, shallowRef, useTemplateRef } from 'vue'
 
 const { props } = defineProps<{ props: { id: string; data: PopBoxData<T> } }>()
 
+const runtimeData = useRuntimeData()
 const model = defineModel<any>()
 
 const id = props.id

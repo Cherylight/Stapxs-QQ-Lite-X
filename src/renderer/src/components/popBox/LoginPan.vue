@@ -1,17 +1,26 @@
 <template>
     <div class="login-pan-card">
-        <div class="setting"
-            @click="openOptions">
+        <div class="setting" @click="openOptions">
             <font-awesome-icon :icon="['fas', 'gear']" />
         </div>
         <Icon animation />
         <p>{{ $t('连接到 协议端') }}</p>
         <form @submit.prevent @submit="connect">
-            <template v-if="loginInfo.quickLogin == null || loginInfo.quickLogin.length == 0">
+            <template
+                v-if="
+                    loginInfo.quickLogin == null ||
+                    loginInfo.quickLogin.length == 0
+                "
+            >
                 <label class="input">
                     <font-awesome-icon :icon="['fas', 'link']" />
-                    <input id="sev_address" v-model="loginInfo.address" :placeholder="$t('连接地址')"
-                        class="ss-input" autocomplete="off">
+                    <input
+                        id="sev_address"
+                        v-model="loginInfo.address"
+                        :placeholder="$t('连接地址')"
+                        class="ss-input"
+                        autocomplete="off"
+                    />
                 </label>
             </template>
             <div v-else class="ss-card quick-login">
@@ -21,9 +30,19 @@
                     <a @click="cancelQuickLogin">{{ $t('取消') }}</a>
                 </div>
                 <div class="list">
-                    <div v-for="item in loginInfo.quickLogin" :key="item.address + ':' + item.port"
-                        :class="(loginInfo.quickLoginSelect == item.address + ':' + item.port) ? 'select' : ''"
-                        @click="selectQuickLogin(item.address + ':' + item.port)">
+                    <div
+                        v-for="item in loginInfo.quickLogin"
+                        :key="item.address + ':' + item.port"
+                        :class="
+                            loginInfo.quickLoginSelect ==
+                            item.address + ':' + item.port
+                                ? 'select'
+                                : ''
+                        "
+                        @click="
+                            selectQuickLogin(item.address + ':' + item.port)
+                        "
+                    >
                         <span>{{ item.address }}:{{ item.port }}</span>
                         <div><div /></div>
                     </div>
@@ -31,26 +50,44 @@
             </div>
             <label class="input">
                 <font-awesome-icon :icon="['fas', 'lock']" />
-                <input id="access_token" v-model="loginInfo.token" :placeholder="$t('连接密钥')"
-                    class="ss-input" type="password" autocomplete="off">
+                <input
+                    id="access_token"
+                    v-model="loginInfo.token"
+                    :placeholder="$t('连接密钥')"
+                    class="ss-input"
+                    type="password"
+                    autocomplete="off"
+                />
             </label>
             <div style="display: flex">
                 <label class="default">
-                    <input id="in_" v-model="runtimeData.sysConfig.auto_save_password" type="checkbox"
+                    <input
+                        id="in_"
+                        v-model="runtimeData.sysConfig.auto_save_password"
+                        type="checkbox"
                         name="save_password"
-                        @click="savePassword">
+                        @click="savePassword"
+                    />
                     <a>{{ $t('记住密码') }}</a>
                 </label>
                 <div style="flex: 1" />
                 <label class="default" style="justify-content: flex-end">
-                    <input v-model="runtimeData.sysConfig.auto_connect" type="checkbox"
-                        name="auto_connect" @click="saveAutoConnect">
+                    <input
+                        v-model="runtimeData.sysConfig.auto_connect"
+                        type="checkbox"
+                        name="auto_connect"
+                        @click="saveAutoConnect"
+                    />
                     <a>{{ $t('自动连接') }}</a>
                 </label>
             </div>
-            <button id="connect_btn" class="ss-button" type="submit"
+            <button
+                id="connect_btn"
+                class="ss-button"
+                type="submit"
                 :disabled="isLogging"
-                @mousemove="afd">
+                @mousemove="afd"
+            >
                 <template v-if="!isLogging">
                     {{ $t('连接') }}
                 </template>
@@ -66,7 +103,7 @@
 <script setup lang="ts">
 import driver from '@renderer/function/driver'
 import { login } from '@renderer/function/login'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { noticePopBox, popBox } from '@renderer/function/utils/popBox'
 import { i18n } from '@renderer/main'
 import { computed, shallowReactive, shallowRef } from 'vue'
@@ -75,42 +112,38 @@ import HowToConnect from '@renderer/components/popBox/doc/HowToConnect.vue'
 import Options from '@renderer/pages/Options.vue'
 const loginInfo = shallowReactive({
     quickLoginSelect: '',
-    quickLogin: shallowReactive([]) as { address: string, port: number }[],
+    quickLogin: shallowReactive([]) as { address: string; port: number }[],
     address: '',
     token: '',
 })
 const runLoginFunc = shallowRef(false)
-const isLogging = computed(
-    () => {
-        if (runLoginFunc.value) return true
-        return driver.isConnecting()
-    }
-)
+const isLogging = computed(() => {
+    if (runLoginFunc.value) return true
+    return driver.isConnecting()
+})
 
 const emit = defineEmits<{
-    'closePopBox': []
+    closePopBox: []
 }>()
 
+const runtimeData = useRuntimeData()
 const $t = i18n.global.t
 
 // 加载密码保存和自动连接
 loginInfo.address = runtimeData.sysConfig.address
-if (
-    runtimeData.sysConfig.auto_save_password
-) {
+if (runtimeData.sysConfig.auto_save_password) {
     loginInfo.token = runtimeData.sysConfig.saved_password
 }
 
 // 自动登陆
-if (runtimeData.sysConfig.auto_connect)
-    connect()
+if (runtimeData.sysConfig.auto_connect) connect()
 
 /**
  * 发起连接
  */
 async function connect() {
     const main = async () => {
-        if(loginInfo.quickLoginSelect != '') {
+        if (loginInfo.quickLoginSelect != '') {
             // PS：快速连接的地址只会是局域网,没ssl,milky没做适配,所以默认 ob 协议
             loginInfo.address = 'ob://' + loginInfo.quickLoginSelect
         }
@@ -152,7 +185,11 @@ function savePassword(event: Event) {
     if (value) {
         runtimeData.sysConfig.auto_save_password = true
         // 创建提示弹窗
-        noticePopBox($t('连接密钥将以明文存储在浏览器 Cookie 中，请确保设备安全以防止密钥泄漏。'))
+        noticePopBox(
+            $t(
+                '连接密钥将以明文存储在浏览器 Cookie 中，请确保设备安全以防止密钥泄漏。',
+            ),
+        )
     } else {
         // 清除保存的密码
         runtimeData.sysConfig.auto_save_password = false
@@ -182,8 +219,8 @@ function howToConnect() {
             {
                 master: true,
                 text: $t('确定'),
-            }
-        ]
+            },
+        ],
     })
 }
 

@@ -10,23 +10,36 @@
         :class="{
             'disable-interaction': !allowInteraction || multiselectMode,
         }"
-        tag="div">
+        tag="div"
+    >
         <template v-for="(message, index) in msgs">
             <!-- 时间戳 -->
             <NoticeBody
-                v-if="message.time && isShowTime(msgs.at(index - 1)?.time?.time, message.time.time)"
-                :key="'notice-time-' + (message.time.time / ( 4 * 60 )).toFixed(0)"
-                :data="SystemNotice.time(message.time.time)" />
+                v-if="
+                    message.time &&
+                    isShowTime(
+                        msgs.at(index - 1)?.time?.time,
+                        message.time.time,
+                    )
+                "
+                :key="
+                    'notice-time-' + (message.time.time / (4 * 60)).toFixed(0)
+                "
+                :data="SystemNotice.time(message.time.time)"
+            />
             <!-- [已删除]消息 -->
             <NoticeBody
                 v-if="
                     !runtimeData.sysConfig.dont_parse_delete &&
-                        message instanceof Msg &&
-                        message.isDelete"
+                    message instanceof Msg &&
+                    message.isDelete
+                "
                 :key="'delete-' + message.uuid"
-                :data="SystemNotice.delete()" />
+                :data="SystemNotice.delete()"
+            />
             <!-- 消息体 -->
-            <MsgBody v-else-if="message instanceof Msg"
+            <MsgBody
+                v-else-if="message instanceof Msg"
                 :key="'msg-' + message.uuid"
                 :selected="isSelected(message)"
                 :data="message"
@@ -38,26 +51,28 @@
                 :without-avatar="getWithoutAvatar(message)"
                 :ex-info="exInfo"
                 @click="msgClick($event, message)"
-                @image-loaded="arg=>$emit('imageLoaded', arg)"
+                @image-loaded="(arg) => $emit('imageLoaded', arg)"
                 @show-msg-menu="(eventData, msg) => openMsgMenu(eventData, msg)"
-                @show-user-menu="(eventData, user) => openUserMenu(eventData, user)"
-                @left-move="arg => $emit('leftMove', arg)"
-                @right-move="arg => $emit('rightMove', arg)"
-                @sender-double-click="arg => $emit('senderDoubleClick', arg)"
-                @emoji-click="(id, msg) => $emit('emojiClick', id, msg)" />
+                @show-user-menu="
+                    (eventData, user) => openUserMenu(eventData, user)
+                "
+                @left-move="(arg) => $emit('leftMove', arg)"
+                @right-move="(arg) => $emit('rightMove', arg)"
+                @sender-double-click="(arg) => $emit('senderDoubleClick', arg)"
+                @emoji-click="(id, msg) => $emit('emojiClick', id, msg)"
+            />
             <!-- 其他通知消息 -->
-            <NoticeBody v-else-if="message instanceof Notice"
+            <NoticeBody
+                v-else-if="message instanceof Notice"
                 :id="message.uuid"
                 :key="'notice-' + index"
-                :data="message" />
+                :data="message"
+            />
         </template>
     </TransitionGroup>
 </template>
 <script setup lang="ts">
-import {
-    shallowReactive,
-    shallowRef,
-} from 'vue'
+import { shallowReactive, shallowRef } from 'vue'
 import MsgBody from './MsgBody.vue'
 import NoticeBody from './NoticeBody.vue'
 
@@ -66,9 +81,9 @@ import { Message } from '@renderer/function/model/message'
 import { Msg } from '@renderer/function/model/msg'
 import { Notice, SystemNotice } from '@renderer/function/model/notice'
 import { IUser } from '@renderer/function/model/user'
-import { runtimeData } from '@renderer/function/msg'
 import { isShowTime } from '@renderer/function/utils/msgUtil'
 import app from '@renderer/main'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 //#region ====定义与导出============================================
 const {
@@ -87,9 +102,12 @@ const {
     withoutAvatar = false,
     exInfo = ['time', 'msgId'],
 } = defineProps<{
-    msgs: Message[],
-    showMsgMenu?: (eventData: MenuEventData, msg: Msg) => (Promise<void> | void),
-    showUserMenu?: (eventData: MenuEventData, user: IUser) => (Promise<void> | void),
+    msgs: Message[]
+    showMsgMenu?: (eventData: MenuEventData, msg: Msg) => Promise<void> | void
+    showUserMenu?: (
+        eventData: MenuEventData,
+        user: IUser,
+    ) => Promise<void> | void
 
     /**
      * 消息对齐方向
@@ -140,23 +158,25 @@ const {
     /**
      * 是否显示时间
      */
-    exInfo?: ('time'|'msgId')[]
+    exInfo?: ('time' | 'msgId')[]
 }>()
 
 const emit = defineEmits<{
-    msgClick: [event: MouseEvent, msg: Msg],
-    imageLoaded: [height: number],
-    leftMove: [msg: Msg],
-    rightMove: [msg: Msg],
-    senderDoubleClick: [user: IUser],
-    emojiClick: [id: string, msg: Msg],
+    msgClick: [event: MouseEvent, msg: Msg]
+    imageLoaded: [height: number]
+    leftMove: [msg: Msg]
+    rightMove: [msg: Msg]
+    senderDoubleClick: [user: IUser]
+    emojiClick: [id: string, msg: Msg]
 }>()
 
 const allowInteraction = shallowRef<boolean>(canInteraction ?? true)
 const multiselectMode = shallowRef<boolean>(false)
-const multipleSelectList = shallowReactive<Set<Msg>>(new Set)
+const multipleSelectList = shallowReactive<Set<Msg>>(new Set())
 const multipleSelectListCardNum = shallowRef<number>(0)
-const selectMsg = shallowRef<undefined|Msg>()
+const selectMsg = shallowRef<undefined | Msg>()
+
+const runtimeData = useRuntimeData()
 
 defineExpose({
     setAllowInteraction,
@@ -215,7 +235,6 @@ function openUserMenu(eventData: MenuEventData, user: IUser) {
 }
 //#endregion
 
-
 //#region ====多选模式相关==========================================
 /**
  * 开始多选模式
@@ -243,7 +262,8 @@ function isMultiselectMode(): boolean {
  * @param msg 消息对象
  */
 function forceAddToMultiselectList(msg: Msg) {
-    if (!multiselectMode.value) throw new Error('多选模式未开启，无法添加消息到多选列表。')
+    if (!multiselectMode.value)
+        throw new Error('多选模式未开启，无法添加消息到多选列表。')
     if (!multipleSelectList.has(msg)) multipleSelectList.add(msg)
 }
 /**
@@ -251,7 +271,8 @@ function forceAddToMultiselectList(msg: Msg) {
  * @returns {number} 多选列表长度
  */
 function getMultiselectListLength(): number {
-    if (!multiselectMode.value) throw new Error('多选模式未开启，无法获取多选列表长度。')
+    if (!multiselectMode.value)
+        throw new Error('多选模式未开启，无法获取多选列表长度。')
     return multipleSelectList.size
 }
 /**
@@ -287,37 +308,35 @@ function toggleMsgInMultiselectList(msg: Msg) {
     }
     if (!multipleSelectList.has(msg)) {
         multipleSelectList.add(msg)
-        if (msg.hasCard()) multipleSelectListCardNum.value ++
-    }
-    else {
+        if (msg.hasCard()) multipleSelectListCardNum.value++
+    } else {
         multipleSelectList.delete(msg)
-        if (msg.hasCard()) multipleSelectListCardNum.value --
+        if (msg.hasCard()) multipleSelectListCardNum.value--
     }
 }
 //#endregion
 
-
 //#region ====配置相关==============================================
 function getDirection(msg: Msg): 'left' | 'right' {
-    if (runtimeData.loginInfo.uin !== msg.sender.user_id) return direction
+    if (runtimeData.loginInfo?.uin !== msg.sender.user_id) return direction
     if (!specialSelf) return direction
     return selfDirection ?? direction
 }
 
 function getSpecial(msg: Msg): boolean {
     if (!specialSelf) return false
-    return msg.sender.user_id === runtimeData.loginInfo.uin
+    return msg.sender.user_id === runtimeData.loginInfo?.uin
 }
 
 function getShowAvatar(msg: Msg): boolean {
-    if (msg.sender.user_id !== runtimeData.loginInfo.uin) return showAvatar
+    if (msg.sender.user_id !== runtimeData.loginInfo?.uin) return showAvatar
     if (!specialSelf) return showAvatar
     return showSelfAvatar ?? showAvatar
 }
 
 function getWithoutAvatar(msg: Msg): boolean {
     if (withoutAvatar) return true
-    if (msg.sender.user_id !== runtimeData.loginInfo.uin) return false
+    if (msg.sender.user_id !== runtimeData.loginInfo?.uin) return false
     if (!specialSelf) return false
     if (getShowAvatar(msg)) return false
     if (selfDirection === direction) return false
@@ -325,9 +344,8 @@ function getWithoutAvatar(msg: Msg): boolean {
 }
 //#endregion
 
-
 //#region ====工具函数==============================================
-function isSelected(msg: Msg): boolean{
+function isSelected(msg: Msg): boolean {
     return multipleSelectList.has(msg) || selectMsg.value === msg
 }
 //#endregion

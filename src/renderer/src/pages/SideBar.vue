@@ -5,11 +5,15 @@
  * @Version: 1.0
 -->
 <template>
-    <div ref="side-bar"
+    <div
+        ref="side-bar"
         v-move="moveOptions"
         class="side-bar"
         :style="{
-            paddingBottom: runtimeData.sysConfig.fs_adaptation > 0 ? `${runtimeData.sysConfig.fs_adaptation}px` : '',
+            paddingBottom:
+                runtimeData.sysConfig.fs_adaptation > 0
+                    ? `${runtimeData.sysConfig.fs_adaptation}px`
+                    : '',
         }"
         :class="{
             fold: foldState === 'fold',
@@ -19,69 +23,83 @@
         @v-move-left="nextSideBar()"
         @v-move-right="prevSideBar()"
         @mouseenter="hoverStart()"
-        @mouseleave="hoverEnd()">
-        <transition mode="out-in" :name="`change-side-bar-${changeSideBarDirection}`">
-            <component :is="sideBarInfo.template"
+        @mouseleave="hoverEnd()"
+    >
+        <transition
+            mode="out-in"
+            :name="`change-side-bar-${changeSideBarDirection}`"
+        >
+            <component
+                :is="sideBarInfo.template"
                 ref="sideBar"
                 :key="sideBarInfo.type"
                 class="side-bar-main"
-                :side-bar-state="foldState" />
+                :side-bar-state="foldState"
+            />
         </transition>
 
-        <div style="margin: auto;" />
-        <hr>
+        <div style="margin: auto" />
+        <hr />
 
         <div class="bottom">
             <div
                 class="icon"
                 :title="$t('消息')"
-                :class="{'active': sideBarInfo.type === 'Message'}"
-                @click="clickChangeSideBar(messageSideBar)">
+                :class="{ active: sideBarInfo.type === 'Message' }"
+                @click="clickChangeSideBar(messageSideBar)"
+            >
                 <font-awesome-icon :icon="['fas', 'envelope']" />
             </div>
             <div
                 class="icon"
                 :title="$t('联系人')"
-                :class="{'active': sideBarInfo.type === 'Friend'}"
-                @click="clickChangeSideBar(friendSideBar)">
+                :class="{ active: sideBarInfo.type === 'Friend' }"
+                @click="clickChangeSideBar(friendSideBar)"
+            >
                 <font-awesome-icon :icon="['fas', 'user']" />
             </div>
             <div
                 class="icon"
                 :title="$t('收纳盒')"
-                :class="{'active': sideBarInfo.type === 'Box'}"
-                @click="clickChangeSideBar(boxSideBar)">
+                :class="{ active: sideBarInfo.type === 'Box' }"
+                @click="clickChangeSideBar(boxSideBar)"
+            >
                 <font-awesome-icon :icon="['fas', 'box']" />
             </div>
-            <div style="margin: auto;" />
-            <div v-if="canControlFold"
+            <div style="margin: auto" />
+            <div
+                v-if="canControlFold"
                 class="icon"
                 :title="fold ? $t('展开') : $t('折叠')"
-                :class="{'active': fold}"
-                @click="fold = !fold">
+                :class="{ active: fold }"
+                @click="fold = !fold"
+            >
                 <font-awesome-icon :icon="['fas', 'bars-staggered']" />
             </div>
-            <div
-                class="icon"
-                :title="$t('设置')"
-                @click="openOptions">
+            <div class="icon" :title="$t('设置')" @click="openOptions">
                 <font-awesome-icon :icon="['fas', 'gear']" />
             </div>
         </div>
 
         <!-- 拖拽块 -->
-        <div class="drag-region"
-            :class="{'grabbing': dragging}"
-            @mousedown="startDrag" />
+        <div
+            class="drag-region"
+            :class="{ grabbing: dragging }"
+            @mousedown="startDrag"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
 import { mousemoveMask } from '@renderer/function/input'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { popBox } from '@renderer/function/utils/popBox'
 import { VMoveOptions, vMove } from '@renderer/function/utils/vcmd'
-import { useEventListener, useKeyboard, useLocalStorage } from '@renderer/function/utils/vuse'
+import {
+    useEventListener,
+    useKeyboard,
+    useLocalStorage,
+} from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
 import { computed, shallowRef, useTemplateRef } from 'vue'
 import Boxes from './Boxes.vue'
@@ -90,15 +108,16 @@ import Messages from './Messages.vue'
 import Options from './Options.vue'
 
 const $t = app.config.globalProperties.$t
+const runtimeData = useRuntimeData()
 
 const moveOptions: VMoveOptions<HTMLDivElement> = {
     leftLimit: {
         value: 999,
-        type: 'px'
+        type: 'px',
     },
     rightLimit: {
         value: 999,
-        type: 'px'
+        type: 'px',
     },
     speedCondition: {
         minMove: {
@@ -111,7 +130,7 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
         minMove: {
             value: 33,
             type: '%',
-        }
+        },
     },
 }
 
@@ -160,7 +179,9 @@ const foldState = computed<'open' | 'fold'>(() => {
         case 'hide':
             return 'open'
         default:
-            throw new Error(`未知侧边栏状态${runtimeData.sysConfig.auto_hide_side_bar}`)
+            throw new Error(
+                `未知侧边栏状态${runtimeData.sysConfig.auto_hide_side_bar}`,
+            )
     }
 })
 
@@ -188,10 +209,8 @@ function prevSideBar() {
  */
 function clickChangeSideBar(bar: SideBarInfo) {
     if (sideBarInfo.value.type === bar.type) return
-    if (bar.id > sideBarInfo.value.id)
-        changeSideBarDirection.value = 'right'
-    else
-        changeSideBarDirection.value = 'left'
+    if (bar.id > sideBarInfo.value.id) changeSideBarDirection.value = 'right'
+    else changeSideBarDirection.value = 'left'
 
     setSideBar(bar)
 }
@@ -238,7 +257,7 @@ function hoverEnd() {
     if (dTime <= 0) {
         isHover.value = false
         staticTime = undefined
-    }else {
+    } else {
         hoverTimeout = setTimeout(() => {
             isHover.value = false
             staticTime = undefined
@@ -251,23 +270,27 @@ function hoverEnd() {
  */
 function startDrag() {
     bar.value!.style.transition = 'none'
-    mousemoveMask((event)=>{
-        // 拖拽标记
-        dragging.value = true
-        // 拖拽大小调整
-        runtimeData.sysConfig.side_bar_width = event.clientX
-        if (runtimeData.sysConfig.side_bar_width < 100) fold.value = true
-        else if (runtimeData.sysConfig.side_bar_width > 250) fold.value = false
-        // 计算鼠标指针大小
-        const el = document.getElementById('mask')!
-        el.style.cursor = fold.value ? 'e-resize' : 'ew-resize'
-    }, ()=>{
-        dragging.value = false
-        bar.value!.style.transition = ''
-    })
+    mousemoveMask(
+        (event) => {
+            // 拖拽标记
+            dragging.value = true
+            // 拖拽大小调整
+            runtimeData.sysConfig.side_bar_width = event.clientX
+            if (runtimeData.sysConfig.side_bar_width < 100) fold.value = true
+            else if (runtimeData.sysConfig.side_bar_width > 250)
+                fold.value = false
+            // 计算鼠标指针大小
+            const el = document.getElementById('mask')!
+            el.style.cursor = fold.value ? 'e-resize' : 'ew-resize'
+        },
+        () => {
+            dragging.value = false
+            bar.value!.style.transition = ''
+        },
+    )
 }
 
-useEventListener(document, 'mouseout', (event)=>{
+useEventListener(document, 'mouseout', (event) => {
     if (runtimeData.sysConfig.auto_hide_side_bar !== 'hide') return
     if (isHover.value) return
     if (event.clientX > 5) return
@@ -275,10 +298,10 @@ useEventListener(document, 'mouseout', (event)=>{
     hoverEnd()
 })
 
-useKeyboard('ctrl+b', ()=>{
-    if (canControlFold.value){
+useKeyboard('ctrl+b', () => {
+    if (canControlFold.value) {
         fold.value = !fold.value
-    }else{
+    } else {
         hoverStart(2000)
         hoverEnd()
     }

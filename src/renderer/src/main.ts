@@ -20,12 +20,12 @@ import './assets/css/sys_notice.css'
 import './assets/css/view.css'
 import './assets/css/color.css'
 
-import { runtimeData } from './function/msg'
 import { getPortableFileLang, getVersion } from './function/utils/systemUtil'
 import { useLocalStorage } from './function/utils/vuse'
 import { backend } from './runtime/backend'
 import win from './runtime/win'
 import useOptionStore from './state/option'
+// import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 /* eslint-disable no-console */
 const zh = getPortableFileLang('zh-CN')
@@ -40,8 +40,12 @@ export const i18n = createI18n({
     silentFallbackWarn: true,
     messages,
 })
+// 创建 Pinia
+const pinia = createPinia()
+// pinia.use(piniaPluginPersistedstate)
+
 // 创建 App
-const app = createApp(App).use(i18n).use(createPinia()).use(VueAMap)
+const app = createApp(App).use(i18n).use(pinia).use(VueAMap)
 library.add(fas)
 library.add(faSquare)
 app.component('FontAwesomeIcon', FontAwesomeIcon)
@@ -94,9 +98,9 @@ console.log('[ SSystem Bootloader Loading …… core/ssqq-core ]')
 // 加载配置文件，挂在
 setTimeout(async () => {
     // 加载设置项
-    const option = useOptionStore()
     await backend.init() // Desktop：初始化客户端功能
-    await option.init(runtimeData) // 载入设置项
+    const option = useOptionStore()
+    await option.init() // 载入设置项
     await win.init() // 初始化窗口信息
     app.mount('#app')
 }, 0)

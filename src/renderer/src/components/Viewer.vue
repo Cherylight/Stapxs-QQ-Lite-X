@@ -282,12 +282,12 @@
 import { popInfo } from '@renderer/function/base'
 import { mousemoveMask } from '@renderer/function/input'
 import { Img } from '@renderer/function/model/img'
-import { runtimeData } from '@renderer/function/msg'
 import { downloadFile } from '@renderer/function/utils/appUtil'
 import { copyToClipboard } from '@renderer/function/utils/systemUtil'
 import { vEsc, vHide, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import { useKeyboard, useViewportUnits } from '@renderer/function/utils/vuse'
 import { i18n } from '@renderer/main'
+import useRuntimeData from '@renderer/state/runtimeData'
 import {
     computed,
     shallowReactive,
@@ -297,6 +297,7 @@ import {
 } from 'vue'
 
 type EditToolType = 'hand' | 'pen' | 'rect'
+const runtimeData = useRuntimeData()
 
 const colorMap = {
     red: '#F0534C',

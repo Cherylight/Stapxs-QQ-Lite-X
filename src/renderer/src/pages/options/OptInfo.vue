@@ -7,22 +7,28 @@
 -->
 
 <template>
-    <div
-        class="info-pan-set"
-        style="padding: 0">
+    <div class="info-pan-set" style="padding: 0">
         <!-- 公用设置 -->
         <!-- 群设置 -->
         <template v-if="chat instanceof GroupSession">
-            <div v-if="chat.getMe().role == 'owner' ||
-                     chat.getMe().role == 'admin'"
-                class="opt-item">
+            <div
+                v-if="
+                    chat.getMe().role == 'owner' || chat.getMe().role == 'admin'
+                "
+                class="opt-item"
+            >
                 <font-awesome-icon :icon="['fas', 'pen']" />
                 <div>
                     <span>{{ $t('群聊名称') }}</span>
                     <span>{{ $t('“你们真是害人不浅呐你们这个群”') }}</span>
                 </div>
-                <input v-model="nowChatName" class="ss-input"
-                    style="width: 150px" type="text" @keyup="setGroupName">
+                <input
+                    v-model="nowChatName"
+                    class="ss-input"
+                    style="width: 150px"
+                    type="text"
+                    @keyup="setGroupName"
+                />
             </div>
             <div class="opt-item">
                 <font-awesome-icon :icon="['fas', 'note-sticky']" />
@@ -30,12 +36,17 @@
                     <span>{{ $t('我的群昵称') }}</span>
                     <span>{{ $t('￡爺↘僞ηι慹著彡') }}</span>
                 </div>
-                <input v-model="meCard" class="ss-input"
-                    style="width: 150px" type="text" @change="
-                        meCard !== chat.getMe().card?.toString() ?
-                            emit('update_member_card', chat.getMe(), meCard)
+                <input
+                    v-model="meCard"
+                    class="ss-input"
+                    style="width: 150px"
+                    type="text"
+                    @change="
+                        meCard !== chat.getMe().card?.toString()
+                            ? emit('update_member_card', chat.getMe(), meCard)
                             : undefined
-                    ">
+                    "
+                />
             </div>
             <div class="opt-item">
                 <font-awesome-icon :icon="['fas', 'bell']" />
@@ -44,17 +55,23 @@
                     <span>{{ $t('快来水群快来水群！') }}</span>
                 </div>
                 <label class="ss-switch">
-                    <input :value="chat.notice" type="checkbox"
-                        name="opt_dark" @change="setGroupNotice">
+                    <input
+                        :value="chat.notice"
+                        type="checkbox"
+                        name="opt_dark"
+                        @change="setGroupNotice"
+                    />
                     <div>
                         <div />
                     </div>
                 </label>
             </div>
 
-            <button class="ss-button"
+            <button
+                class="ss-button"
                 style="width: calc(100% - 60px); margin: 10px 30px 0 30px"
-                @click="leaveGroup()">
+                @click="leaveGroup()"
+            >
                 {{ $t('退出群聊') }}
             </button>
         </template>
@@ -64,20 +81,18 @@
 <script setup lang="ts">
 import { GroupSession } from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { reloadUsers } from '@renderer/function/utils/appUtil'
 import { delay } from '@renderer/function/utils/systemUtil'
 import app from '@renderer/main'
 
 import { popInfo } from '@renderer/function/base'
 import { ensurePopBox, waitPopBox } from '@renderer/function/utils/popBox'
-import {
-    shallowRef,
-    watch,
-} from 'vue'
+import { shallowRef, watch } from 'vue'
 
 //#region == 声明变量 ================================================================
 const { $t } = app.config.globalProperties
+const runtimeData = useRuntimeData()
 const { chat } = defineProps<{
     chat: GroupSession
 }>()
@@ -90,19 +105,25 @@ const nowChatName = shallowRef(chat.showName ?? '')
 //#endregion
 
 //#region == 变量更新 ================================================================
-watch(() => chat.showName, (newName) => {
-    nowChatName.value = newName ?? ''
-})
-watch(() => chat.getMe().card, (newCard) => {
-    meCard.value = newCard?.toString() ?? ''
-})
+watch(
+    () => chat.showName,
+    (newName) => {
+        nowChatName.value = newName ?? ''
+    },
+)
+watch(
+    () => chat.getMe().card,
+    (newCard) => {
+        meCard.value = newCard?.toString() ?? ''
+    },
+)
 //#endregion
 
 //#region == 方法函数 ================================================================
 /**
-* 设置群消息通知
-* @param event 输入事件
-*/
+ * 设置群消息通知
+ * @param event 输入事件
+ */
 function setGroupNotice(event: Event) {
     const status = (event.target as HTMLInputElement).checked
     if (!(chat instanceof GroupSession)) return
@@ -153,8 +174,8 @@ async function checkSetChatInfoResult() {
 </script>
 
 <style scoped>
-    .opt-item:hover input[type='text'] {
-        background: var(--color-card-2);
-        transition: background 0.2s;
-    }
+.opt-item:hover input[type='text'] {
+    background: var(--color-card-2);
+    transition: background 0.2s;
+}
 </style>

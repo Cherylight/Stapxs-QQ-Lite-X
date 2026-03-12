@@ -8,12 +8,14 @@
 -->
 
 <template>
-    <div class="chat-head"
+    <div
+        class="chat-head"
         :class="{ hide: hide }"
         @mouseenter="hoverStart()"
-        @mouseleave="hoverEnd()">
+        @mouseleave="hoverEnd()"
+    >
         <div class="info">
-            <img :src="session.face" :alt="session.showName">
+            <img :src="session.face" :alt="session.showName" />
             <div class="info">
                 <p>
                     {{ session.showName }}
@@ -26,18 +28,26 @@
                         {{ session.appendInfo }}
                     </template>
                     {{
-                        session.preMessage ? $t('上次消息 - {time}', {
-                            time: session.preMessage.time?.format()
-                        }) : $t('暂无消息')
+                        session.preMessage
+                            ? $t('上次消息 - {time}', {
+                                  time: session.preMessage.time?.format(),
+                              })
+                            : $t('暂无消息')
                     }}
                 </span>
             </div>
             <div class="space" />
             <div class="more">
-                <font-awesome-icon v-if="session.isActive"
-                    :icon="['fas', 'ellipsis-vertical']" @click="openChatInfoPan" />
-                <font-awesome-icon v-else
-                    :icon="['fas', 'spinner']" class="loading" />
+                <font-awesome-icon
+                    v-if="session.isActive"
+                    :icon="['fas', 'ellipsis-vertical']"
+                    @click="openChatInfoPan"
+                />
+                <font-awesome-icon
+                    v-else
+                    :icon="['fas', 'spinner']"
+                    class="loading"
+                />
             </div>
         </div>
         <div id="chat-head-bottom" />
@@ -46,11 +56,13 @@
 
 <script setup lang="ts">
 import { GroupSession, Session } from '@renderer/function/model/session'
-import { runtimeData } from '@renderer/function/msg'
 import { popBox } from '@renderer/function/utils/popBox'
 import app from '@renderer/main'
 import Info from '@renderer/pages/info/Info.vue'
 import { computed, shallowRef } from 'vue'
+import useRuntimeData from '@renderer/state/runtimeData'
+
+const runtimeData = useRuntimeData()
 
 const { session } = defineProps<{
     session: Session
@@ -58,7 +70,7 @@ const { session } = defineProps<{
 
 const hover = shallowRef(false)
 
-const hide = computed<boolean>(()=>{
+const hide = computed<boolean>(() => {
     if (!runtimeData.sysConfig.hide_chat_head) return false
     return !hover.value
 })
@@ -66,7 +78,6 @@ const hide = computed<boolean>(()=>{
 function $t(key: string, args: Record<string, any> = {}): string {
     return app.config.globalProperties.$t(key, args)
 }
-
 
 let hoverTimeout: ReturnType<typeof setTimeout> | undefined
 let staticTime: number | undefined
@@ -95,14 +106,13 @@ function hoverEnd(event?: MouseEvent) {
     if (dTime <= 0) {
         hover.value = false
         staticTime = undefined
-    }else {
+    } else {
         hoverTimeout = setTimeout(() => {
             hover.value = false
             staticTime = undefined
         }, dTime)
     }
 }
-
 
 /**
  * 打开好友/群组信息页面
@@ -123,7 +133,7 @@ function openChatInfoPan() {
     //     chat.show.type === 'group' &&
     //     chat.info.group_info.gc !== chat.show.id
     // ) {
-    //     const url = `https://qinfo.clt.qq.com/cgi-bin/qun_info/get_group_info_all?gc=${chat.show.id}&bkn=${runtimeData.loginInfo.bkn}`
+    //     const url = `https://qinfo.clt.qq.com/cgi-bin/qun_info/get_group_info_all?gc=${chat.show.id}&bkn=${runtimeData.loginInfo?.bkn}`
     //     Connector.send(
     //         'http_proxy',
     //         { url: url },

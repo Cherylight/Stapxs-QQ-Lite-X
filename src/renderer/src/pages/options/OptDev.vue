@@ -327,7 +327,7 @@
 import Switch from '@renderer/components/Switch.vue'
 import useOptionStore from '@renderer/state/option'
 import { popInfo } from '@renderer/function/base'
-import { runtimeData } from '@renderer/function/msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { BrowserInfo, detect } from 'detect-browser'
 import app, { uptime } from '@renderer/main'
 import { backend } from '@renderer/runtime/backend'
@@ -348,6 +348,7 @@ import WelPan from '@renderer/components/popBox/WelPan.vue'
 const option = useOptionStore()
 
 const $t = app.config.globalProperties.$t
+const runtimeData = useRuntimeData()
 const appmsg_text = shallowRef('')
 const winState = shallowRef<'none' | 'tiling' | 'win'>('none')
 

@@ -18,7 +18,7 @@ import {
 } from 'vue'
 import { Message } from './message'
 import { GroupSession, Session } from './session'
-import { runtimeData } from '../msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 import { Msg } from './msg'
 import win from '@renderer/runtime/win'
 
@@ -157,6 +157,7 @@ export class SessionBox {
      * @returns
      */
     static load(): void {
+        const runtimeData = useRuntimeData()
         // 读取所有的收纳盒
         for (const box of runtimeData.sysConfig.boxes) {
             this.parse(box)
@@ -179,8 +180,9 @@ export class SessionBox {
      * 保存当前收纳盒的状态
      */
     static saveData(): void {
+        const runtimeData = useRuntimeData()
         // 检查前提条件
-        if (!runtimeData.loginInfo.uin) return
+        if (!runtimeData.loginInfo?.uin) return
 
         // 保存收纳盒数据
         runtimeData.sysConfig.boxes = this.sessionBoxes.map((box) =>
@@ -246,6 +248,7 @@ export class SessionBox {
      */
     putSession(session: Session): void {
         if (this.content.has(session)) return
+        const runtimeData = useRuntimeData()
         // 加入到收纳盒
         this.content.add(session)
         session.addBox(this)
@@ -262,6 +265,7 @@ export class SessionBox {
     removeSession(session: Session): void {
         // 离开收纳盒
         if (!this.content.has(session)) return
+        const runtimeData = useRuntimeData()
         this.content.delete(session)
         session.leaveBox(this)
         // 更新当前收纳盒
@@ -412,6 +416,7 @@ export class BubbleBox extends SessionBox {
         SessionBox.sessionBoxes.pop() // 给自己删了
 
         setTimeout(() => {
+            const runtimeData = useRuntimeData()
             // 添加到群收纳盒
             Session.afterActiveHook.push((session: Session) => {
                 if (!runtimeData.sysConfig.bubble_sort_user) return

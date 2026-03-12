@@ -9,7 +9,7 @@
 import { shallowReactive } from 'vue'
 import { PopInfoElem } from './elements/system'
 import useOptionStore from '@renderer/state/option'
-import { runtimeData } from './msg'
+import useRuntimeData from '@renderer/state/runtimeData'
 
 // =============== 日志 ===============
 
@@ -26,6 +26,7 @@ const logTypeInfo: Record<LogType, [string, string]> = {
 
 function normallyConditionCheck(type: LogType): boolean {
     const option = useOptionStore()
+    const runtimeData = useRuntimeData()
     const logLevel = option.options.log_level
     if (logLevel === 'all') return true
     if (logLevel === 'debug' && (type === 'DEBUG' || type === 'UI')) return true
