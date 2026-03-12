@@ -158,7 +158,7 @@ import {
     watch,
 } from 'vue'
 import ChatMsgMenu from './menu/ChatMsgMenu.vue'
-import useRuntimeData from '@renderer/state/runtimeData'
+import { getCm } from '@renderer/function/utils/baseUtil'
 
 const { vw } = useViewportUnits()
 const stack = shallowReactive<ForwardSeg[]>([])
@@ -169,8 +169,6 @@ const isMultiselectMode = shallowRef(false)
 
 const msgBarEl = useTemplateRef('msgBar')
 const mergePanEl = useTemplateRef('mergePan')
-
-const runtimeData = useRuntimeData()
 
 const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
     beforeHook: (_) => {
@@ -197,10 +195,10 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
     },
     speedCondition: {
         minMove: {
-            value: runtimeData.cm,
+            value: getCm(),
             type: 'px',
         },
-        minSpeed: 10 * runtimeData.cm,
+        minSpeed: 10 * getCm(),
     },
     moveCondition: {
         minMove: {

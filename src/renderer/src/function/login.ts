@@ -3,7 +3,6 @@ import { backend } from '@renderer/runtime/backend'
 import { markRaw } from 'vue'
 import { AdapterInterface } from './adapter/interface'
 import { logger, popInfo } from './base'
-import { URL } from './model/data'
 import { User } from './model/user'
 import {
     reloadUsers,
@@ -204,6 +203,7 @@ import { popBox } from './utils/popBox'
 import { dns } from './utils/systemUtil'
 import WhyNeedToken from '@renderer/components/popBox/doc/WhyNeedToken.vue'
 import useRuntimeData from '@renderer/state/runtimeData'
+import { URL } from './utils/baseUtil'
 
 /**
  * 判断传入的 host 是否为公网 IP。

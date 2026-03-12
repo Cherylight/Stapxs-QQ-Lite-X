@@ -283,6 +283,7 @@ import { popInfo } from '@renderer/function/base'
 import { mousemoveMask } from '@renderer/function/input'
 import { Img } from '@renderer/function/model/img'
 import { downloadFile } from '@renderer/function/utils/appUtil'
+import { getCm } from '@renderer/function/utils/baseUtil'
 import { copyToClipboard } from '@renderer/function/utils/systemUtil'
 import { vEsc, vHide, vMove, VMoveOptions } from '@renderer/function/utils/vcmd'
 import { useKeyboard, useViewportUnits } from '@renderer/function/utils/vuse'
@@ -1207,7 +1208,7 @@ function touchResizeKeep(point1: Touch, point2: Touch) {
 function getTouchDistance(point1: Touch, point2: Touch): number {
     const dx = point1.clientX - point2.clientX
     const dy = point1.clientY - point2.clientY
-    return Math.sqrt(dx * dx + dy * dy)
+    return Math.hypot(dx, dy)
 }
 //#endregion
 
@@ -1223,10 +1224,10 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
     },
     speedCondition: {
         minMove: {
-            value: runtimeData.cm,
+            value: getCm(),
             type: 'px',
         },
-        minSpeed: 10 * runtimeData.cm,
+        minSpeed: 10 * getCm(),
     },
     moveCondition: {
         minMove: {

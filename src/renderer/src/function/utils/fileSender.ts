@@ -4,11 +4,11 @@ import { Msg } from '../model/msg'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { popInfo } from '../base'
 import { noticePopBox, waitPopBox } from './popBox'
-import { TimeoutSet } from '../model/data'
 import { GroupFileFolder } from '../model/file'
 import { FileSegData } from '../adapter/interface'
 import { FileSeg } from '../model/seg'
 import { uploadFile } from '../input'
+import { TimeoutSet } from './baseUtil'
 
 export class FileSender {
     private static lock: number = 0

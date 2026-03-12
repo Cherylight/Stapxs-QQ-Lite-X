@@ -22,7 +22,7 @@ import {
     UserSession,
 } from '@renderer/function/model/session'
 import { Member } from '@renderer/function/model/user'
-import { queueWait } from '@renderer/function/utils/systemUtil'
+import { queueWait } from '@renderer/function/utils/baseUtil'
 import { shallowReactive, shallowRef, ShallowRef } from 'vue'
 import type {
     AdapterInterface,

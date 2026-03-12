@@ -65,7 +65,7 @@ import {
     VideoSeg,
     XmlSeg,
 } from '@renderer/function/model/seg'
-import { queueWait } from '@renderer/function/utils/systemUtil'
+import { queueWait } from '@renderer/function/utils/baseUtil'
 import * as MilkyTypeLib from '@saltify/milky-types'
 import {
     Event,

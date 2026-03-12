@@ -752,6 +752,7 @@ import { Img } from '@renderer/function/model/img'
 import JsonSegComp from './msg-component/JsonSegComp.vue'
 import XmlSegComp from './msg-component/XmlSegComp.vue'
 import useRuntimeData from '@renderer/state/runtimeData'
+import { getCm } from '@renderer/function/utils/baseUtil'
 
 //#region == 声明变量 ================================================================
 const {
@@ -831,16 +832,16 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
         target.style.transition = 'all 0.3'
     },
     leftLimit: {
-        value: runtimeData.cm,
+        value: getCm(),
         type: 'px',
     },
     rightLimit: {
-        value: runtimeData.cm,
+        value: getCm(),
         type: 'px',
     },
     moveCondition: {
         minMove: {
-            value: runtimeData.cm,
+            value: getCm(),
             type: 'px',
         },
     },

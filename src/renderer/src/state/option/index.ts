@@ -5,6 +5,7 @@ import { computed, shallowReactive } from 'vue'
 import { loadAllOptions, saveAllOptions } from './utils'
 import { defineStore } from 'pinia'
 import useRuntimeData from '../runtimeData'
+import { queueWait } from '@renderer/function/utils/baseUtil'
 
 type OptionGlobalTag = 'global'
 type OptionOtherTag = 'protocol' | 'user'
@@ -130,8 +131,6 @@ function runOnLoadHook<T>(option: OptionField<T>, value: T): T | undefined {
 }
 
 export const useOptionStore = defineStore('option', () => {
-    let queueWait!: typeof import('@renderer/function/utils/systemUtil').queueWait
-
     let initd = false
     let rawConfigs!: Record<string, any>
     let options!: AppConfig
@@ -141,10 +140,6 @@ export const useOptionStore = defineStore('option', () => {
      * @param data
      */
     async function init() {
-        // 加载依赖
-        queueWait = await import('@renderer/function/utils/systemUtil').then(
-            (mod) => mod.queueWait,
-        )
         // 迁移检测
         await checkAndMigration()
         // 加载所有配置

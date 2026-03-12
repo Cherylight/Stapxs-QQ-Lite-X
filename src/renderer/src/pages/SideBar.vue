@@ -106,6 +106,7 @@ import Boxes from './Boxes.vue'
 import Friends from './Friends.vue'
 import Messages from './Messages.vue'
 import Options from './Options.vue'
+import { getCm } from '@renderer/function/utils/baseUtil'
 
 const $t = app.config.globalProperties.$t
 const runtimeData = useRuntimeData()
@@ -121,10 +122,10 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
     },
     speedCondition: {
         minMove: {
-            value: runtimeData.cm,
+            value: getCm(),
             type: 'px',
         },
-        minSpeed: 10 * runtimeData.cm,
+        minSpeed: 10 * getCm(),
     },
     moveCondition: {
         minMove: {

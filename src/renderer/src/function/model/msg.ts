@@ -18,7 +18,7 @@ import type {
 import { popInfo } from '../base'
 import useRuntimeData from '@renderer/state/runtimeData'
 import { delay } from '../utils/systemUtil'
-import { Time, TimeoutSet } from './data'
+import { Time } from './data'
 import { Img } from './img'
 import { Message } from './message'
 import { AtSeg, ForwardSeg, ReplySeg, Seg } from './seg'
@@ -27,6 +27,7 @@ import { BaseUser, ForwardSender, getSender, Member, type IUser } from './user'
 import { autoMarkRaw, autoReactive } from './utils'
 import { sendStatEvent } from '../utils/appUtil'
 import { Role } from '../adapter/enmu'
+import { TimeoutSet } from '../utils/baseUtil'
 
 type IconData = { icon: string; rotate: boolean; desc: string; color: string }
 

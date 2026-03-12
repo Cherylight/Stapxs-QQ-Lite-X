@@ -9,19 +9,6 @@ import { backend } from '@renderer/runtime/backend'
 import { ProxyUrl } from '@renderer/function/model/proxyUrl'
 import { AdapterInterface } from '@renderer/function/adapter/interface'
 
-/**
- * 获得1cm的像素点数
- */
-export function getCm(): number {
-    const div = document.createElement('div')
-    div.style.width = '1cm'
-    div.style.visibility = 'hidden'
-    document.body.appendChild(div)
-    const dpi = div.offsetWidth
-    div.remove()
-    return dpi
-}
-
 const useRuntimeData = defineStore('runtimeData', () => {
     const option = useOptionStore()
     const selfInfo = shallowRef<User | undefined>()
@@ -42,7 +29,6 @@ const useRuntimeData = defineStore('runtimeData', () => {
         dev: false,
     })
     const defaultColorMode = shallowRef<'light' | 'dark'>('light')
-    let _cm: number | undefined = undefined
     const nowAdapter = shallowRef<AdapterInterface | undefined>()
     const nowChat = shallowRef<Session | undefined>()
     const nowBox = shallowRef<SessionBox | undefined>()
@@ -100,10 +86,6 @@ const useRuntimeData = defineStore('runtimeData', () => {
         nowBox,
         nowAdapter,
         repoName,
-        cm: computed(() => {
-            if (!_cm) _cm = getCm()
-            return _cm
-        }),
         sysConfig: computed(() => option.options),
         reset,
     }

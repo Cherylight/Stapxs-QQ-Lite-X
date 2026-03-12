@@ -77,6 +77,7 @@ import {
 import { useViewportUnits } from '@renderer/function/utils/vuse'
 import { animate } from 'animejs'
 import { type Component, nextTick, shallowRef, useTemplateRef } from 'vue'
+import { getCm } from '@renderer/function/utils/baseUtil'
 
 const { props } = defineProps<{ props: { id: string; data: PopBoxData<T> } }>()
 
@@ -112,10 +113,10 @@ const moveOptions: VMoveOptions<HTMLDivElement> = {
     },
     speedCondition: {
         minMove: {
-            value: runtimeData.cm,
+            value: getCm(),
             type: 'px',
         },
-        minSpeed: 5 * runtimeData.cm,
+        minSpeed: 5 * getCm(),
     },
     moveCondition: {
         minMove: {

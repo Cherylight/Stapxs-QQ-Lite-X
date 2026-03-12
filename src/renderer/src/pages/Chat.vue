@@ -211,6 +211,7 @@ import {
     markRaw,
     provide,
 } from 'vue'
+import { getCm } from '@renderer/function/utils/baseUtil'
 //#region == 常量声明 ====================================================================
 const { chat } = defineProps<{ chat: Session }>()
 const inputMsg = defineModel<InputMsg>({ required: true })
@@ -620,10 +621,10 @@ const chatMoveOptions: VMoveOptions<HTMLDivElement> = {
     },
     speedCondition: {
         minMove: {
-            value: runtimeData.cm,
+            value: getCm(),
             type: 'px',
         },
-        minSpeed: 10 * runtimeData.cm,
+        minSpeed: 10 * getCm(),
     },
     moveCondition: {
         minMove: {
