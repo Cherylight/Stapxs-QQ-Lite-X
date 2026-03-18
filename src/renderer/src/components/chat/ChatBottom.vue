@@ -45,15 +45,19 @@
             >
                 <div class="imgs">
                     <div
-                        v-for="[key, value] in inputMsg.imgCache"
-                        :key="'imgCache-' + key"
+                        v-for="[hash, info] in inputMsg.imgCache"
+                        :key="'imgCache-' + hash"
                     >
                         <div class="img-btns">
-                            <div @click="editImg(key)">
-                                <font-awesome-icon :icon="['fas', 'pencil']" />
-                            </div>
-                            <hr />
-                            <div @click="inputMsg.rmImg(key)">
+                            <template v-if="info.state === 'done'">
+                                <div @click="editImg(hash)">
+                                    <font-awesome-icon
+                                        :icon="['fas', 'pencil']"
+                                    />
+                                </div>
+                                <hr />
+                            </template>
+                            <div @click="inputMsg.rmImg(hash)">
                                 <font-awesome-icon
                                     style="color: var(--color-red)"
                                     :icon="['fas', 'xmark']"
@@ -61,9 +65,19 @@
                             </div>
                         </div>
                         <div class="img">
-                            <img :src="value" :alt="`[SQ:${key}]`" />
+                            <img
+                                v-if="info.state === 'done'"
+                                :src="info.dataurl!"
+                                :alt="`[SQ:${info.id}]`"
+                            />
+                            <span v-else-if="info.state === 'compressing'">
+                                [{{ $t('压缩中') }}]
+                            </span>
+                            <span v-else class="error">
+                                [{{ $t('上传失败') }}]
+                            </span>
                         </div>
-                        <span>[SQ:{{ key }}]</span>
+                        <span>[SQ:{{ info.id }}]</span>
                     </div>
                 </div>
             </div>
@@ -224,8 +238,7 @@ import {
     TempSession,
     UserSession,
 } from '@renderer/function/model/session'
-import { logger, popInfo } from '@renderer/function/base'
-import imageCompression from 'browser-image-compression'
+import { logger } from '@renderer/function/base'
 import app from '@renderer/main'
 import { sendMsgRaw } from '@renderer/function/utils/msgUtil'
 import { delay } from '@renderer/function/utils/systemUtil'
@@ -600,14 +613,15 @@ function addImg(event: ClipboardEvent) {
     }
     for (let i = 0, len = event.clipboardData.items.length; i < len; i++) {
         const item = event.clipboardData.items[i]
-        if (item.kind === 'file') {
-            const file = item.getAsFile()
-            if (!file) continue
-            if (!file.type.startsWith('image/')) continue
-            setImg(file)
-            // 阻止默认行为
-            event.preventDefault()
-        }
+        if (item.kind !== 'file') continue
+        const file = item.getAsFile()
+        if (!file) continue
+        if (!file.type.startsWith('image/')) continue
+        if (file.size === 0) continue
+
+        inputMsg.value.addImg(file)
+        // 阻止默认行为
+        event.preventDefault()
     }
 }
 
@@ -615,74 +629,24 @@ function addImg(event: ClipboardEvent) {
  * 手动选择图片
  */
 async function selectImg() {
-    const img = await uploadFile('image/*')
-    if (!img) return
-    setImg(img)
-}
-
-/**
- * 将图片转换为 base64 并缓存
- * @param file 文件对象
- */
-async function setImg(file: File) {
-    if (file.size === 0) return
-
-    // 图片太大
-    if (file.size > 3145728) {
-        const options = { maxSizeMB: 3, useWebWorker: true }
-        try {
-            popInfo.info($t('正在压缩图片 ……'))
-            const compressedFile = await imageCompression(file, options)
-            logger.info(
-                '图片压缩成功，原大小：' +
-                    file.size / 1024 / 1024 +
-                    ' MB，压缩后大小：' +
-                    compressedFile.size / 1024 / 1024 +
-                    ' MB',
-            )
-            file = compressedFile
-        } catch (error) {
-            logger.error(error as Error, '图片压缩失败')
-            popInfo.error($t('压缩图片失败'))
-            return
-        }
+    const imgs = await uploadFile('image/*', true)
+    for (const img of imgs ?? []) {
+        if (img.size === 0) return
+        inputMsg.value.addImg(img)
     }
-
-    inputMsg.value.addImg(await fileToDataURL(file))
-}
-
-/**
- * 将文件转换为 data URL
- * @param file 文件对象
- * @returns data URL
- */
-function fileToDataURL(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-
-        reader.onload = function (event) {
-            if (!event.target) reject(new Error('读取文件失败'))
-            else resolve(event.target.result as string) // 这就是 data URL
-        }
-
-        reader.onerror = function (error) {
-            reject(error)
-        }
-
-        reader.readAsDataURL(file)
-    })
 }
 
 /**
  * 编辑图片
  * @param key 图片在缓存中的键
  */
-async function editImg(key: number) {
+async function editImg(key: string) {
     const img = inputMsg.value.imgCache.get(key)
     if (!img) return
+    if (img.state !== 'done') return
     if (!viewer.value) return
-    const dataurl = await viewer.value.edit(img)
-    inputMsg.value.imgCache.set(key, dataurl)
+    const dataurl = await viewer.value.edit(img.dataurl!)
+    img.dataurl = dataurl
 }
 //#endregion
 

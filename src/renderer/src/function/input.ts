@@ -2,7 +2,10 @@
  * 触控板滚动蒙版
  * 用来连续返回一系列滚动事件处理,自带中断处理
  */
-export function wheelMask(process: (event: WheelEvent) => boolean, removeHook?: ()=>void): Promise<void> {
+export function wheelMask(
+    process: (event: WheelEvent) => boolean,
+    removeHook?: () => void,
+): Promise<void> {
     // 中断回调
     const mask = document.createElement('div')
     let r!: () => void
@@ -23,18 +26,25 @@ export function wheelMask(process: (event: WheelEvent) => boolean, removeHook?: 
     mask.style.height = '100vh'
     mask.style.zIndex = '9999'
     mask.style.backgroundColor = 'rgba(0, 0, 0, 0)'
-    mask.addEventListener('wheel', (event) => {
-        event.preventDefault()
-        if (!process(event)) return
-        // 中断回调
-        clearTimeout(wheelTimeOut)
-        wheelTimeOut = setTimeout(remove, 100) as unknown as number
-    }, { passive: false })
+    mask.addEventListener(
+        'wheel',
+        (event) => {
+            event.preventDefault()
+            if (!process(event)) return
+            // 中断回调
+            clearTimeout(wheelTimeOut)
+            wheelTimeOut = setTimeout(remove, 100) as unknown as number
+        },
+        { passive: false },
+    )
     document.body.appendChild(mask)
     return promise
 }
 
-export function mousemoveMask(process: (event: MouseEvent) => void, removeHook?: (event: MouseEvent)=>void): Promise<void> {
+export function mousemoveMask(
+    process: (event: MouseEvent) => void,
+    removeHook?: (event: MouseEvent) => void,
+): Promise<void> {
     // 中断回调
     const mask = document.createElement('div')
     let r!: () => void
@@ -69,16 +79,28 @@ export function mousemoveMask(process: (event: MouseEvent) => void, removeHook?:
     return promise
 }
 
-
-export function uploadFile(accept: string = '*/*'): Promise<File|undefined> {
+export function uploadFile(accept?: string): Promise<File | undefined>
+export function uploadFile(
+    accept: string,
+    multiple: true,
+): Promise<File[] | undefined>
+export function uploadFile(
+    accept: string = '*/*',
+    multiple: boolean = false,
+): Promise<File | File[] | undefined> {
     const dom = document.createElement('input')
     dom.type = 'file'
     dom.accept = accept
+    dom.multiple = multiple
     dom.style.display = 'none'
     document.body.appendChild(dom)
-    return new Promise<File | undefined>((resolve) => {
+    return new Promise<File | File[] | undefined>((resolve) => {
         dom.onchange = () => {
-            resolve(dom.files?.[0] ?? undefined)
+            if (multiple) {
+                resolve(Array.from(dom.files || []))
+            } else {
+                resolve(dom.files?.[0] ?? undefined)
+            }
             dom.remove()
         }
         dom.click()

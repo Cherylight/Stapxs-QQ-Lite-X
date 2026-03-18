@@ -1941,6 +1941,10 @@ body.with-bar .msg-menu {
     max-height: 100%;
 }
 
+.img-pan > .imgs > div > .img > .error {
+    color: var(--color-red);
+}
+
 .img-pan > .imgs > div > span {
     margin-top: 5px;
     font-size: 0.9rem;
