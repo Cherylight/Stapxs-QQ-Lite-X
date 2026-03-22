@@ -76,6 +76,6 @@ const parsedData = contact.safeParse(json)
 const success = parsedData.success
 const data = parsedData.data!
 if (!success) {
-    logger.error(parsedData.error, 'Map Card Parse Error')
+    logger.error(parsedData.error, 'Card Parse Error')
 }
 </script>
