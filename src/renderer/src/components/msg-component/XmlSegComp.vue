@@ -9,7 +9,7 @@
     <div
         ref="main"
         @click="cardClick()"
-        v-html="buildXML(seg.data, seg.id, seg.id)"
+        v-html="buildXML(seg.data, seg.id, currentMsg?.message_id ?? '')"
     />
 </template>
 
@@ -17,6 +17,7 @@
 import { logger } from '@renderer/function/base'
 import { XmlSeg } from '@renderer/function/model/seg'
 import { openLink } from '@renderer/function/utils/appUtil'
+import { useCurrentMsg } from '@renderer/function/utils/vuse'
 import app from '@renderer/main'
 import { useTemplateRef } from 'vue'
 
@@ -25,6 +26,7 @@ const { seg } = defineProps<{
 }>()
 
 const mainDom = useTemplateRef('main')
+const currentMsg = useCurrentMsg()
 
 let link: string | undefined = undefined
 
