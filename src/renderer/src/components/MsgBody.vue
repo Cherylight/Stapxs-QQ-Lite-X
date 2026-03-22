@@ -744,7 +744,7 @@ import {
     vTooltip,
 } from '@renderer/function/utils/vcmd'
 import { backend } from '@renderer/runtime/backend'
-import { defineComponent, useTemplateRef } from 'vue'
+import { defineComponent, provide, useTemplateRef } from 'vue'
 import LazyLottie from './LazyLottie.vue'
 import { vUserTooltip } from '@renderer/function/tooltip'
 import { VueCompData } from '@renderer/function/elements/vueComp'
@@ -863,6 +863,7 @@ if (data.message.length === 0) {
     }
 }
 
+provide('message-content', data)
 //#endregion
 //#region == 工具函数 ================================================================
 function getAtMember(id: number): IUser | number {

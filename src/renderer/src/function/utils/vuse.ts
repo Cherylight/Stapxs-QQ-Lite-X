@@ -9,6 +9,7 @@
 import {
     computed,
     ComputedRef,
+    inject,
     onMounted,
     onUnmounted,
     // eslint-disable-next-line no-restricted-imports
@@ -22,6 +23,7 @@ import {
 import { MenuEventData } from '../elements/information'
 import { pastTimeFormat } from './systemUtil'
 import { backend } from '@renderer/runtime/backend'
+import { Msg } from '../model/msg'
 
 /**
  * 用来封装一个停留事件的处理, 支持传递额外上下文
@@ -461,4 +463,10 @@ export function useBackHoldup(hook?: () => boolean | Promise<boolean>) {
         stopFlag = true
         history.back()
     }
+}
+
+export function useCurrentMsg(): Msg | undefined {
+    const data = inject('message-content')
+    if (data instanceof Msg) return data
+    return undefined
 }
