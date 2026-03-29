@@ -315,7 +315,7 @@ function init() {
     chatBottom.value?.init()
     // 聚焦输入框
     // PS: 有虚拟键盘的设备会弹键盘,要做判断
-    if (shouldAutoFocus()) chat.inputMsg.focus()
+    if (shouldAutoFocus()) nextTick(() => chat.inputMsg.focus())
     // 滑动到底部
     nextTick(() => {
         scrollBottom(false)
