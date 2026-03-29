@@ -229,7 +229,7 @@ export class InputMsg {
     }
 
     clear(): void {
-        this._content.value = ''
+        this.content = ''
         this.sqCache.length = 0
         this.imgCache.clear()
         this.rmReply()

@@ -338,7 +338,7 @@ useResizeObserver(calcInputHeight, inputPan)
 onMounted(() => {
     watchEffect(() => {
         void inputMsg.value.content
-        calcInputHeight()
+        setTimeout(calcInputHeight, 0)
     })
     setTimeout(calcInputHeight, 0)
 })
