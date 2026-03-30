@@ -58,6 +58,8 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
         modifiers: { prevent?: boolean; stop?: boolean }
     }
 
+    let activeMenu = false
+
     // 右键菜单事件数据类型
     const { handle: menuTouchHandle, handleEnd: menuTouchEnd } = useStayEvent(
         (event: TouchEvent) => {
@@ -71,6 +73,7 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
             onFit: (data: MenuEventData, binding: Binding) => {
                 // 触发右键菜单事件
                 binding.value(data)
+                activeMenu = true
             },
         },
         400,
@@ -106,8 +109,6 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
             el.addEventListener(
                 'touchstart',
                 (event) => {
-                    if (prevent) event.preventDefault()
-                    if (stop) event.stopPropagation()
                     menuTouchHandle(event, binding)
                     touchStartTime = Date.now()
                 },
@@ -116,8 +117,8 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
             el.addEventListener(
                 'touchmove',
                 (event) => {
-                    if (prevent) event.preventDefault()
-                    if (stop) event.stopPropagation()
+                    if (prevent && activeMenu) event.preventDefault()
+                    if (stop && activeMenu) event.stopPropagation()
                     menuTouchHandle(event, binding)
                 },
                 options,
@@ -125,9 +126,10 @@ function createVMenu(): Directive<HTMLElement, (event: MenuEventData) => void> {
             el.addEventListener(
                 'touchend',
                 (event) => {
-                    if (prevent) event.preventDefault()
-                    if (stop) event.stopPropagation()
+                    if (prevent && activeMenu) event.preventDefault()
+                    if (stop && activeMenu) event.stopPropagation()
                     menuTouchEnd(event)
+                    activeMenu = false
 
                     // 快速点击则触发点击事件
                     if (Date.now() - touchStartTime < 200)
