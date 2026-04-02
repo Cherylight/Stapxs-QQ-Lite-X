@@ -58,7 +58,7 @@ function unpackNestedUrl(url: string): string | null {
     }
 }
 
-const music = z
+const feed = z
     .object({
         app: z.literal('com.tencent.feed.lua'),
         meta: z.object({
@@ -83,18 +83,10 @@ const music = z
         desc: o.meta.feed.forwardMessage,
     }))
 const json = JSON.parse(seg.data)
-const parsedData = music.safeParse(json)
+const parsedData = feed.safeParse(json)
 const success = parsedData.success
 const data = parsedData.data!
 if (!success) {
     logger.error(parsedData.error, 'Card Parse Error')
 }
 </script>
-
-<style lang="css" scoped>
-.forum-img {
-    max-width: 30vw;
-    min-width: 240px;
-    object-fit: cover;
-}
-</style>

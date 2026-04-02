@@ -34,7 +34,7 @@ const { seg } = defineProps<{
 }>()
 const msg = useCurrentMsg()
 
-const music = z
+const autoReply = z
     .object({
         app: z.literal('com.tencent.autoreply'),
         meta: z.object({
@@ -60,7 +60,7 @@ const music = z
         })),
     }))
 const json = JSON.parse(seg.data)
-const parsedData = music.safeParse(json)
+const parsedData = autoReply.safeParse(json)
 const success = parsedData.success
 const data = parsedData.data!
 if (!success) {
