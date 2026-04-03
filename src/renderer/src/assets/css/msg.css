@@ -136,6 +136,10 @@
     background: var(--color-main);
 }
 
+.message-body.special > div.message-content > div.main:has(.msg-link-view) {
+    min-width: 270px;
+}
+
 .message-content {
     display: flex;
     width: 100%;
@@ -554,6 +558,8 @@
     border-radius: 7px;
     margin-top: 7px;
     padding: 10px;
+    width: min-content;
+    min-width: calc(100% - 20px);
 }
 
 .msg-link-view > div.bar {
