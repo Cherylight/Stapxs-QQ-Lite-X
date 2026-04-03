@@ -30,27 +30,34 @@
         <div :class="mainListSelected ? 'select' : ''">
             <div v-if="showName != 'overview'" class="detail-list">
                 <template v-if="showName === 'website'">
-                    <span>{{ $t('访客数据') }}</span>
+                    <p>{{ $t('访客数据') }}</p>
                 </template>
                 <template v-if="showName === 'session'">
-                    <span>{{ $t('访客详情') }}</span>
-                    <a>
+                    <p>{{ $t('访客详情') }}</p>
+                    <span>
                         {{
                             $t(
                                 '访客数据表示访问网站的独立会话，同一个访客只会统计一次。并且在下次访问时覆盖上次的数据。',
                             )
                         }}
-                    </a>
+                        <span v-if="onlyValidData"
+                            ><br /><br />{{
+                                $t(
+                                    '“有效数据”仅包含了访客中连接了 bot 的部分会话。',
+                                )
+                            }}</span
+                        ></span
+                    >
                 </template>
                 <template v-if="showName === 'event'">
-                    <span>{{ $t('事件详情') }}</span>
-                    <a>
+                    <p>{{ $t('事件详情') }}</p>
+                    <span>
                         {{
                             $t(
                                 '事件数据表示用户在访问期间的具体操作或上报行为，每次触发都会单独记录，因此同一个访客可能产生多个事件。',
                             )
                         }}
-                    </a>
+                    </span>
                 </template>
                 <div class="list">
                     <div
@@ -94,6 +101,20 @@
                             </option>
                         </select>
                     </div>
+                </div>
+                <div v-if="showName === 'session'" class="only-valid-data">
+                    <span>{{ $t('仅有效数据') }}</span>
+                    <label class="ss-switch">
+                        <input
+                            v-model="onlyValidData"
+                            :disabled="loading"
+                            type="checkbox"
+                            @change="changeTime"
+                        />
+                        <div>
+                            <div />
+                        </div>
+                    </label>
                 </div>
             </div>
             <div class="view-pan">
@@ -152,21 +173,38 @@
                 <!-- 访客数据 -->
                 <template v-else-if="showName === 'website'">
                     <div class="status">
-                        <template
+                        <div
                             v-for="name in Object.keys(visitData.status)"
+                            v-show="name !== 'bounces' && name !== 'totaltime'"
                             :key="name"
                         >
-                            <div
+                            <a>{{
+                                formatNumber(visitData.status[name].value)
+                            }}</a>
+                            <span
                                 v-if="
                                     name !== 'bounces' && name !== 'totaltime'
                                 "
                             >
-                                <a>{{
-                                    formatNumber(visitData.status[name].value)
-                                }}</a>
-                                <span>{{ $t('访客数据_' + name) }}</span>
-                            </div>
-                        </template>
+                                {{ $t('访客数据_' + name) }}
+                                <span
+                                    v-if="
+                                        visitData.status[name].comparison !==
+                                        undefined
+                                    "
+                                >
+                                    ({{
+                                        visitData.status[name].comparison >= 0
+                                            ? '+'
+                                            : ''
+                                    }}{{
+                                        visitData.status[
+                                            name
+                                        ].comparison.toFixed(0)
+                                    }}%)
+                                </span>
+                            </span>
+                        </div>
                     </div>
                     <span
                         >{{ $t('当前在线人数') }}: {{ visitData.online }}</span
@@ -216,7 +254,7 @@
                 <template v-if="showName === 'event' || showName === 'session'">
                     <div
                         v-show="mainListSelected != ''"
-                        v-if="eventData != null"
+                        v-if="eventData != null && eventData.color"
                         class="pie-pan"
                     >
                         <v-chart :option="eventData" autoresize />
@@ -225,6 +263,9 @@
                                 per: minPiePercentage * 100,
                             })
                         }}</a>
+                    </div>
+                    <div v-show="mainListSelected != ''" v-else>
+                        <a>{{ $t('暂无数据') }}</a>
                     </div>
                 </template>
             </div>
@@ -248,6 +289,8 @@ import { CanvasRenderer } from 'echarts/renderers'
 
 import VChart from 'vue-echarts'
 
+import win from '@renderer/runtime/win'
+
 use([
     TooltipComponent,
     LegendComponent,
@@ -261,7 +304,7 @@ use([
     GridComponent,
 ])
 
-const API_URL = 'https://api.stapxs.cn/ssqq/umami'
+const API_URL = import.meta.env.VITE_APP_MU_DATA_API
 
 export default defineComponent({
     name: 'UmamiInfoPan',
@@ -271,7 +314,7 @@ export default defineComponent({
     data() {
         return {
             metricTypes: {
-                url: '页面',
+                path: '页面',
                 browser: '浏览器',
                 os: '操作系统',
                 device: '设备',
@@ -281,18 +324,27 @@ export default defineComponent({
             },
             eventTypes: {
                 send_msg: '发送消息',
-                link_view: '预览链接',
+                sendMsg: '发送消息（弃用）',
                 connect: '连接',
                 use_theme_color: '切换主题色',
                 use_language: '切换语言',
                 click_statistics: '触发按钮',
                 use_chatview: '切换聊天面板样式',
+                cilent: '上报版本（弃用）',
                 show_qed: '触发彩蛋',
+                use_transparent: '切换窗口透明',
+                link_view: '链接预览',
 
                 app_version: '应用版本',
                 os_version: '系统版本',
                 bot_version: '机器人版本',
                 os_arch: '系统架构',
+            },
+            buttonTypes: {
+                touch_randomly: '彩蛋按钮',
+                visit_fish: '赞助按钮',
+                visit_github: 'GitHub 按钮',
+                visit_blog: '博客按钮',
             },
             minPiePercentage: 0.0084, // 饼图中最小显示百分比
             showName: 'website',
@@ -314,6 +366,7 @@ export default defineComponent({
                 online: 0,
             },
             eventData: null as any,
+            onlyValidData: false,
         }
     },
     mounted() {
@@ -333,6 +386,12 @@ export default defineComponent({
         this.$watch(this.showName, () => {
             this.updateData()
         })
+        this.$watch(
+            () => win.darkMode,
+            () => {
+                this.updateData()
+            },
+        )
     },
     methods: {
         changeView(view: string) {
@@ -365,14 +424,14 @@ export default defineComponent({
         getData(value: string) {
             // 获取 css 中的 var(--color-main)
             const colorMainRaw = getComputedStyle(
-                document.documentElement,
+                document.body,
             ).getPropertyValue('--color-main')
-            const colorFont = getComputedStyle(
-                document.documentElement,
-            ).getPropertyValue('--color-font-1')
-            const colorCard = getComputedStyle(
-                document.documentElement,
-            ).getPropertyValue('--color-card-1')
+            const colorFont = getComputedStyle(document.body).getPropertyValue(
+                '--color-font-1',
+            )
+            const colorCard = getComputedStyle(document.body).getPropertyValue(
+                '--color-card-1',
+            )
 
             this.mainListSelected = value
             if (this.showName === 'overview') {
@@ -485,21 +544,48 @@ export default defineComponent({
                     // }
                     // 按 value 降序排列
                     pieData.sort((a: any, b: any) => b.value - a.value)
+
+                    // ======= 特殊处理 =======
+                    // 应用版本去除 beta- 后的部分，pre. 后的部分
+                    if (value.indexOf('app_version') == 0) {
+                        pieData = this.processAppVersion(pieData)
+                    }
+                    // 系统版本格式是：Windows 10.0.22031 (Web) 这样的，只取前两段。如果有 Web 全都归为 Web
+                    else if (value.indexOf('os_version') == 0) {
+                        pieData = this.processOsVersion(pieData)
+                    }
+                    // 机器人版本忽略版本号第三位，如果版本号前有 v 也去掉
+                    else if (value.indexOf('bot_version') == 0) {
+                        pieData = this.processBotVersion(pieData)
+                    }
+                    // 系统架构将 x86_64 统一为 x64、arm64 统一为 aarch64
+                    else if (value.indexOf('os_arch') == 0) {
+                        pieData = this.processOsArch(pieData)
+                    }
+                    // 触发按钮进行名称映射
+                    else if (value.indexOf('click_statistics') == 0) {
+                        pieData = this.processClickStatistics(pieData)
+                    }
+                    // 触发彩蛋的数值实际上是尝试次数，把它们划到一个合适的指数区间内
+                    else if (value.indexOf('show_qed') == 0) {
+                        pieData = this.processShowQed(pieData)
+                    }
                     // 这边的颜色用 colorMainRaw 创建 10 级不同透明度的颜色，不需要转为 rgba，使用十六进制颜色
-                    // const colors = [] as string[]
-                    // for (let i = 10; i >= 1; i--) {
-                    //     const alpha = Math.floor((i / 10) * 255).toString(16).padStart(2, '0')
-                    //     colors.push(colorMainRaw + alpha)
-                    // }
+                    const colors = [] as string[]
+                    for (let i = 10; i >= 1; i--) {
+                        const alpha = Math.floor((i / 10) * 255)
+                            .toString(16)
+                            .padStart(2, '0')
+                        colors.push(colorMainRaw + alpha)
+                    }
                     // 去除占比小于等于 0.84% 的
+                    const total = pieData.reduce(
+                        (sum: number, it: any) => sum + it.value,
+                        0,
+                    )
                     pieData = pieData.filter(
                         (item: any) =>
-                            item.value /
-                                pieData.reduce(
-                                    (sum: number, it: any) => sum + it.value,
-                                    0,
-                                ) >
-                            this.minPiePercentage,
+                            item.value / total > this.minPiePercentage,
                     )
                     this.eventData = {
                         // colors: colors,
@@ -585,7 +671,7 @@ export default defineComponent({
             const res = await fetch(url)
             const data = await res.json()
             if (!data.error) {
-                this.visitData.online = data.x
+                this.visitData.online = data.visitors
             }
         },
 
@@ -614,7 +700,25 @@ export default defineComponent({
                 if (this.showName == 'session') {
                     url = API_URL + '/sessions/' + this.getRealTimeRange().time
                 }
-                const res = await fetch(url)
+                let res
+                if (this.showName == 'session' && this.onlyValidData) {
+                    url =
+                        API_URL +
+                        '/sessions/' +
+                        this.getRealTimeRange().time +
+                        '/filter'
+                    res = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            event: 'eq.send_msg',
+                        }),
+                    })
+                } else {
+                    res = await fetch(url)
+                }
                 const data = await res.json()
                 if (!data.error) {
                     const list = [] as {
@@ -651,17 +755,47 @@ export default defineComponent({
          * 获取访客数据总览
          */
         async getStatus() {
-            // 获取页面浏览量
-            this.visitData.status = {
-                pageviews: { value: 0 },
-                visitors: { value: 0 },
-                visits: { value: 0 },
-            }
             const url = API_URL + '/status/' + this.getRealTimeRange().time
             const res = await fetch(url)
             const data = await res.json()
             if (!data.error) {
-                this.visitData.status = data
+                const calculateComparison = (
+                    current: number,
+                    baseline: number,
+                ): number => {
+                    const currentVal = current || 0
+                    const baselineVal = baseline || 0
+                    // 如果基准值为 0，则无法计算百分比变化
+                    if (baselineVal === 0) {
+                        return currentVal === 0 ? 0 : 100
+                    }
+                    const result =
+                        ((currentVal - baselineVal) / baselineVal) * 100
+                    return isNaN(result) ? 0 : result
+                }
+                this.visitData.status = {
+                    pageviews: {
+                        value: data.pageviews || 0,
+                        comparison: calculateComparison(
+                            data.pageviews,
+                            data.comparison?.pageviews,
+                        ),
+                    },
+                    visitors: {
+                        value: data.visitors || 0,
+                        comparison: calculateComparison(
+                            data.visitors,
+                            data.comparison?.visitors,
+                        ),
+                    },
+                    visits: {
+                        value: data.visits || 0,
+                        comparison: calculateComparison(
+                            data.visits,
+                            data.comparison?.visits,
+                        ),
+                    },
+                }
             }
         },
 
@@ -695,6 +829,186 @@ export default defineComponent({
         },
 
         // ========== 工具函数 ===========
+
+        /**
+         * 合并同名项并降序排序
+         */
+        mergeAndSort(pieData: Array<{ name: string; value: number }>) {
+            const mergedData: Record<string, number> = {}
+            for (const item of pieData) {
+                if (mergedData[item.name]) {
+                    mergedData[item.name] += item.value
+                } else {
+                    mergedData[item.name] = item.value
+                }
+            }
+            const result = Object.keys(mergedData).map((name) => ({
+                name,
+                value: mergedData[name],
+            }))
+            result.sort((a, b) => b.value - a.value)
+            return result
+        },
+
+        /**
+         * 处理应用版本数据
+         */
+        processAppVersion(pieData: Array<{ name: string; value: number }>) {
+            return this.mergeAndSort(
+                pieData.map((item) => {
+                    let name = item.name
+                    if (name.includes('beta-')) {
+                        name = name.split('beta-')[0] + 'beta'
+                    }
+                    if (name.includes('pre.')) {
+                        name = name.split('pre.')[0] + 'pre'
+                    }
+                    return { value: item.value, name }
+                }),
+            )
+        },
+
+        /**
+         * 处理系统版本数据
+         */
+        processOsVersion(pieData: Array<{ name: string; value: number }>) {
+            return this.mergeAndSort(
+                pieData.map((item) => {
+                    if (item.name.includes('(Web)')) {
+                        return { value: item.value, name: 'Web' }
+                    } else {
+                        const parts = item.name.split(' ')
+                        return {
+                            value: item.value,
+                            name: parts.slice(0, 2).join(' '),
+                        }
+                    }
+                }),
+            )
+        },
+
+        /**
+         * 处理机器人版本数据
+         */
+        processBotVersion(pieData: Array<{ name: string; value: number }>) {
+            return this.mergeAndSort(
+                pieData.map((item) => {
+                    const name = item.name.split(',')[0]
+                    let version = item.name.split(',')[1]
+
+                    if (!item.name || !name || !version) {
+                        return { value: item.value, name: item.name }
+                    }
+
+                    if (version.startsWith('v')) {
+                        version = version.slice(1)
+                    }
+                    const parts = version.split('.')
+                    if (parts.length >= 2 && Number(parts[1]) != 0) {
+                        version = parts[0] + '.' + parts[1]
+                    }
+                    return { value: item.value, name: name + ',' + version }
+                }),
+            )
+        },
+
+        /**
+         * 处理系统架构数据
+         */
+        processOsArch(pieData: Array<{ name: string; value: number }>) {
+            return this.mergeAndSort(
+                pieData.map((item) => {
+                    let name = item.name
+                    if (name === 'x86_64') {
+                        name = 'x64'
+                    } else if (name === 'arm64') {
+                        name = 'aarch64'
+                    }
+                    return { value: item.value, name }
+                }),
+            )
+        },
+
+        /**
+         * 处理触发按钮数据
+         */
+        processClickStatistics(
+            pieData: Array<{ name: string; value: number }>,
+        ) {
+            return this.mergeAndSort(
+                pieData.map((item) => {
+                    let name = item.name
+                    if (this.buttonTypes[name]) {
+                        name = this.$t(this.buttonTypes[name])
+                    }
+                    return { value: item.value, name }
+                }),
+            )
+        },
+
+        /**
+         * 处理彩蛋数据
+         */
+        processShowQed(pieData: Array<{ name: string; value: number }>) {
+            const mapped = pieData.map((item) => {
+                let name = item.name
+                const num = Number(name)
+                if (isNaN(num)) {
+                    name = this.$t('未知')
+                } else if (num >= 1000) {
+                    name = '1000+'
+                } else if (num >= 500) {
+                    name = '500-999'
+                } else if (num >= 200) {
+                    name = '200-499'
+                } else if (num >= 100) {
+                    name = '100-199'
+                } else if (num >= 50) {
+                    name = '50-99'
+                } else if (num >= 20) {
+                    name = '20-49'
+                } else if (num >= 10) {
+                    name = '10-19'
+                } else if (num >= 5) {
+                    name = '5-9'
+                } else if (num >= 1) {
+                    name = '1-4'
+                } else {
+                    name = this.$t('未知')
+                }
+                return { value: item.value, name }
+            })
+
+            // 合并同名项
+            const mergedData: Record<string, number> = {}
+            for (const item of mapped) {
+                if (mergedData[item.name]) {
+                    mergedData[item.name] += item.value
+                } else {
+                    mergedData[item.name] = item.value
+                }
+            }
+            const result = Object.keys(mergedData).map((name) => ({
+                name,
+                value: mergedData[name],
+            }))
+
+            // 按区间顺序排列
+            const order = [
+                '1-4',
+                '5-9',
+                '10-19',
+                '20-49',
+                '50-99',
+                '100-199',
+                '200-499',
+                '500-999',
+                '1000+',
+                this.$t('未知'),
+            ]
+            result.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name))
+            return result
+        },
 
         getRealTimeRange() {
             const now = new Date()
@@ -803,6 +1117,7 @@ export default defineComponent({
 
 <style scoped>
 .umami-info-pan {
+    margin: -41px -15px -15px -15px;
     padding: 0 !important;
     flex-direction: row;
     display: flex;
@@ -952,6 +1267,22 @@ export default defineComponent({
 }
 .detail-list > .list > div.select > span > span {
     color: var(--color-font-2-r);
+}
+
+.only-valid-data {
+    font-size: 0.8rem;
+    display: flex;
+    margin: 0 20px 20px 20px;
+}
+.only-valid-data > span {
+    flex: 1;
+}
+.only-valid-data > label {
+    --switch-height: 20px;
+    min-width: 35px;
+}
+.only-valid-data > label > div {
+    background: var(--color-card-2);
 }
 
 .view-pan {
