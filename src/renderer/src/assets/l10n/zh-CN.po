@@ -2360,3 +2360,15 @@ msgstr ""
 
 msgid "压缩中"
 msgstr ""
+
+msgid "不记录"
+msgstr ""
+
+msgid "使用顺序"
+msgstr ""
+
+msgid "100次使用频率（默认）"
+msgstr ""
+
+msgid "500次使用频率"
+msgstr ""
