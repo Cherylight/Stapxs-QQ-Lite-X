@@ -3,10 +3,22 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+/**
+ * Windows Electron 构建烟雾测试脚本。
+ *
+ * 流程：构建 -> 启动可执行文件 -> 采集日志 -> 检查关键标记 -> 可选二次构建探测。
+ * 产物会写入 artifacts/electron-smoke/<timestamp>/attempt-xx 目录。
+ */
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const rootDir = path.resolve(__dirname, '..')
 
+/**
+ * 解析命令行参数。
+ * @param {string[]} argv 参数列表
+ * @returns {{ retries: number, runSeconds: number, skipBuild: boolean, probeRebuild: boolean }} 运行选项
+ */
 function parseArgs(argv) {
     const options = {
         retries: 3,
@@ -48,6 +60,11 @@ function appendText(filePath, content) {
     fs.appendFileSync(filePath, content, 'utf8')
 }
 
+/**
+ * 读取运行日志并检查关键健康标记。
+ * @param {string} filePath 日志文件路径
+ * @returns {{ ok: boolean, missingMarkers: string[], hitForbiddenMarkers: string[], homeStateLine: string | undefined }} 检查结果
+ */
 function inspectRuntimeLog(filePath) {
     const text = fs.readFileSync(filePath, 'utf8')
     const requiredMarkers = [
@@ -89,6 +106,13 @@ function quoteArgWindows(arg) {
     return arg
 }
 
+/**
+ * 运行外部命令并可选落盘输出日志。
+ * @param {string} command 可执行命令
+ * @param {string[]} args 命令参数
+ * @param {{ cwd?: string, logFile?: string }} [options] 执行选项
+ * @returns {Promise<{ code: number }>} 退出码
+ */
 function runCommand(command, args, options = {}) {
     return new Promise((resolve) => {
         let actualCommand = command
@@ -216,6 +240,13 @@ async function collectExternalLogs(targetDir) {
     }
 }
 
+/**
+ * 启动 Electron 可执行文件并观察固定时间窗口。
+ * @param {string} exePath 可执行文件路径
+ * @param {number} runSeconds 观测秒数
+ * @param {string} attemptDir 当前尝试目录
+ * @returns {Promise<{ ok: boolean, reason: string }>} 运行结果
+ */
 async function runExeForWindow(exePath, runSeconds, attemptDir) {
     const runtimeLog = path.join(attemptDir, 'runtime.log')
     const stderrLog = path.join(attemptDir, 'runtime.stderr.log')
@@ -260,6 +291,10 @@ async function runExeForWindow(exePath, runSeconds, attemptDir) {
     })
 }
 
+/**
+ * 主流程入口。
+ * @returns {Promise<void>}
+ */
 async function main() {
     const options = parseArgs(process.argv.slice(2))
     const runRoot = path.join(rootDir, 'artifacts', 'electron-smoke', nowStamp())
